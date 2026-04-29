@@ -935,8 +935,8 @@ function renderDraftJobConfig() {
         style="border-bottom-color:${p.banner};" oninput="draftJob.clientName = this.value;"/>
     </div>
     <div style="display:flex;gap:6px;margin-bottom:12px;">
-      <button class="panel-btn" onclick="commitDraftJob()" style="flex:1;background:#c01010;color:#fff;border-color:#c01010;font-weight:700;font-size:13px;padding:8px;">Create job</button>
-      <button class="panel-btn panel-clear" onclick="cancelDraftJob()" style="flex:0 0 auto;padding:8px 12px;">Cancel</button>
+      <button onclick="commitDraftJob()" style="flex:1;min-width:0;background:#c01010;color:#fff;border:2px solid #c01010;font-weight:700;font-size:13px;padding:8px 12px;border-radius:18px;cursor:pointer;font-family:inherit;white-space:nowrap;">Create job</button>
+      <button onclick="cancelDraftJob()" style="flex:0 0 auto;background:transparent;color:var(--muted);border:1px solid var(--border);font-size:12px;padding:8px 12px;border-radius:18px;cursor:pointer;font-family:inherit;">Cancel</button>
     </div>
     <div style="font-size:11px;color:var(--muted);margin:8px 0 5px;letter-spacing:.08em;text-transform:uppercase;">Date range (can span months)</div>
     <div class="cfg-row">
