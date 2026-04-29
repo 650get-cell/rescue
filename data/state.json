@@ -228,7 +228,9 @@
       "4_29_day": 1,
       "4_30_day": 1
     },
-    "2026_6": {}
+    "2026_6": {},
+    "2026_7": {},
+    "2026_8": {}
   },
   "availability": {
     "2026_3": {},
@@ -270,13 +272,15 @@
         "email": "650get@gmail.com",
         "submittedAt": "2026-04-29T20:39:19.287Z"
       }
-    }
+    },
+    "2026_4": {}
   },
   "excludedMonthly": {
     "2026_3": [],
-    "2026_5": []
+    "2026_5": [],
+    "2026_4": []
   },
   "viewYear": 2026,
-  "viewMonth": 3,
-  "activeJobId": null
+  "viewMonth": 4,
+  "activeJobId": "__draft__"
 }

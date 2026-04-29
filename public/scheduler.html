@@ -49,7 +49,7 @@
   .app { display:grid; grid-template-columns:270px 1fr; height:calc(100vh - 57px - 50px); }
 
   /* JOB STRIP */
-  .job-strip { display:flex; gap:8px; align-items:center; padding:8px 16px; background:var(--surface); border-bottom:1px solid var(--border); height:50px; }
+  .job-strip { display:flex; gap:8px; align-items:center; padding:8px 16px; background:var(--surface); border-bottom:1px solid var(--border); height:50px; position:sticky; top:57px; z-index:99; }
   .job-pill-add { background:var(--accent); border:2px solid var(--accent); color:#fff; padding:6px 16px; border-radius:18px; font-size:13px; cursor:pointer; font-family:inherit; font-weight:700; flex-shrink:0; position:sticky; left:0; z-index:1; box-shadow:0 1px 3px rgba(0,0,0,0.15); transition:transform .08s, box-shadow .08s; }
   .job-pill-add:hover { transform:translateY(-1px); box-shadow:0 3px 8px rgba(192,16,16,0.35); background:#a00c0c; border-color:#a00c0c; }
   .job-pills-scroll { display:flex; gap:8px; align-items:center; overflow-x:auto; flex-wrap:nowrap; flex:1; min-width:0; }
