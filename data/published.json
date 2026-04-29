@@ -1,0 +1,146 @@
+{
+  "publishedAt": "2026-04-29T20:43:08.312Z",
+  "employees": [
+    {
+      "id": 1,
+      "name": "Christopher Wright"
+    },
+    {
+      "id": 2,
+      "name": "Eugene Teves"
+    },
+    {
+      "id": 3,
+      "name": "Tim Moyles"
+    },
+    {
+      "id": 4,
+      "name": "James Bell"
+    },
+    {
+      "id": 5,
+      "name": "Brandon Wright"
+    },
+    {
+      "id": 6,
+      "name": "Brian Swanson"
+    },
+    {
+      "id": 7,
+      "name": "Cody De Lemos"
+    },
+    {
+      "id": 8,
+      "name": "Ryan Rose"
+    },
+    {
+      "id": 9,
+      "name": "James Magnuson"
+    },
+    {
+      "id": 10,
+      "name": "Frank Zavala"
+    },
+    {
+      "id": 11,
+      "name": "Travis Chamberlain"
+    },
+    {
+      "id": 12,
+      "name": "Justin Wilson"
+    },
+    {
+      "id": 13,
+      "name": "James Crain"
+    },
+    {
+      "id": 14,
+      "name": "Eugene Hernandez"
+    },
+    {
+      "id": 15,
+      "name": "Xavier Ricci"
+    },
+    {
+      "id": 16,
+      "name": "Kevin Crosby"
+    },
+    {
+      "id": 18,
+      "name": "Justin Nasello"
+    },
+    {
+      "id": 19,
+      "name": "Tony Mo"
+    },
+    {
+      "id": 20,
+      "name": "Craig Hunter"
+    },
+    {
+      "id": 21,
+      "name": "John Loverin"
+    }
+  ],
+  "jobs": [
+    {
+      "id": 1,
+      "clientName": "James",
+      "startDate": "2026-06-01",
+      "endDate": "2026-06-30",
+      "startTime": "07:00",
+      "endTime": "16:00",
+      "workDays": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "teamSize": 2
+    },
+    {
+      "id": 2,
+      "clientName": "COdy",
+      "startDate": "2026-04-01",
+      "endDate": "2026-04-30",
+      "startTime": "13:42",
+      "endTime": "19:42",
+      "workDays": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "teamSize": 2
+    }
+  ],
+  "assignments": {
+    "2026_3": {},
+    "2026_4": {},
+    "2026_5": {
+      "4_1_day": 1,
+      "4_2_day": 1,
+      "4_3_day": 1,
+      "4_5_day": 1,
+      "4_8_day": 1,
+      "4_9_day": 1,
+      "4_10_day": 1,
+      "4_12_day": 1,
+      "4_15_day": 1,
+      "4_16_day": 1,
+      "4_17_day": 1,
+      "4_19_day": 1,
+      "4_22_day": 1,
+      "4_23_day": 1,
+      "4_24_day": 1,
+      "4_26_day": 1,
+      "4_29_day": 1,
+      "4_30_day": 1
+    },
+    "2026_6": {}
+  }
+}

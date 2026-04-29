@@ -1,0 +1,12 @@
+{
+  "name": "martech-rescue-scheduler",
+  "version": "1.0.0",
+  "description": "MarTech Rescue crew scheduler with availability submissions and published schedule view",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
