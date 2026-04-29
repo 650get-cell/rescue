@@ -247,7 +247,7 @@ app.post('/api/publish', requireAdmin, (req, res) => {
 // ============================================================
 app.get('/', (req, res) => res.redirect('/availability.html'));
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`MarTech scheduler running on port ${PORT}`);
   console.log(`Admin password: ${ADMIN_PASSWORD === 'change-me' ? 'CHANGE-ME (set ADMIN_PASSWORD env var!)' : '[set]'}`);
 });
