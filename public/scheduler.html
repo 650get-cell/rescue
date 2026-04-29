@@ -316,12 +316,17 @@
   <div class="sidebar">
 
     <div class="sidebar-section">
-      <div class="sidebar-label">Configure job</div>
-      <div class="job-select-row">
-        <div class="job-color-dot" id="activeJobDot"></div>
-        <select class="job-select" id="jobSelect" onchange="selectJob(this.value)"></select>
+      <div class="sidebar-label" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;" onclick="toggleJobBox()">
+        <span>Job</span>
+        <span id="jobBoxToggle" style="font-size:10px;color:var(--muted);">&#9660;</span>
       </div>
-      <div class="job-config" id="jobConfig"></div>
+      <div id="jobBoxContent">
+        <div class="job-select-row">
+          <div class="job-color-dot" id="activeJobDot"></div>
+          <select class="job-select" id="jobSelect" onchange="selectJob(this.value)"></select>
+        </div>
+        <div class="job-config" id="jobConfig"></div>
+      </div>
     </div>
 
     <div class="sidebar-section" style="border-bottom:none;">
@@ -685,6 +690,15 @@ function scrollToMonth(y, m){
   renderAllCalendars();
 }
 
+let _jobBoxCollapsed = false;
+function toggleJobBox(){
+  _jobBoxCollapsed = !_jobBoxCollapsed;
+  const content = document.getElementById('jobBoxContent');
+  const toggle = document.getElementById('jobBoxToggle');
+  if(content) content.style.display = _jobBoxCollapsed ? 'none' : '';
+  if(toggle) toggle.innerHTML = _jobBoxCollapsed ? '&#9654;' : '&#9660;';
+}
+
 function setActiveMonth(y,m){
   activeYear=y; activeMonth=m;
   // (activeMonthBadge removed — Configure panel is no longer month-scoped)
@@ -879,8 +893,7 @@ function renderJobConfig(){
 
   document.getElementById('jobConfig').innerHTML=`
     <div style="margin-bottom:10px;">
-      <div style="font-size:11px;color:var(--muted);margin-bottom:4px;letter-spacing:.08em;text-transform:uppercase;">Client name</div>
-      <input class="client-name-input" id="cfgName" value="${escapeHtml(j.clientName)}" placeholder="Client name…"
+      <input class="client-name-input" id="cfgName" value="${escapeHtml(j.clientName)}" placeholder="Job name…"
         style="border-bottom-color:${p.banner};" oninput="updateClientName(this.value)"/>
     </div>
     <div style="font-size:11px;color:var(--muted);margin:8px 0 5px;letter-spacing:.08em;text-transform:uppercase;">Date range (can span months)</div>
@@ -930,8 +943,7 @@ function renderDraftJobConfig() {
 
   document.getElementById('jobConfig').innerHTML = `
     <div style="margin-bottom:10px;">
-      <div style="font-size:11px;color:var(--muted);margin-bottom:4px;letter-spacing:.08em;text-transform:uppercase;">Client name</div>
-      <input class="client-name-input" id="cfgName" value="${escapeHtml(d.clientName)}" placeholder="Client name…"
+      <input class="client-name-input" id="cfgName" value="${escapeHtml(d.clientName)}" placeholder="Job name…"
         style="border-bottom-color:${p.banner};" oninput="draftJob.clientName = this.value;"/>
     </div>
     <div style="display:flex;gap:6px;margin-bottom:12px;">
