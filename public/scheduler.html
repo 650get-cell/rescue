@@ -672,7 +672,10 @@ function scrollToMonth(y, m){
   for(const block of blocks){
     const title = block.querySelector('.month-block-title');
     if(title && +title.dataset.y === y && +title.dataset.m === m){
-      block.scrollIntoView({ behavior:'smooth', block:'start' });
+      // Scroll only the calendarWrap, never the page — prevents ribbon disappearing
+      const wrapTop = wrap.getBoundingClientRect().top;
+      const blockTop = block.getBoundingClientRect().top;
+      wrap.scrollBy({ top: blockTop - wrapTop, behavior:'smooth' });
       return;
     }
   }
