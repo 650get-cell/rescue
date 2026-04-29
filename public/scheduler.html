@@ -796,12 +796,25 @@ function selectJobFromStrip(jobId) {
   // If clicking the already-active job pill, close the configure panel
   if (state.activeJobId === jobId) {
     state.activeJobId = null;
-  } else {
-    state.activeJobId = jobId;
+    draftJob = null;
+    saveState();
+    renderJobStrip(); renderJobSelect(); renderJobConfig(); updateActiveDot();
+    return;
   }
+  state.activeJobId = jobId;
   draftJob = null;
   saveState();
   renderJobStrip(); renderJobSelect(); renderJobConfig(); updateActiveDot();
+
+  // Scroll calendar to the job's start month
+  const j = jobById(jobId);
+  if (j && j.startDate) {
+    const parts = j.startDate.split('-');
+    const jy = parseInt(parts[0]), jm = parseInt(parts[1]) - 1;
+    // Update the infinite scroll start point and scroll there
+    state.viewYear = jy; state.viewMonth = jm;
+    scrollToMonth(jy, jm);
+  }
 }
 
 function updateActiveDot(){
