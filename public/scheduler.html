@@ -656,11 +656,29 @@ function isJobExcluded(jobId,empId) {
 // VIEW NAVIGATION
 // ================================================================
 function shiftView(dir){
-  state.viewMonth += dir;
-  while(state.viewMonth>11){state.viewMonth=0;state.viewYear++;}
-  while(state.viewMonth<0){state.viewMonth=11;state.viewYear--;}
-  saveState();
-  renderAll();
+  // Jump 3 months forward or backward by scrolling to that month block
+  let ty = _iscEndY, tm = _iscEndM;
+  if(dir < 0){ ty = _iscStartY; tm = _iscStartM; }
+  tm += dir * 3;
+  while(tm > 11){ tm -= 12; ty++; }
+  while(tm < 0){ tm += 12; ty--; }
+  scrollToMonth(ty, tm);
+}
+
+function scrollToMonth(y, m){
+  const wrap = document.getElementById('calendarWrap');
+  // Try to find the block already rendered
+  const blocks = wrap.querySelectorAll('.month-block');
+  for(const block of blocks){
+    const title = block.querySelector('.month-block-title');
+    if(title && +title.dataset.y === y && +title.dataset.m === m){
+      block.scrollIntoView({ behavior:'smooth', block:'start' });
+      return;
+    }
+  }
+  // Not rendered yet — reinitialize from that month
+  state.viewYear = y; state.viewMonth = m;
+  renderAllCalendars();
 }
 
 function setActiveMonth(y,m){
@@ -678,8 +696,8 @@ function setActiveMonth(y,m){
 }
 
 function updateViewLabel(){
-  document.getElementById('viewRangeLabel').textContent=
-    `${MONTH_NAMES[state.viewMonth].slice(0,3)} ${state.viewYear} — ${MONTH_NAMES[(state.viewMonth+NUM_MONTHS-1)%12].slice(0,3)} ${state.viewYear+Math.floor((state.viewMonth+NUM_MONTHS-1)/12)}`;
+  // Updated dynamically by scroll — see _iscUpdateLabel()
+  _iscUpdateLabel();
 }
 
 // ================================================================
@@ -1530,14 +1548,92 @@ function renderAll(){
   setActiveMonth(activeYear, activeMonth);
 }
 
-function renderAllCalendars(){
-  const wrap=document.getElementById('calendarWrap');
-  wrap.innerHTML='';
-  for(let i=0;i<NUM_MONTHS;i++){
-    let m=state.viewMonth+i, y=state.viewYear;
-    while(m>11){m-=12;y++;}
-    wrap.appendChild(buildMonthBlock(y,m));
+// ================================================================
+// INFINITE SCROLL
+// ================================================================
+let _iscStartY, _iscStartM, _iscEndY, _iscEndM;
+let _iscObserver = null;
+const _ISC_BATCH = 3;
+
+function _iscAdvanceEnd(){ _iscEndM++; if(_iscEndM>11){_iscEndM=0;_iscEndY++;} }
+function _iscRetreatStart(){ _iscStartM--; if(_iscStartM<0){_iscStartM=11;_iscStartY--;} }
+
+function _iscInsertBottom(wrap){
+  const bot = document.getElementById('_iscBot');
+  const block = buildMonthBlock(_iscEndY, _iscEndM);
+  wrap.insertBefore(block, bot);
+  _iscAdvanceEnd();
+}
+
+function _iscInsertTop(wrap){
+  _iscRetreatStart();
+  const top = document.getElementById('_iscTop');
+  const block = buildMonthBlock(_iscStartY, _iscStartM);
+  const prevH = wrap.scrollHeight, prevT = wrap.scrollTop;
+  wrap.insertBefore(block, top.nextSibling);
+  wrap.scrollTop = prevT + (wrap.scrollHeight - prevH);
+}
+
+function _iscUpdateLabel(){
+  const wrap = document.getElementById('calendarWrap');
+  if(!wrap) return;
+  const blocks = wrap.querySelectorAll('.month-block');
+  const wrapTop = wrap.getBoundingClientRect().top;
+  for(const block of blocks){
+    if(block.getBoundingClientRect().bottom > wrapTop + 10){
+      const title = block.querySelector('.month-block-title');
+      if(title && title.dataset.y){
+        document.getElementById('viewRangeLabel').textContent =
+          `${MONTH_NAMES[+title.dataset.m]} ${title.dataset.y}`;
+        return;
+      }
+    }
   }
+}
+
+function renderAllCalendars(){
+  const wrap = document.getElementById('calendarWrap');
+  if(_iscObserver){ _iscObserver.disconnect(); _iscObserver = null; }
+  wrap.innerHTML = '';
+
+  _iscStartY = state.viewYear; _iscStartM = state.viewMonth;
+  _iscEndY   = state.viewYear; _iscEndM   = state.viewMonth;
+
+  // Top sentinel
+  const topEl = document.createElement('div');
+  topEl.id = '_iscTop'; topEl.style.cssText = 'height:1px;';
+  wrap.appendChild(topEl);
+
+  // Render initial batch
+  for(let i = 0; i < 5; i++) _iscInsertBottom(wrap);
+
+  // Bottom sentinel
+  const botEl = document.createElement('div');
+  botEl.id = '_iscBot'; botEl.style.cssText = 'height:40px;';
+  wrap.appendChild(botEl);
+
+  // IntersectionObserver
+  _iscObserver = new IntersectionObserver((entries) => {
+    const w = document.getElementById('calendarWrap');
+    entries.forEach(e => {
+      if(!e.isIntersecting) return;
+      if(e.target.id === '_iscBot'){
+        for(let i=0;i<_ISC_BATCH;i++) _iscInsertBottom(w);
+      } else if(e.target.id === '_iscTop'){
+        // Cap how far back we load (3 years)
+        const minY = new Date().getFullYear() - 3;
+        if(_iscStartY > minY || (_iscStartY === minY && _iscStartM > 0)){
+          for(let i=0;i<_ISC_BATCH;i++) _iscInsertTop(w);
+        }
+      }
+    });
+  }, { root: wrap, rootMargin:'300px 0px', threshold:0 });
+
+  _iscObserver.observe(topEl);
+  _iscObserver.observe(botEl);
+
+  wrap.addEventListener('scroll', _iscUpdateLabel, { passive:true });
+  _iscUpdateLabel();
 }
 
 function buildMonthBlock(y,m){
