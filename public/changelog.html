@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MarTech Rescue — Change Log</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Syne:wght@700;800&display=swap');
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'Inter',sans-serif; font-size:13px; color:#1a1a1a; background:#fff; padding:40px 48px; max-width:780px; margin:0 auto; }
+  .header { border-bottom:3px solid #c01010; padding-bottom:14px; margin-bottom:28px; }
+  .logo { font-family:'Syne',sans-serif; font-weight:800; font-size:22px; letter-spacing:-0.02em; }
+  .logo .mar { color:#c01010; }
+  .logo .tech { color:#1a1a1a; }
+  .logo .rescue { color:#666; font-weight:700; }
+  .doc-title { font-size:17px; font-weight:700; margin-top:6px; color:#1a1a1a; }
+  .doc-meta { font-size:11px; color:#888; margin-top:3px; }
+  h2 { font-size:12px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:#c01010; margin:24px 0 10px; border-bottom:1px solid #e8e8e8; padding-bottom:5px; }
+  .item { display:flex; gap:12px; margin-bottom:10px; align-items:flex-start; }
+  .num { flex-shrink:0; width:20px; height:20px; background:#1a1a1a; color:#fff; border-radius:50%; font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center; margin-top:1px; }
+  .item-body { flex:1; }
+  .item-title { font-weight:600; font-size:13px; margin-bottom:3px; }
+  .item-desc { color:#444; font-size:12px; line-height:1.6; }
+  .tag { display:inline-block; background:#f0f0f0; border-radius:4px; font-size:10px; font-weight:600; padding:1px 6px; color:#555; margin-right:4px; text-transform:uppercase; letter-spacing:.05em; }
+  .tag.fix { background:#fff0f0; color:#c01010; }
+  .tag.feature { background:#f0f7ff; color:#1a5a9a; }
+  .tag.ui { background:#f0fff4; color:#1a7a3a; }
+  .urls { margin-top:28px; background:#f7f7f7; border:1px solid #e0e0e0; border-radius:8px; padding:16px 20px; }
+  .urls h2 { margin-top:0; border:none; padding:0 0 8px; }
+  .url-row { display:flex; gap:10px; margin-bottom:6px; align-items:baseline; }
+  .url-label { font-weight:600; font-size:12px; min-width:160px; flex-shrink:0; }
+  .url-val { font-family:monospace; font-size:11px; color:#333; word-break:break-all; }
+  .footer { margin-top:36px; padding-top:12px; border-top:1px solid #e8e8e8; font-size:11px; color:#aaa; display:flex; justify-content:space-between; }
+  @media print {
+    body { padding:20px 24px; }
+    @page { margin:0.6in; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo"><span class="mar">Mar</span><span class="tech">Tech</span> <span class="rescue">Rescue</span></div>
+  <div class="doc-title">Scheduler — Change Log Summary</div>
+  <div class="doc-meta">Session recorded May 2026 &nbsp;·&nbsp; Replit Agent</div>
+</div>
+
+<h2>Features &amp; Changes</h2>
+
+<div class="item">
+  <div class="num">1</div>
+  <div class="item-body">
+    <div class="item-title"><span class="tag feature">Feature</span> Infinite Calendar Scroll</div>
+    <div class="item-desc">Replaced the fixed 4-month snapshot with infinite scroll. Months load automatically as you scroll down or up (up to 3 years back). Arrow buttons jump 3 months at a time. The month label in the header updates live as you scroll.</div>
+  </div>
+</div>
+
+<div class="item">
+  <div class="num">2</div>
+  <div class="item-body">
+    <div class="item-title"><span class="tag ui">UI</span> Consistent Month Header Size</div>
+    <div class="item-desc">Fixed the navigation label between the ← → arrows to a fixed width (130 px, centered) so short month names like "May" and long ones like "September" no longer shift the arrow buttons.</div>
+  </div>
+</div>
+
+<div class="item">
+  <div class="num">3</div>
+  <div class="item-body">
+    <div class="item-title"><span class="tag feature">Feature</span> Job Pill Scrolls to Start Month</div>
+    <div class="item-desc">Clicking a job pill in the ribbon now automatically scrolls the calendar to the first month of that job, so you land right at the beginning of the engagement.</div>
+  </div>
+</div>
+
+<div class="item">
+  <div class="num">4</div>
+  <div class="item-body">
+    <div class="item-title"><span class="tag fix">Fix</span> Job Ribbon Disappearing</div>
+    <div class="item-desc">Two root causes fixed: (a) replaced <code>scrollIntoView</code> — which scrolled the whole page — with a targeted <code>wrap.scrollBy</code> that only moves the calendar panel; (b) locked <code>html/body</code> with <code>overflow:hidden</code> so the page can never scroll and carry the ribbon off-screen.</div>
+  </div>
+</div>
+
+<div class="item">
+  <div class="num">5</div>
+  <div class="item-body">
+    <div class="item-title"><span class="tag fix">Fix</span> "Create Job" Button Always Visible</div>
+    <div class="item-desc">Moved the Create Job and Cancel buttons to the top of the new-job form (directly below the name field) so they are always in view without needing to scroll, regardless of screen height.</div>
+  </div>
+</div>
+
+<div class="item">
+  <div class="num">6</div>
+  <div class="item-body">
+    <div class="item-title"><span class="tag ui">UI</span> Collapsible Job Section + Label Cleanup</div>
+    <div class="item-desc">The sidebar "Configure job" section was renamed to <strong>Job</strong>. Clicking the label collapses or expands the entire section (▼/▶ toggle). The redundant "CLIENT NAME" heading inside the form was removed; the input placeholder now reads "Job name…"</div>
+  </div>
+</div>
+
+<div class="urls">
+  <h2>App URLs</h2>
+  <div class="url-row">
+    <div class="url-label">Scheduler (admin)</div>
+    <div class="url-val">https://cbd7fad6-9d9c-4e7c-b3e3-a8a50c1e64fa-00-18wvtxmfc03ty.spock.replit.dev/scheduler.html</div>
+  </div>
+  <div class="url-row">
+    <div class="url-label">Crew Availability Form</div>
+    <div class="url-val">https://cbd7fad6-9d9c-4e7c-b3e3-a8a50c1e64fa-00-18wvtxmfc03ty.spock.replit.dev/availability.html</div>
+  </div>
+  <div class="url-row">
+    <div class="url-label">Published Schedule</div>
+    <div class="url-val">https://cbd7fad6-9d9c-4e7c-b3e3-a8a50c1e64fa-00-18wvtxmfc03ty.spock.replit.dev/schedule_view.html</div>
+  </div>
+  <div class="url-row">
+    <div class="url-label">Availability View</div>
+    <div class="url-val">https://cbd7fad6-9d9c-4e7c-b3e3-a8a50c1e64fa-00-18wvtxmfc03ty.spock.replit.dev/availability_view.html</div>
+  </div>
+</div>
+
+<div class="footer">
+  <span>MarTech Rescue Scheduler</span>
+  <span>Print date: <script>document.write(new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}))</script></span>
+</div>
+
+</body>
+</html>
