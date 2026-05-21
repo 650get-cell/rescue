@@ -518,7 +518,14 @@ async function apiPutState(state) {
     headers: { 'Content-Type': 'application/json', 'X-Admin-Password': ADMIN_PW },
     body: JSON.stringify(state),
   });
+  if (resp.status === 409) {
+    alert('Heads up: the schedule was changed in another window (or by a crew submission) since this page loaded.\n\nTo avoid overwriting those changes, your most recent edit was NOT saved. This page will now reload the current schedule.');
+    location.reload();
+    throw new Error('STALE');
+  }
   if (!resp.ok) throw new Error('Failed to save');
+  const data = await resp.json().catch(() => null);
+  if (data && typeof data.version === 'number') state.version = data.version;
 }
 async function apiCheckPw(pw) {
   const resp = await fetch('/api/admin/check', {
