@@ -177,14 +177,14 @@
       "runLength": 3,
       "excludedEmployees": [],
       "startDate": "2026-06-01",
-      "endDate": "2026-06-30",
+      "endDate": "2026-07-11",
       "startTime": "07:00",
       "endTime": "16:00",
       "active": true
     },
     {
       "id": 2,
-      "clientName": "COdy",
+      "clientName": "Test2",
       "workDays": [
         0,
         1,
@@ -308,15 +308,17 @@
       }
     },
     "2026_4": {},
-    "2023_0": {}
+    "2023_0": {},
+    "2026_6": {}
   },
   "excludedMonthly": {
     "2026_3": [],
     "2026_5": [],
     "2026_4": [],
-    "2023_0": []
+    "2023_0": [],
+    "2026_6": []
   },
   "viewYear": 2026,
-  "viewMonth": 3,
-  "activeJobId": 2
+  "viewMonth": 5,
+  "activeJobId": 1
 }
