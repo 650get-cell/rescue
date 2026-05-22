@@ -184,6 +184,16 @@
       .day-btn.hidden {
         visibility: hidden;
       }
+      .day-header {
+        text-align: center;
+        font-size: 12px;
+        font-weight: 700;
+        color: #999;
+        padding: 2px 0;
+      }
+      .day-blank {
+        aspect-ratio: 1;
+      }
 
       .submit-btn {
         width: 100%;
@@ -375,19 +385,36 @@
       monthSel.value = now.getMonth() + 1;
       yearSel.value = now.getFullYear();
 
-      // Build day grid 1..31
-      const grid = document.getElementById("dayGrid");
-      for (let d = 1; d <= 31; d++) {
-        const btn = document.createElement("div");
-        btn.className = "day-btn";
-        btn.textContent = d;
-        btn.dataset.day = d;
-        btn.addEventListener("click", () => {
-          if (btn.classList.contains("hidden")) return;
-          btn.classList.toggle("selected");
-          syncSelectAll();
+      // Build the day grid as a month calendar (Su-Sa header + weekday offset)
+      function renderDayGrid() {
+        const grid = document.getElementById("dayGrid");
+        grid.innerHTML = "";
+        const m = parseInt(monthSel.value);
+        const y = parseInt(yearSel.value);
+        const daysInMonth = m && y ? new Date(y, m, 0).getDate() : 31;
+        const firstDay = m && y ? new Date(y, m - 1, 1).getDay() : 0;
+        ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].forEach((h) => {
+          const hd = document.createElement("div");
+          hd.className = "day-header";
+          hd.textContent = h;
+          grid.appendChild(hd);
         });
-        grid.appendChild(btn);
+        for (let i = 0; i < firstDay; i++) {
+          const blank = document.createElement("div");
+          blank.className = "day-blank";
+          grid.appendChild(blank);
+        }
+        for (let d = 1; d <= daysInMonth; d++) {
+          const btn = document.createElement("div");
+          btn.className = "day-btn";
+          btn.textContent = d;
+          btn.dataset.day = d;
+          btn.addEventListener("click", () => {
+            btn.classList.toggle("selected");
+            syncSelectAll();
+          });
+          grid.appendChild(btn);
+        }
       }
 
       // Load roster from server
@@ -477,19 +504,7 @@
       }
 
       function updateDays() {
-        const m = parseInt(monthSel.value);
-        const y = parseInt(yearSel.value);
-        if (!m || !y) return;
-        const daysInMonth = new Date(y, m, 0).getDate();
-        document.querySelectorAll(".day-btn").forEach((btn) => {
-          const d = parseInt(btn.dataset.day);
-          if (d > daysInMonth) {
-            btn.classList.add("hidden");
-            btn.classList.remove("selected");
-          } else {
-            btn.classList.remove("hidden");
-          }
-        });
+        renderDayGrid();
         const cb = document.getElementById("selectAllChk");
         if (cb) cb.checked = false;
       }
