@@ -611,63 +611,99 @@
         }
       }
 
-      // ---- See my schedule (gated: only after phone verification) ----
-      let _pubSnapshot = null;
+      // ---- See my schedule (opens in a new window; gated by phone verification) ----
       function msEsc(x) {
         return String(x == null ? "" : x).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
       }
+      const MY_SCHED_CSS =
+        "body{font-family:system-ui,-apple-system,'Inter',sans-serif;margin:0;background:#f4f4f4;color:#1a1a1a;padding:18px;}" +
+        ".ms-hd{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;}" +
+        "h1{font-size:20px;margin:0;}" +
+        ".ms-ics{background:#1a4a2e;color:#fff;border:none;border-radius:8px;padding:10px 16px;font-size:14px;font-weight:700;cursor:pointer;}" +
+        ".ms-note{font-size:12px;color:#777;margin:4px 0 0;}" +
+        ".ms-month{margin-top:16px;background:#fff;border-radius:10px;padding:12px;box-shadow:0 1px 4px rgba(0,0,0,.06);}" +
+        ".ms-title{font-weight:800;font-size:16px;margin-bottom:8px;}" +
+        ".ms-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}" +
+        ".ms-head{text-align:center;font-size:11px;font-weight:700;color:#999;}" +
+        ".ms-blank{min-height:54px;}" +
+        ".ms-day{min-height:54px;border:1.5px solid #e3e3e3;border-radius:8px;background:#fafafa;color:#aaa;display:flex;flex-direction:column;align-items:center;padding:3px 2px;overflow:hidden;}" +
+        ".ms-day .n{font-size:12px;font-weight:600;}" +
+        ".ms-day.on{background:#1a4a2e;border-color:#1a4a2e;color:#fff;}" +
+        ".ms-day.on .j{font-size:9px;font-weight:700;line-height:1.1;text-align:center;}" +
+        ".ms-day.on .t{font-size:8px;opacity:.85;}";
+      function buildScheduleHTML(shifts) {
+        const MN = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+        const DOW = ["Su","Mo","Tu","We","Th","Fr","Sa"];
+        const months = {};
+        shifts.forEach((s) => { const k = s.y + "_" + s.m; (months[k] = months[k] || {})[s.day] = s; });
+        const keys = Object.keys(months).sort((a, b) => { const p = a.split("_").map(Number), q = b.split("_").map(Number); return p[0] - q[0] || p[1] - q[1]; });
+        let html = "";
+        keys.forEach((k) => {
+          const parts = k.split("_").map(Number), y = parts[0], m = parts[1];
+          const dim = new Date(y, m + 1, 0).getDate(), first = new Date(y, m, 1).getDay();
+          html += '<div class="ms-month"><div class="ms-title">' + MN[m] + " " + y + '</div><div class="ms-grid">';
+          DOW.forEach((d) => { html += '<div class="ms-head">' + d + "</div>"; });
+          for (let i = 0; i < first; i++) html += '<div class="ms-blank"></div>';
+          for (let d = 1; d <= dim; d++) {
+            const s = months[k][d];
+            if (s) { const t = s.start && s.end ? s.start + "-" + s.end : ""; html += '<div class="ms-day on"><span class="n">' + d + '</span><span class="j">' + msEsc(s.job) + '</span><span class="t">' + msEsc(t) + "</span></div>"; }
+            else html += '<div class="ms-day"><span class="n">' + d + "</span></div>";
+          }
+          html += "</div></div>";
+        });
+        return html;
+      }
+      function downloadICS(shifts, name) {
+        const p = (n) => String(n).padStart(2, "0");
+        const stamp = new Date().toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+        const lines = ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//MarTech Rescue//Schedule//EN","CALSCALE:GREGORIAN"];
+        shifts.forEach((s, i) => {
+          const dt = "" + s.y + p(s.m + 1) + p(s.day);
+          const st = (s.start || "00:00").replace(":", "") + "00";
+          const en = (s.end || "23:59").replace(":", "") + "00";
+          lines.push("BEGIN:VEVENT","UID:martech-" + dt + "-" + i + "@rescue","DTSTAMP:" + stamp,"DTSTART:" + dt + "T" + st,"DTEND:" + dt + "T" + en,"SUMMARY:" + (s.job || "Shift") + " - " + name,"END:VEVENT");
+        });
+        lines.push("END:VCALENDAR");
+        const blob = new Blob([lines.join("\r\n")], { type: "text/calendar;charset=utf-8" });
+        const url = URL.createObjectURL(blob), a = document.createElement("a");
+        a.href = url; a.download = "my-schedule.ics"; document.body.appendChild(a); a.click();
+        setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+      }
       async function showMySchedule() {
         if (!unlockedFor) return;
-        const wrap = document.getElementById("myScheduleWrap");
-        wrap.innerHTML = "<div class='myschedule-empty'>Loading\u2026</div>";
+        let snap;
         try {
-          if (!_pubSnapshot) {
-            const resp = await fetch("/api/published");
-            if (resp.status === 404) { wrap.innerHTML = "<div class='myschedule-empty'>No schedule has been published yet.</div>"; return; }
-            if (!resp.ok) throw new Error("load failed");
-            _pubSnapshot = await resp.json();
-          }
-          const snap = _pubSnapshot;
-          const me = (snap.employees || []).find((e) => e.name === unlockedFor);
-          if (!me) { wrap.innerHTML = "<div class='myschedule-empty'>You are not on the published schedule yet.</div>"; return; }
-          const jobsById = {};
-          (snap.jobs || []).forEach((j) => { jobsById[j.id] = j; });
-          const months = {};
-          for (const key in (snap.assignments || {})) {
-            const mo = snap.assignments[key];
-            for (const slot in mo) {
-              const sp = slot.split("_");
-              if (parseInt(sp[0]) === me.id) { (months[key] = months[key] || {})[parseInt(sp[1])] = mo[slot]; }
+          const resp = await fetch("/api/published");
+          if (resp.status === 404) { alert("No schedule has been published yet."); return; }
+          if (!resp.ok) throw new Error("load");
+          snap = await resp.json();
+        } catch (e) { alert("Could not load your schedule. Please try again."); return; }
+        const me = (snap.employees || []).find((e) => e.name === unlockedFor);
+        if (!me) { alert("You are not on the published schedule yet."); return; }
+        const jobsById = {};
+        (snap.jobs || []).forEach((j) => { jobsById[j.id] = j; });
+        const shifts = [];
+        for (const key in (snap.assignments || {})) {
+          const parts = key.split("_").map(Number), y = parts[0], m = parts[1];
+          for (const slot in snap.assignments[key]) {
+            const sp = slot.split("_");
+            if (parseInt(sp[0]) === me.id) {
+              const job = jobsById[snap.assignments[key][slot]] || {};
+              shifts.push({ y, m, day: parseInt(sp[1]), job: job.clientName || "Job", start: job.startTime || "", end: job.endTime || "" });
             }
           }
-          const keys = Object.keys(months).sort((x, z) => { const p = x.split("_").map(Number), q = z.split("_").map(Number); return p[0] - q[0] || p[1] - q[1]; });
-          if (!keys.length) { wrap.innerHTML = "<div class='myschedule-empty'>You have no scheduled days in the published schedule.</div>"; return; }
-          const MN = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-          const DOW = ["Su","Mo","Tu","We","Th","Fr","Sa"];
-          let html = "";
-          for (const key of keys) {
-            const parts = key.split("_").map(Number), y = parts[0], m = parts[1];
-            const dim = new Date(y, m + 1, 0).getDate();
-            const firstDay = new Date(y, m, 1).getDay();
-            html += `<div class="ms-month"><div class="ms-title">${MN[m]} ${y}</div><div class="ms-grid">`;
-            for (const d of DOW) html += `<div class="ms-head">${d}</div>`;
-            for (let i = 0; i < firstDay; i++) html += `<div class="ms-blank"></div>`;
-            for (let d = 1; d <= dim; d++) {
-              const jid = months[key][d];
-              if (jid != null) {
-                const job = jobsById[jid] || {};
-                const t = job.startTime && job.endTime ? `${job.startTime}-${job.endTime}` : "";
-                html += `<div class="ms-day on"><span class="ms-num">${d}</span><span class="ms-job">${msEsc(job.clientName || "Job")}</span><span class="ms-time">${msEsc(t)}</span></div>`;
-              } else {
-                html += `<div class="ms-day"><span class="ms-num">${d}</span></div>`;
-              }
-            }
-            html += `</div></div>`;
-          }
-          wrap.innerHTML = html;
-        } catch (e) {
-          wrap.innerHTML = "<div class='myschedule-empty'>Could not load your schedule. Please try again.</div>";
         }
+        if (!shifts.length) { alert("You have no scheduled days in the published schedule yet."); return; }
+        shifts.sort((a, b) => a.y - b.y || a.m - b.m || a.day - b.day);
+        const win = window.open("", "_blank");
+        if (!win) { alert("Please allow pop-ups to open your schedule in a new window."); return; }
+        const d = win.document;
+        d.open();
+        d.write('<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>My Schedule</title><style>' + MY_SCHED_CSS + '</style></head><body><div class="ms-hd"><div><h1 id="msName">My Schedule</h1><div class="ms-note">Tap "Add to calendar" to add these shifts to your phone.</div></div><button id="icsBtn" class="ms-ics" type="button">Add to calendar (.ics)</button></div><div id="cal"></div></body></html>');
+        d.close();
+        d.getElementById("msName").textContent = "My Schedule - " + unlockedFor;
+        d.getElementById("cal").innerHTML = buildScheduleHTML(shifts);
+        d.getElementById("icsBtn").addEventListener("click", () => downloadICS(shifts, unlockedFor));
       }
 
       async function submitForm() {
