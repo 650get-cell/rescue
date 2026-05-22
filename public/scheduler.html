@@ -299,7 +299,7 @@
     <button class="btn btn-ghost" onclick="openManageCrewModal()">Manage Crew</button>
     <a class="btn btn-ghost" href="availability_view.html" target="_blank" rel="noopener">Availability view ↗</a>
     <button class="btn btn-accent" onclick="publishSchedule()" style="background:#2a7a4e;border-color:#2a7a4e;">Publish</button>
-    <button class="btn btn-ghost" onclick="exportCsv()">Export CSV</button>
+    <button class="btn btn-ghost" onclick="exportXlsx()">Export Excel</button>
   </div>
 </div>
 
@@ -418,18 +418,20 @@
 // COLOR PALETTE — 12 jobs
 // ================================================================
 const JOB_PALETTE = [
-  { bg:'#1a4a2e', text:'#b8f0d0', banner:'#2a7a4e', pbg:'#d4f5e4', ptext:'#0a3020' },
-  { bg:'#1a2e50', text:'#b8d8f8', banner:'#2a5090', pbg:'#d4e8fc', ptext:'#0a1e40' },
-  { bg:'#4a1a3a', text:'#f8b8e0', banner:'#8a2a6a', pbg:'#fad4ee', ptext:'#3a0a2a' },
-  { bg:'#3a2a08', text:'#f8e0a0', banner:'#8a6010', pbg:'#faf0c4', ptext:'#2a1a00' },
-  { bg:'#3a1a1a', text:'#f8c8b8', banner:'#8a3020', pbg:'#fde0d4', ptext:'#2a0a08' },
-  { bg:'#0a3a3a', text:'#b8f0f0', banner:'#0a7070', pbg:'#d0f5f5', ptext:'#002828' },
-  { bg:'#2a1a4a', text:'#d0b8f8', banner:'#5a3090', pbg:'#eadafc', ptext:'#180a38' },
-  { bg:'#1a3a1a', text:'#c8f0a0', banner:'#3a7020', pbg:'#daf5c4', ptext:'#0a2808' },
-  { bg:'#3a1a00', text:'#ffd8a0', banner:'#904010', pbg:'#fde8cc', ptext:'#280a00' },
-  { bg:'#001a3a', text:'#a0d8ff', banner:'#005090', pbg:'#d0ecff', ptext:'#001028' },
-  { bg:'#2a2a00', text:'#f0f0a0', banner:'#707000', pbg:'#f5f5c4', ptext:'#181800' },
-  { bg:'#1a0a2a', text:'#e8b8ff', banner:'#6a1a90', pbg:'#f2d8ff', ptext:'#100018' },
+  { bg:'#a0c4ff', text:'#2c3647', banner:'#50627f', pbg:'#a0c4ff', ptext:'#2c3647' },  // Pastel Blue
+  { bg:'#baffc9', text:'#344738', banner:'#5d7f64', pbg:'#baffc9', ptext:'#344738' },  // Pastel Mint
+  { bg:'#ffb3ba', text:'#473234', banner:'#7f595d', pbg:'#ffb3ba', ptext:'#473234' },  // Pastel Pink
+  { bg:'#ffffba', text:'#474734', banner:'#7f7f5d', pbg:'#ffffba', ptext:'#474734' },  // Pastel Yellow
+  { bg:'#cbaacb', text:'#382f38', banner:'#655565', pbg:'#cbaacb', ptext:'#382f38' },  // Pastel Lavender
+  { bg:'#ffdfba', text:'#473e34', banner:'#7f6f5d', pbg:'#ffdfba', ptext:'#473e34' },  // Pastel Peach
+  { bg:'#a7d3e0', text:'#2e3b3e', banner:'#536970', pbg:'#a7d3e0', ptext:'#2e3b3e' },  // Pastel Sky
+  { bg:'#e2b2e8', text:'#3f3140', banner:'#715974', pbg:'#e2b2e8', ptext:'#3f3140' },  // Pastel Lilac
+  { bg:'#ffd3b6', text:'#473b32', banner:'#7f695b', pbg:'#ffd3b6', ptext:'#473b32' },  // Pastel Sand
+  { bg:'#a3d5d3', text:'#2d3b3b', banner:'#516a69', pbg:'#a3d5d3', ptext:'#2d3b3b' },  // Pastel Seafoam
+  { bg:'#f6e8b1', text:'#444031', banner:'#7b7458', pbg:'#f6e8b1', ptext:'#444031' },  // Pastel Lemon
+  { bg:'#bae1ff', text:'#343f47', banner:'#5d707f', pbg:'#bae1ff', ptext:'#343f47' },  // Pastel LtBlue
+  { bg:'#ff6f61', text:'#471f1b', banner:'#7f3730', pbg:'#ff6f61', ptext:'#471f1b' },  // Pastel Coral
+  { bg:'#d3d3d3', text:'#3b3b3b', banner:'#696969', pbg:'#d3d3d3', ptext:'#3b3b3b' },  // Pastel Grey
 ];
 
 // ================================================================
@@ -2362,6 +2364,68 @@ function exportData(){
 
 // Export the schedule (all assignments across all months) to a CSV file.
 // One row per assignment: Date, Day, Job, Crew, Shift Start, Shift End.
+function __buildScheduleWorkbook(state, paletteFor, jobById){
+    const MN=['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const DOWN=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const argb=h=>'FF'+String(h).replace('#','').toUpperCase();
+    const B={style:'thin',color:{argb:'FF9AA0A6'}}, BORDER={top:B,left:B,right:B,bottom:B};
+    function weeksOf(y,m){const first=new Date(y,m,1).getDay(),dim=new Date(y,m+1,0).getDate(),cells=[];
+      for(let i=0;i<first;i++)cells.push(0);for(let d=1;d<=dim;d++)cells.push(d);
+      while(cells.length%7)cells.push(0);const w=[];for(let i=0;i<cells.length;i+=7)w.push(cells.slice(i,i+7));return w;}
+    const wb=new ExcelJS.Workbook();
+    const keys=Object.keys(state.assignments||{}).filter(k=>Object.keys(state.assignments[k]||{}).length>0)
+      .sort((a,b)=>{const x=a.split('_').map(Number),z=b.split('_').map(Number);return x[0]-z[0]||x[1]-z[1];});
+    for(const key of keys){
+      const parts=key.split('_').map(Number),y=parts[0],m=parts[1];
+      const byDay={};
+      for(const slot in state.assignments[key]){
+        const jobId=state.assignments[key][slot],sp=slot.split('_'),empId=+sp[0],day=+sp[1];
+        const job=jobById(jobId),emp=(state.employees||[]).find(e=>e.id===empId);
+        if(!job||!emp)continue;
+        byDay[day]=byDay[day]||{};(byDay[day][jobId]=byDay[day][jobId]||[]).push(emp.name);
+      }
+      const ws=wb.addWorksheet(MN[m]+' '+y,{pageSetup:{paperSize:1,orientation:'portrait',fitToWidth:1,fitToHeight:1,margins:{left:.2,right:.2,top:.2,bottom:.2,header:.1,footer:.1}}});
+      for(let c=1;c<=7;c++)ws.getColumn(c).width=16;
+      ws.mergeCells(1,1,1,7);const t=ws.getCell(1,1);t.value=MN[m]+' '+y;
+      t.font={name:'Arial',size:20,bold:true,color:{argb:'FFFFFFFF'}};t.alignment={horizontal:'center',vertical:'middle'};
+      t.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF1F3864'}};ws.getRow(1).height=30;
+      for(let c=1;c<=7;c++){const h=ws.getCell(2,c);h.value=DOWN[c-1];h.font={name:'Arial',size:12,bold:true,color:{argb:'FFFFFFFF'}};h.alignment={horizontal:'center',vertical:'middle'};h.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF37474F'}};h.border=BORDER;}
+      ws.getRow(2).height=20;
+      let r=3;
+      for(const wk of weeksOf(y,m)){
+        for(let c=1;c<=7;c++){const day=wk[c-1],cell=ws.getCell(r,c);cell.value=day||null;cell.font={name:'Arial',size:12,bold:true,color:{argb:'FF202124'}};cell.alignment={horizontal:'right',vertical:'middle'};cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:day?'FFF2F2F2':'FFFFFFFF'}};cell.border=BORDER;}
+        ws.getRow(r).height=16;
+        const jids=[...new Set(wk.filter(d=>d).flatMap(d=>Object.keys(byDay[d]||{}).map(Number)))].sort((a,b)=>a-b);
+        const jr=jids.length?jids:[null];
+        jr.forEach((jid,ri)=>{const rr=r+1+ri;let ml=1;
+          for(let c=1;c<=7;c++){const day=wk[c-1],cell=ws.getCell(rr,c),crew=(day&&jid)?(byDay[day]&&byDay[day][jid]):null;
+            if(crew&&crew.length){cell.value=crew.join('\n');cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:argb(paletteFor(jid).bg)}};ml=Math.max(ml,crew.length);}
+            else cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFFFFFFF'}};
+            cell.font={name:'Arial',size:10,color:{argb:'FF202124'}};cell.alignment={horizontal:'left',vertical:'top',wrapText:true};cell.border=BORDER;}
+          ws.getRow(rr).height=ml*14+2;});
+        r+=1+jr.length;
+      }
+      r+=1;ws.getCell(r,1).value='Legend';ws.getCell(r,1).font={name:'Arial',bold:true,size:12};
+      const mj=[...new Set(Object.values(byDay).flatMap(o=>Object.keys(o).map(Number)))].sort((a,b)=>a-b);
+      mj.forEach((jid,i)=>{const rr=r+1+i,cell=ws.getCell(rr,1),job=jobById(jid);cell.value=job?job.clientName:('Job '+jid);cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:argb(paletteFor(jid).bg)}};cell.font={name:'Arial',size:11,bold:true,color:{argb:'FF202124'}};cell.alignment={horizontal:'center',vertical:'middle'};cell.border=BORDER;ws.getRow(rr).height=18;});
+    }
+    return wb;
+}
+async function exportXlsx(){
+    try{
+      if(typeof ExcelJS==='undefined'){await new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js';s.onload=res;s.onerror=()=>rej(new Error('Could not load the Excel library'));document.head.appendChild(s);});}
+      const keys=Object.keys(state.assignments||{}).filter(k=>Object.keys(state.assignments[k]||{}).length>0);
+      if(!keys.length){alert('No assignments to export yet. Assign crew to jobs first.');return;}
+      const wb=__buildScheduleWorkbook(state,paletteFor,jobById);
+      const buf=await wb.xlsx.writeBuffer();
+      const blob=new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+      const url=URL.createObjectURL(blob),a=document.createElement('a');
+      a.href=url;a.download='martech-schedule-'+new Date().toISOString().slice(0,10)+'.xlsx';
+      document.body.appendChild(a);a.click();
+      setTimeout(()=>{document.body.removeChild(a);URL.revokeObjectURL(url);},100);
+    }catch(e){alert('Export failed: '+e.message);}
+}
+
 function exportCsv() {
   const DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
   const rows = [];
