@@ -299,14 +299,7 @@
     <button class="btn btn-ghost" onclick="openManageCrewModal()">Manage Crew</button>
     <a class="btn btn-ghost" href="availability_view.html" target="_blank" rel="noopener">Availability view ↗</a>
     <button class="btn btn-accent" onclick="publishSchedule()" style="background:#2a7a4e;border-color:#2a7a4e;">Publish</button>
-    <select class="print-size-select" id="printSizeSelect" title="Paper size for printing">
-      <option value="letter-landscape">Letter landscape</option>
-      <option value="legal-landscape" selected>Legal landscape</option>
-      <option value="tabloid-landscape">Tabloid (11×17)</option>
-      <option value="a3-landscape">A3 landscape</option>
-    </select>
-    <button class="btn btn-ghost" onclick="doPrint()">Print</button>
-    <button class="btn btn-ghost" onclick="exportData()">Export</button>
+    <button class="btn btn-ghost" onclick="exportCsv()">Export CSV</button>
   </div>
 </div>
 
@@ -2365,6 +2358,57 @@ function exportData(){
   // Open the PDF export modal — the old JSON-export function name is kept
   // so the toolbar button doesn't need to change.
   openPdfExportModal();
+}
+
+// Export the schedule (all assignments across all months) to a CSV file.
+// One row per assignment: Date, Day, Job, Crew, Shift Start, Shift End.
+function exportCsv() {
+  const DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const rows = [];
+  for (const key of Object.keys(state.assignments || {})) {
+    const ym = key.split('_').map(Number);     // 'YYYY_M' (M is 0-based)
+    const y = ym[0], m = ym[1];
+    const monthObj = state.assignments[key] || {};
+    for (const slotKey of Object.keys(monthObj)) {
+      const jobId = monthObj[slotKey];
+      const sp = slotKey.split('_');            // 'empId_day_shift'
+      const empId = Number(sp[0]);
+      const day = Number(sp[1]);
+      if (!Number.isInteger(empId) || !Number.isInteger(day)) continue;
+      const job = jobById(jobId);
+      const emp = state.employees.find(e => e.id === empId);
+      if (!job || !emp) continue;               // skip orphaned assignments
+      const iso = `${y}-${String(m + 1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+      rows.push({
+        date: iso,
+        dow: DOW[new Date(y, m, day).getDay()],
+        job: job.clientName || ('Job ' + job.id),
+        crew: emp.name || ('#' + emp.id),
+        start: job.startTime || '',
+        end: job.endTime || '',
+      });
+    }
+  }
+  if (rows.length === 0) { alert('No assignments to export yet. Assign crew to jobs first.'); return; }
+  rows.sort((a, b) => a.date.localeCompare(b.date) || a.job.localeCompare(b.job) || a.crew.localeCompare(b.crew));
+
+  const esc = v => {
+    const str = String(v == null ? '' : v);
+    return /[",\n\r]/.test(str) ? '"' + str.replace(/"/g, '""') + '"' : str;
+  };
+  const header = ['Date','Day','Job','Crew','Shift Start','Shift End'];
+  const lines = [header.join(',')];
+  for (const r of rows) lines.push([r.date, r.dow, r.job, r.crew, r.start, r.end].map(esc).join(','));
+  const csv = '﻿' + lines.join('\r\n');   // BOM so Excel reads UTF-8 + commas correctly
+
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `martech-schedule-${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
 }
 
 function openPdfExportModal() {
