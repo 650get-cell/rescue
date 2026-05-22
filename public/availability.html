@@ -612,25 +612,26 @@
       }
 
       // ---- See my schedule (opens in a new window; gated by phone verification) ----
+      const MS_PALETTE = ["#a0c4ff","#baffc9","#ffb3ba","#ffffba","#cbaacb","#ffdfba","#a7d3e0","#e2b2e8","#ffd3b6","#a3d5d3","#f6e8b1","#bae1ff","#ff6f61","#d3d3d3"];
       function msEsc(x) {
         return String(x == null ? "" : x).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
       }
       const MY_SCHED_CSS =
         "body{font-family:system-ui,-apple-system,'Inter',sans-serif;margin:0;background:#f4f4f4;color:#1a1a1a;padding:18px;}" +
         ".ms-hd{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;}" +
-        "h1{font-size:20px;margin:0;}" +
-        ".ms-ics{background:#1a4a2e;color:#fff;border:none;border-radius:8px;padding:10px 16px;font-size:14px;font-weight:700;cursor:pointer;}" +
+        "h1{font-size:22px;margin:0;}" +
+        ".ms-ics{background:#1a4a2e;color:#fff;border:none;border-radius:8px;padding:11px 18px;font-size:15px;font-weight:700;cursor:pointer;}" +
         ".ms-note{font-size:12px;color:#777;margin:4px 0 0;}" +
-        ".ms-month{margin-top:16px;background:#fff;border-radius:10px;padding:12px;box-shadow:0 1px 4px rgba(0,0,0,.06);}" +
-        ".ms-title{font-weight:800;font-size:16px;margin-bottom:8px;}" +
-        ".ms-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}" +
-        ".ms-head{text-align:center;font-size:11px;font-weight:700;color:#999;}" +
-        ".ms-blank{min-height:54px;}" +
-        ".ms-day{min-height:54px;border:1.5px solid #e3e3e3;border-radius:8px;background:#fafafa;color:#aaa;display:flex;flex-direction:column;align-items:center;padding:3px 2px;overflow:hidden;}" +
-        ".ms-day .n{font-size:12px;font-weight:600;}" +
-        ".ms-day.on{background:#1a4a2e;border-color:#1a4a2e;color:#fff;}" +
-        ".ms-day.on .j{font-size:9px;font-weight:700;line-height:1.1;text-align:center;}" +
-        ".ms-day.on .t{font-size:8px;opacity:.85;}";
+        ".ms-month{margin-top:16px;background:#fff;border-radius:10px;padding:14px;box-shadow:0 1px 4px rgba(0,0,0,.06);}" +
+        ".ms-title{font-weight:800;font-size:20px;margin-bottom:10px;}" +
+        ".ms-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;}" +
+        ".ms-head{text-align:center;font-size:13px;font-weight:700;color:#999;}" +
+        ".ms-blank{min-height:70px;}" +
+        ".ms-day{min-height:70px;border:1.5px solid #e3e3e3;border-radius:8px;background:#fafafa;color:#999;display:flex;flex-direction:column;align-items:center;padding:4px 3px;overflow:hidden;}" +
+        ".ms-day .n{font-size:15px;font-weight:700;}" +
+        ".ms-day.on{color:#202124;font-weight:600;}" +
+        ".ms-day.on .j{font-size:12px;font-weight:700;line-height:1.15;text-align:center;margin-top:1px;}" +
+        ".ms-day.on .t{font-size:11px;opacity:.9;}";
       function buildScheduleHTML(shifts) {
         const MN = ["January","February","March","April","May","June","July","August","September","October","November","December"];
         const DOW = ["Su","Mo","Tu","We","Th","Fr","Sa"];
@@ -646,8 +647,13 @@
           for (let i = 0; i < first; i++) html += '<div class="ms-blank"></div>';
           for (let d = 1; d <= dim; d++) {
             const s = months[k][d];
-            if (s) { const t = s.start && s.end ? s.start + "-" + s.end : ""; html += '<div class="ms-day on"><span class="n">' + d + '</span><span class="j">' + msEsc(s.job) + '</span><span class="t">' + msEsc(t) + "</span></div>"; }
-            else html += '<div class="ms-day"><span class="n">' + d + "</span></div>";
+            if (s) {
+              const t = s.start && s.end ? s.start + "-" + s.end : "";
+              const col = s.color || "#a0c4ff";
+              html += '<div class="ms-day on" style="background:' + col + ';border-color:' + col + ';"><span class="n">' + d + '</span><span class="j">' + msEsc(s.job) + '</span><span class="t">' + msEsc(t) + "</span></div>";
+            } else {
+              html += '<div class="ms-day"><span class="n">' + d + "</span></div>";
+            }
           }
           html += "</div></div>";
         });
@@ -680,16 +686,17 @@
         } catch (e) { alert("Could not load your schedule. Please try again."); return; }
         const me = (snap.employees || []).find((e) => e.name === unlockedFor);
         if (!me) { alert("You are not on the published schedule yet."); return; }
-        const jobsById = {};
-        (snap.jobs || []).forEach((j) => { jobsById[j.id] = j; });
+        const jobsById = {}, jobColorById = {};
+        (snap.jobs || []).forEach((j, idx) => { jobsById[j.id] = j; jobColorById[j.id] = MS_PALETTE[idx % MS_PALETTE.length]; });
         const shifts = [];
         for (const key in (snap.assignments || {})) {
           const parts = key.split("_").map(Number), y = parts[0], m = parts[1];
           for (const slot in snap.assignments[key]) {
             const sp = slot.split("_");
             if (parseInt(sp[0]) === me.id) {
-              const job = jobsById[snap.assignments[key][slot]] || {};
-              shifts.push({ y, m, day: parseInt(sp[1]), job: job.clientName || "Job", start: job.startTime || "", end: job.endTime || "" });
+              const jid = snap.assignments[key][slot];
+              const job = jobsById[jid] || {};
+              shifts.push({ y, m, day: parseInt(sp[1]), job: job.clientName || "Job", start: job.startTime || "", end: job.endTime || "", color: jobColorById[jid] || "#a0c4ff" });
             }
           }
         }
