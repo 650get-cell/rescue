@@ -242,6 +242,14 @@ app.post('/api/publish', requireAdmin, (req, res) => {
   res.json({ ok: true, publishedAt: snapshot.publishedAt });
 });
 
+// Clear ALL submitted availability — admin only, for testing
+app.delete('/api/availability/all', requireAdmin, (req, res) => {
+  const state = loadState();
+  state.availability = {};
+  saveState(state);
+  res.json({ ok: true, message: 'All availability cleared.' });
+});
+
 // ============================================================
 // ROUTES (serve HTML)
 // ============================================================

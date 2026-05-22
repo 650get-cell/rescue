@@ -501,6 +501,7 @@
           Edit submission
         </button>
         <button class="btn" onclick="window.print()">Print</button>
+        <button class="btn" onclick="clearAllAvailability()" style="border-color:#c04040;color:#ff9090;" title="Testing only — wipes all submitted availability">&#x1F9F9; Clear All Availability</button>
         <a class="btn btn-accent" href="scheduler.html">&larr; Scheduler</a>
       </div>
     </div>
@@ -1133,6 +1134,24 @@
       }
 
       boot();
+
+      async function clearAllAvailability() {
+        const pw = prompt('Admin password required to clear all availability:');
+        if (pw === null) return;
+        if (!confirm('This will permanently delete ALL submitted availability for every employee and every month. Continue?')) return;
+        try {
+          const res = await fetch('/api/availability/all', {
+            method: 'DELETE',
+            headers: { 'X-Admin-Password': pw }
+          });
+          const data = await res.json();
+          if (!res.ok) { alert('Error: ' + (data.error || res.status)); return; }
+          alert('All availability cleared. Reloading…');
+          location.reload();
+        } catch(e) {
+          alert('Request failed: ' + e.message);
+        }
+      }
     </script>
   </body>
 </html>
