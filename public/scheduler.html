@@ -2386,6 +2386,8 @@ async function exportXlsx(){
     }catch(e){alert('Export failed: '+e.message);}
 }
 
+function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
 // ================================================================
 // GLOBAL CLICK HANDLER
 // ================================================================
