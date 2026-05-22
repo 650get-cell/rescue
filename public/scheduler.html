@@ -693,6 +693,10 @@ function scrollToMonth(y, m){
 }
 
 let _jobBoxCollapsed = false;
+function saveJobAndMinimize(){
+  saveState();
+  if(!_jobBoxCollapsed) toggleJobBox();
+}
 function toggleJobBox(){
   _jobBoxCollapsed = !_jobBoxCollapsed;
   const content = document.getElementById('jobBoxContent');
@@ -804,7 +808,7 @@ function renderJobStrip() {
       html += `<button type="button" class="job-pill${isActive?' active':''}" data-jobid="${j.id}"
         style="background:${p.bg};color:${p.text};"
         onclick="selectJobFromStrip(${j.id})">
-        ${escapeHtml(j.clientName||('Job '+j.id))} ${dateMeta}
+        ${escapeHtml(j.clientName||('Job '+j.id))}
       </button>`;
     });
   }
@@ -931,6 +935,7 @@ function renderJobConfig(){
       <span style="font-size:12px;color:var(--muted);margin-left:6px;">${sz}-person team</span>
     </div>
     ${(startDate&&endDate)?`<button class="panel-btn panel-clear" onclick="clearJobAssignments()">Clear all assignments</button>`:''}
+    <button class="panel-btn" onclick="saveJobAndMinimize()" style="background:#2a7a4e;color:#fff;border:2px solid #2a7a4e;font-weight:700;border-radius:18px;margin-bottom:8px;">Save job</button>
     <button class="panel-btn panel-clear" onclick="setJobInactive()" style="margin-top:10px;">Set inactive (archive)</button>
     <button class="panel-btn panel-clear" onclick="deleteJob()" style="color:#c04040;border-color:#c04040;">Delete job (permanent)</button>
   `;
