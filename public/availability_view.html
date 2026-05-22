@@ -385,6 +385,16 @@
       .edit-day-btn.hidden {
         visibility: hidden;
       }
+      .edit-day-header {
+        text-align: center;
+        font-size: 11px;
+        font-weight: 700;
+        color: #999;
+        padding: 2px 0;
+      }
+      .edit-day-blank {
+        aspect-ratio: 1;
+      }
       .modal-actions {
         display: flex;
         gap: 8px;
@@ -548,7 +558,7 @@
             onclick="editSelectAll()"
             style="flex: 1"
           >
-            Select all workdays
+            Select all
           </button>
           <button
             class="btn-modal"
@@ -955,16 +965,25 @@
         const grid = document.getElementById("editDayGrid");
         grid.innerHTML = "";
         const dim = dimOf(y, m);
-        for (let d = 1; d <= 31; d++) {
+        const firstDay = new Date(y, m, 1).getDay();
+        ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].forEach((h) => {
+          const hd = document.createElement("div");
+          hd.className = "edit-day-header";
+          hd.textContent = h;
+          grid.appendChild(hd);
+        });
+        for (let i = 0; i < firstDay; i++) {
+          const blank = document.createElement("div");
+          blank.className = "edit-day-blank";
+          grid.appendChild(blank);
+        }
+        for (let d = 1; d <= dim; d++) {
           const btn = document.createElement("div");
           btn.className =
-            "edit-day-btn" +
-            (editSelectedDays.has(d) ? " selected" : "") +
-            (d > dim ? " hidden" : "");
+            "edit-day-btn" + (editSelectedDays.has(d) ? " selected" : "");
           btn.textContent = d;
           btn.dataset.day = d;
           btn.addEventListener("click", () => {
-            if (btn.classList.contains("hidden")) return;
             const dayNum = parseInt(btn.dataset.day);
             if (editSelectedDays.has(dayNum)) {
               editSelectedDays.delete(dayNum);
@@ -1036,11 +1055,10 @@
         const m = parseInt(document.getElementById("editMonthSelect").value);
         const y = parseInt(document.getElementById("editYearSelect").value);
         const dim = dimOf(y, m);
-        // "Workdays" = Mon-Fri (1-5)
+        // Select every day in the month
         editSelectedDays.clear();
         for (let d = 1; d <= dim; d++) {
-          const dow = new Date(y, m, d).getDay();
-          if (dow >= 1 && dow <= 5) editSelectedDays.add(d);
+          editSelectedDays.add(d);
         }
         // Sync the buttons
         document.querySelectorAll(".edit-day-btn").forEach((btn) => {
@@ -1112,46 +1130,4 @@
         }
 
         await refresh();
-        // Refetch when window regains focus — picks up scheduler edits made elsewhere
-        window.addEventListener("focus", refresh);
-      }
-
-      async function refresh() {
-        try {
-          _cachedState = await apiGetState();
-          render();
-        } catch (e) {
-          if (e.message === "AUTH") {
-            sessionStorage.removeItem("martech_admin_pw");
-            ADMIN_PW = "";
-            return boot();
-          }
-          document.getElementById("wrap").innerHTML =
-            '<div style="padding:60px;text-align:center;color:#c01010;font-family:sans-serif;">Could not load data: ' +
-            e.message +
-            "</div>";
-        }
-      }
-
-      boot();
-
-      async function clearAllAvailability() {
-        const pw = prompt('Admin password required to clear all availability:');
-        if (pw === null) return;
-        if (!confirm('This will permanently delete ALL submitted availability for every employee and every month. Continue?')) return;
-        try {
-          const res = await fetch('/api/availability/all', {
-            method: 'DELETE',
-            headers: { 'X-Admin-Password': pw }
-          });
-          const data = await res.json();
-          if (!res.ok) { alert('Error: ' + (data.error || res.status)); return; }
-          alert('All availability cleared. Reloading…');
-          location.reload();
-        } catch(e) {
-          alert('Request failed: ' + e.message);
-        }
-      }
-    </script>
-  </body>
-</html>
+        // Refetch when window regains

@@ -257,6 +257,17 @@
         border-color: #9acdaf;
         color: #1a5a33;
       }
+      .myschedule-empty { padding: 14px; color: #777; font-size: 14px; text-align: center; }
+      .ms-month { margin-top: 16px; }
+      .ms-title { font-weight: 700; font-size: 15px; margin-bottom: 6px; color: #1a1a1a; }
+      .ms-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+      .ms-head { text-align: center; font-size: 11px; font-weight: 700; color: #999; padding: 2px 0; }
+      .ms-blank { min-height: 48px; }
+      .ms-day { min-height: 48px; border: 1.5px solid #e3e3e3; border-radius: 8px; background: #fafafa; color: #aaa; display: flex; flex-direction: column; align-items: center; padding: 3px 2px; overflow: hidden; }
+      .ms-day .ms-num { font-size: 12px; font-weight: 600; }
+      .ms-day.on { background: #1a4a2e; border-color: #1a4a2e; color: #fff; }
+      .ms-day.on .ms-job { font-size: 9px; font-weight: 700; line-height: 1.1; text-align: center; margin-top: 1px; }
+      .ms-day.on .ms-time { font-size: 8px; opacity: 0.85; }
     </style>
   </head>
   <body>
@@ -267,9 +278,6 @@
           <span class="res">Rescue</span>
         </div>
         <div class="header-sub">Monthly availability</div>
-        <div class="header-link">
-          <a href="/schedule_view.html">View published schedule →</a>
-        </div>
       </div>
 
       <div class="body" id="formBody">
@@ -303,6 +311,10 @@
 
         <!-- Everything below is hidden until phone matches -->
         <div id="lockedSection" style="display: none">
+          <button class="submit-btn" id="seeMyScheduleBtn" type="button" onclick="showMySchedule()" style="margin-top: 18px; background: #1a4a2e; border-color: #1a4a2e;">
+            See my schedule
+          </button>
+          <div id="myScheduleWrap"></div>
           <div class="row-2" style="margin-top: 18px">
             <div class="field">
               <label class="field-label">Month</label>
@@ -596,6 +608,65 @@
           }
         } catch (e) {
           // silent — they can still submit
+        }
+      }
+
+      // ---- See my schedule (gated: only after phone verification) ----
+      let _pubSnapshot = null;
+      function msEsc(x) {
+        return String(x == null ? "" : x).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+      }
+      async function showMySchedule() {
+        if (!unlockedFor) return;
+        const wrap = document.getElementById("myScheduleWrap");
+        wrap.innerHTML = "<div class='myschedule-empty'>Loading\u2026</div>";
+        try {
+          if (!_pubSnapshot) {
+            const resp = await fetch("/api/published");
+            if (resp.status === 404) { wrap.innerHTML = "<div class='myschedule-empty'>No schedule has been published yet.</div>"; return; }
+            if (!resp.ok) throw new Error("load failed");
+            _pubSnapshot = await resp.json();
+          }
+          const snap = _pubSnapshot;
+          const me = (snap.employees || []).find((e) => e.name === unlockedFor);
+          if (!me) { wrap.innerHTML = "<div class='myschedule-empty'>You are not on the published schedule yet.</div>"; return; }
+          const jobsById = {};
+          (snap.jobs || []).forEach((j) => { jobsById[j.id] = j; });
+          const months = {};
+          for (const key in (snap.assignments || {})) {
+            const mo = snap.assignments[key];
+            for (const slot in mo) {
+              const sp = slot.split("_");
+              if (parseInt(sp[0]) === me.id) { (months[key] = months[key] || {})[parseInt(sp[1])] = mo[slot]; }
+            }
+          }
+          const keys = Object.keys(months).sort((x, z) => { const p = x.split("_").map(Number), q = z.split("_").map(Number); return p[0] - q[0] || p[1] - q[1]; });
+          if (!keys.length) { wrap.innerHTML = "<div class='myschedule-empty'>You have no scheduled days in the published schedule.</div>"; return; }
+          const MN = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+          const DOW = ["Su","Mo","Tu","We","Th","Fr","Sa"];
+          let html = "";
+          for (const key of keys) {
+            const parts = key.split("_").map(Number), y = parts[0], m = parts[1];
+            const dim = new Date(y, m + 1, 0).getDate();
+            const firstDay = new Date(y, m, 1).getDay();
+            html += `<div class="ms-month"><div class="ms-title">${MN[m]} ${y}</div><div class="ms-grid">`;
+            for (const d of DOW) html += `<div class="ms-head">${d}</div>`;
+            for (let i = 0; i < firstDay; i++) html += `<div class="ms-blank"></div>`;
+            for (let d = 1; d <= dim; d++) {
+              const jid = months[key][d];
+              if (jid != null) {
+                const job = jobsById[jid] || {};
+                const t = job.startTime && job.endTime ? `${job.startTime}-${job.endTime}` : "";
+                html += `<div class="ms-day on"><span class="ms-num">${d}</span><span class="ms-job">${msEsc(job.clientName || "Job")}</span><span class="ms-time">${msEsc(t)}</span></div>`;
+              } else {
+                html += `<div class="ms-day"><span class="ms-num">${d}</span></div>`;
+              }
+            }
+            html += `</div></div>`;
+          }
+          wrap.innerHTML = html;
+        } catch (e) {
+          wrap.innerHTML = "<div class='myschedule-empty'>Could not load your schedule. Please try again.</div>";
         }
       }
 
