@@ -6,6 +6,8 @@ This document is the deployment guide for taking the scheduler off Replit and ho
 
 A small crew-scheduling web app for MarTech Rescue. Crew submit monthly availability through a phone-gated form, an admin assigns crew to jobs through a separate scheduler page, and the admin publishes a read-only schedule that crew can view on their phones. There is no SaaS dependency — the entire app is one Node.js process, a folder of static HTML, and two JSON files for persistence.
 
+The admin can attach free-text notes to each job (parking, contact info, gear, gate codes) through a Notes pill on the scheduler. Crew see the notes both in the "See my schedule" day-detail dialog and in the live calendar subscription feed — a per-crew `webcal://` URL that any phone calendar (iOS, Google, Outlook) can subscribe to. Once subscribed, the crew member's phone calendar auto-updates each hour: new shifts, partner names ("Chili Bar — with Tim Moyles"), and notes flow through automatically.
+
 ## Tech stack
 
 - **Runtime:** Node.js 20 (Node 18 works; 20 is what it has been running on).
@@ -17,7 +19,7 @@ A small crew-scheduling web app for MarTech Rescue. Crew submit monthly availabi
 ## Repository layout
 
 ```
-server.js                    # Express app, all server logic in one file (~17 KB)
+server.js                    # Express app, all server logic in one file (~23 KB)
 package.json                 # dependencies + start script
 public/
   availability.html          # Crew-facing form (submit availability, view personal schedule)
@@ -90,8 +92,12 @@ The bind-mount on `/app/data` is critical — without it the JSON state is lost 
 | POST | `/api/admin/check` | password | Validate admin password |
 | GET | `/api/state` | password | Full state dump (admin) |
 | POST | `/api/publish` | password | Promote current state to `published.json` |
+| POST | `/api/availability/subscribe-url` | phone match | Mint (or fetch existing) opaque token, return https:// and webcal:// subscription URLs |
+| GET | `/api/myschedule.ics` | token in query string | Live per-crew ICS feed — calendar apps poll this every hour |
 
-Admin endpoints take the password in the `X-Admin-Password` header.
+Admin endpoints take the password in the `X-Admin-Password` header. The ICS feed endpoint is deliberately token-only (no header) because calendar apps cannot send custom headers when polling — the token is the entire credential.
+
+**Per-job notes** ride along on the same publish flow: the admin types them in the scheduler's Notes pill, they save to `state.json` under each job, and the `/api/publish` snapshot copies them into `published.json` along with the other job fields. Crew see them in the calendar event DESCRIPTION (live feed) and in the day-detail dialog (See my schedule).
 
 ## Data and backup model
 
@@ -107,6 +113,7 @@ Admin endpoints take the password in the `X-Admin-Password` header.
 - **Admin identity** is a single shared password compared with `crypto.timingSafeEqual`. After 10 failed attempts from one IP, that IP is locked out for a few minutes (`recordFail` / `rateLimited` in `server.js`).
 - **No HTTPS in the app itself.** Terminate TLS at your reverse proxy (nginx, Cloudflare, ALB, etc.) and forward to the Node process over HTTP on the configured `PORT`. The app does not look at `X-Forwarded-For` for rate limiting — if you need accurate per-IP limits behind a proxy, add `app.set('trust proxy', true)` near the top of `server.js`.
 - **No CSRF protection on admin endpoints.** The admin UI is gated by the password header; treat the admin pages as something to expose only to a trusted network or behind your SSO. If you put the scheduler on the open internet, consider adding origin checks or wrapping the admin endpoints behind your IdP.
+- **Calendar feed tokens** are 32-char url-safe random strings stored on each employee record (`calendarToken` field in `state.json`). They are minted on demand the first time a phone-verified crew member requests their subscribe URL. A leaked token only exposes one person's own shift schedule — no PII, no other crew's data — but tokens currently have no expiry. To revoke a token (e.g. a crew member changes phone), clear the field on their employee record in `state.json`; the next subscribe-url request will mint a fresh one. Consider adding a TTL or admin "rotate" button if you start dealing with sensitive customer addresses in job notes.
 
 ## What to drop when migrating off Replit
 
