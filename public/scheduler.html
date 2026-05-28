@@ -658,6 +658,27 @@ function scrollToMonth(y, m){
   renderAllCalendars();
 }
 
+// Re-render the calendar but pin the visible position to the given month,
+// so a single-day edit (unassign/assign) doesn't bounce the user to a
+// different month. The anchor month is forced into the initial batch,
+// then we set scrollTop directly (no smooth animation) so the user sees
+// no movement when they close the modal.
+function rerenderAt(anchorY, anchorM){
+  state.viewYear = anchorY; state.viewMonth = anchorM;
+  renderAllCalendars();
+  const wrap = document.getElementById('calendarWrap');
+  const blocks = wrap.querySelectorAll('.month-block');
+  for(const block of blocks){
+    const title = block.querySelector('.month-block-title');
+    if(title && +title.dataset.y === anchorY && +title.dataset.m === anchorM){
+      const wrapTop = wrap.getBoundingClientRect().top;
+      const blockTop = block.getBoundingClientRect().top;
+      wrap.scrollTop = wrap.scrollTop + (blockTop - wrapTop);
+      return;
+    }
+  }
+}
+
 let _jobBoxCollapsed = false;
 function saveJobAndMinimize(){
   saveState();
@@ -1743,7 +1764,7 @@ function buildMonthBlock(y,m){
             const ns=document.createElement('span'); ns.style.cssText='flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'; ns.textContent=emp.name;
             s.appendChild(ns);
             const rm=document.createElement('span'); rm.className='slot-remove'; rm.textContent='✕';
-            rm.addEventListener('click',ev=>{ ev.stopPropagation(); delete asgn[key]; saveState(); renderAllCalendars(); updateStatus(); });
+            rm.addEventListener('click',ev=>{ ev.stopPropagation(); delete asgn[key]; saveState(); rerenderAt(y,m); updateStatus(); });
             s.appendChild(rm); c.appendChild(s);
           });
           for(let i=0;i<Math.max(0,sz-assigned.length);i++){
@@ -1858,7 +1879,7 @@ function removeAssign2(empId,day,shift,e){
   e.stopPropagation();
   delete getA(modalYear,modalMonth)[`${empId}_${day}_${shift}`];
   saveState();
-  openDayModal(modalYear,modalMonth,day); renderAllCalendars(); updateStatus();
+  openDayModal(modalYear,modalMonth,day); rerenderAt(modalYear,modalMonth); updateStatus();
 }
 function addAssign2(empId,day,shift,jobId,e){
   e.stopPropagation();
@@ -1869,7 +1890,7 @@ function addAssign2(empId,day,shift,jobId,e){
   }
   getA(modalYear,modalMonth)[`${empId}_${day}_${shift}`]=jobId;
   saveState();
-  openDayModal(modalYear,modalMonth,day); renderAllCalendars(); updateStatus();
+  openDayModal(modalYear,modalMonth,day); rerenderAt(modalYear,modalMonth); updateStatus();
 }
 function closeDayModal(e){ if(e.target===document.getElementById('dayModal')) closeDayModalDirect(); }
 function closeDayModalDirect(){ document.getElementById('dayModal').classList.remove('open'); }
@@ -1945,7 +1966,7 @@ function openFillPopup(x,y, yr, m, day, jobId, shift) {
       getA(yr,m)[`${eid}_${day}_${shift}`] = jobId;
       saveState();
       closeFillPopup();
-      renderAllCalendars(); updateStatus();
+      rerenderAt(yr,m); updateStatus();
     });
   });
 }
