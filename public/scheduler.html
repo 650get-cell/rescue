@@ -77,6 +77,11 @@
   .job-select { flex:1; font-family:'Inter',sans-serif; font-size:13px; background:var(--surface2); border:1px solid var(--border); border-radius:6px; padding:7px 28px 7px 10px; color:var(--text); outline:none; cursor:pointer; appearance:none; -webkit-appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23606060' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 10px center; }
   .job-color-dot { width:13px; height:13px; border-radius:50%; flex-shrink:0; }
   .job-config { background:var(--bg); border-radius:8px; padding:12px; border:1px solid var(--border); }
+  .notes-pill { display:inline-flex; align-items:center; gap:6px; background:#f1f1f1; color:#333; border:1px solid #c8c8c8; border-radius:14px; padding:5px 13px; font-size:12px; font-weight:600; cursor:pointer; font-family:inherit; margin:4px 0 10px; transition:background .12s,border-color .12s; }
+  .notes-pill:hover { background:#e6e6e6; border-color:#888; }
+  .notes-pill.has-notes { background:#e8f5ee; border-color:#9acdaf; color:#1a5a33; }
+  .notes-pill .dot { width:7px; height:7px; border-radius:50%; background:#2a7a4e; display:inline-block; }
+  .notes-textarea { width:100%; min-height:180px; padding:10px 12px; border:1px solid var(--border); border-radius:6px; font-family:inherit; font-size:14px; line-height:1.5; resize:vertical; box-sizing:border-box; }
 
   .cfg-row { display:flex; align-items:center; gap:6px; margin-bottom:8px; }
   .cfg-label { font-size:11px; color:var(--muted); width:38px; flex-shrink:0; }
@@ -315,6 +320,21 @@
     <div class="modal-sub" id="dmSub"></div>
     <div id="dmBody"></div>
     <div class="modal-actions"><button class="btn" style="background:var(--surface2);color:var(--text);border-color:var(--border);" onclick="closeDayModalDirect()">Done</button></div>
+  </div>
+</div>
+
+<!-- Job notes modal -->
+<div class="modal-overlay" id="notesModal" onclick="closeNotesModal(event)">
+  <div class="modal" style="width:520px;max-width:95vw;">
+    <div class="modal-title" id="notesModalTitle">Notes</div>
+    <div class="modal-sub">Special instructions, contacts, gear, parking — anything crew should see for this job.</div>
+    <div class="modal-field">
+      <textarea id="notesModalText" class="notes-textarea" placeholder="Type notes here..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" style="background:var(--surface2);color:var(--text);border-color:var(--border);" onclick="closeNotesModalDirect()">Cancel</button>
+      <button class="btn btn-accent" onclick="saveNotesModal()">Save notes</button>
+    </div>
   </div>
 </div>
 
@@ -679,6 +699,28 @@ function rerenderAt(anchorY, anchorM){
   }
 }
 
+// Re-render the calendar AND keep the user on whatever month they're currently
+// looking at. Used when something other than a single-day edit (e.g. selecting
+// a different job) triggers a full re-render. Finds the topmost-visible
+// month-block by viewport position, then re-renders anchored on it.
+function rerenderPreservingView(){
+  const wrap = document.getElementById('calendarWrap');
+  if (!wrap) { renderAllCalendars(); return; }
+  const wrapTop = wrap.getBoundingClientRect().top;
+  const blocks = wrap.querySelectorAll('.month-block');
+  let anchorY = state.viewYear, anchorM = state.viewMonth, bestDist = Infinity;
+  for (const block of blocks) {
+    const title = block.querySelector('.month-block-title');
+    if (!title) continue;
+    const dist = Math.abs(block.getBoundingClientRect().top - wrapTop);
+    if (dist < bestDist) {
+      bestDist = dist;
+      anchorY = +title.dataset.y; anchorM = +title.dataset.m;
+    }
+  }
+  rerenderAt(anchorY, anchorM);
+}
+
 let _jobBoxCollapsed = false;
 function saveJobAndMinimize(){
   saveState();
@@ -722,8 +764,8 @@ function updateViewLabel(){
 let draftJob = null;
 
 function selectJob(val){
-  if(val==='new'){
-    if(activeJobs().length>=12){ alert('Maximum 12 active jobs. Set one inactive to free a slot.'); renderJobSelect(); return; }
+  if (val === 'new') {
+    if (activeJobs().length >= 12) { alert('Maximum 12 active jobs. Set one inactive to free a slot.'); renderJobSelect(); return; }
     // Start a new draft — don't push to state.jobs until Create is clicked
     draftJob = {
       clientName: '',
@@ -737,15 +779,22 @@ function selectJob(val){
       endTime: '16:00',
     };
     state.activeJobId = '__draft__';
-  } else if (val === '') {
+    renderJobStrip(); renderJobSelect(); renderJobConfig(); updateActiveDot(); rerenderPreservingView(); updateStatus();
+    return;
+  }
+  if (val === '') {
     state.activeJobId = null;
     draftJob = null;
-  } else {
-    state.activeJobId=parseInt(val);
-    draftJob = null;
+    saveState();
+    renderJobStrip(); renderJobSelect(); renderJobConfig(); updateActiveDot(); rerenderPreservingView(); updateStatus();
+    return;
   }
-  if (state.activeJobId !== '__draft__') saveState();
-  renderJobStrip(); renderJobSelect(); renderJobConfig(); updateActiveDot(); renderAllCalendars(); updateStatus();
+  // Picking an existing job from the dropdown: route through the pill-click path
+  // so dropdown and pill behave identically — both scroll to the job's start month.
+  const jobId = parseInt(val);
+  if (state.activeJobId === jobId) return; // already selected; don't toggle off via dropdown
+  draftJob = null;
+  selectJobFromStrip(jobId);
 }
 
 function commitDraftJob(){
@@ -814,12 +863,13 @@ function selectJobFromStrip(jobId) {
   saveState();
   renderJobStrip(); renderJobSelect(); renderJobConfig(); updateActiveDot();
 
-  // Scroll calendar to the job's start month
+  // Scroll the calendar to the job's start month — both pill clicks and
+  // dropdown picks come through here, so the user always lands on the right
+  // month for the job they just selected.
   const j = jobById(jobId);
   if (j && j.startDate) {
     const parts = j.startDate.split('-');
     const jy = parseInt(parts[0]), jm = parseInt(parts[1]) - 1;
-    // Update the infinite scroll start point and scroll there
     state.viewYear = jy; state.viewMonth = jm;
     scrollToMonth(jy, jm);
   }
@@ -886,6 +936,7 @@ function renderJobConfig(){
       <input class="client-name-input" id="cfgName" value="${escapeHtml(j.clientName)}" placeholder="Job name…"
         style="border-bottom-color:${p.banner};" oninput="updateClientName(this.value)"/>
     </div>
+    <button class="notes-pill${j.notes?' has-notes':''}" onclick="openNotesModal()" title="Add or edit notes for this job">${j.notes?'<span class="dot"></span>':''}<span>${j.notes?'Notes':'+ Notes'}</span></button>
     <div style="font-size:11px;color:var(--muted);margin:8px 0 5px;letter-spacing:.08em;text-transform:uppercase;">Date range (can span months)</div>
     <div class="cfg-row">
       <span class="cfg-label">Start</span>
@@ -937,6 +988,7 @@ function renderDraftJobConfig() {
       <input class="client-name-input" id="cfgName" value="${escapeHtml(d.clientName)}" placeholder="Job name…"
         style="border-bottom-color:${p.banner};" oninput="draftJob.clientName = this.value;"/>
     </div>
+    <button class="notes-pill" disabled style="opacity:.55;cursor:not-allowed;" title="Save the job first, then add notes"><span>+ Notes (after save)</span></button>
     <div style="display:flex;gap:6px;margin-bottom:12px;">
       <button onclick="commitDraftJob()" style="flex:1;min-width:0;background:#c01010;color:#fff;border:2px solid #c01010;font-weight:700;font-size:13px;padding:8px 12px;border-radius:18px;cursor:pointer;font-family:inherit;white-space:nowrap;">Create job</button>
       <button onclick="cancelDraftJob()" style="flex:0 0 auto;background:transparent;color:var(--muted);border:1px solid var(--border);font-size:12px;padding:8px 12px;border-radius:18px;cursor:pointer;font-family:inherit;">Cancel</button>
@@ -1894,6 +1946,28 @@ function addAssign2(empId,day,shift,jobId,e){
 }
 function closeDayModal(e){ if(e.target===document.getElementById('dayModal')) closeDayModalDirect(); }
 function closeDayModalDirect(){ document.getElementById('dayModal').classList.remove('open'); }
+
+// ----------------------------------------------------------------
+// JOB NOTES MODAL
+// ----------------------------------------------------------------
+function openNotesModal(){
+  const j = jobById(state.activeJobId);
+  if (!j) return;
+  document.getElementById('notesModalTitle').textContent = 'Notes — ' + (j.clientName || 'this job');
+  document.getElementById('notesModalText').value = j.notes || '';
+  document.getElementById('notesModal').classList.add('open');
+  setTimeout(()=>{ const ta=document.getElementById('notesModalText'); if(ta) ta.focus(); }, 50);
+}
+function saveNotesModal(){
+  const j = jobById(state.activeJobId);
+  if (!j) { closeNotesModalDirect(); return; }
+  j.notes = (document.getElementById('notesModalText').value || '').trim();
+  saveState();
+  renderJobConfig();
+  closeNotesModalDirect();
+}
+function closeNotesModal(e){ if (e.target === document.getElementById('notesModal')) closeNotesModalDirect(); }
+function closeNotesModalDirect(){ document.getElementById('notesModal').classList.remove('open'); }
 
 // ================================================================
 // FILL POPUP (quick assignment for open slots)

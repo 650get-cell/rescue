@@ -354,6 +354,147 @@ app.get('/api/published', (req, res) => {
 });
 
 // ============================================================
+// CALENDAR FEED (per-crew live ICS subscription)
+// ============================================================
+
+// Generate or fetch the opaque token that identifies a crew member to their
+// personal calendar feed URL. 32 chars of url-safe random, stored on the
+// employee record. Admin can revoke by clearing the field in state.json.
+function getOrCreateCalendarToken(emp, state) {
+  if (typeof emp.calendarToken === 'string' && emp.calendarToken.length >= 24) {
+    return emp.calendarToken;
+  }
+  emp.calendarToken = crypto.randomBytes(24).toString('base64')
+    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  state.version = (state.version || 0) + 1;
+  saveState(state);
+  return emp.calendarToken;
+}
+
+// Return both the https:// and webcal:// subscription URLs for a verified
+// crew member. Phone-verified, same gate as the other availability endpoints.
+app.post('/api/availability/subscribe-url', (req, res) => {
+  const result = verifyEmpAuth(req, res);
+  if (!result) return;
+  const { state, emp } = result;
+  const token = getOrCreateCalendarToken(emp, state);
+  const proto = (req.get('x-forwarded-proto') || req.protocol || 'https').split(',')[0].trim();
+  const host  = (req.get('x-forwarded-host')  || req.get('host')   || '').split(',')[0].trim();
+  res.json({
+    https:  `${proto}://${host}/api/myschedule.ics?token=${token}`,
+    webcal: `webcal://${host}/api/myschedule.ics?token=${token}`,
+  });
+});
+
+// Live ICS feed. Calendar apps poll this URL automatically with no UI, so
+// the token in the query string IS the credential — there's no phone challenge
+// here. Token is bound to a single employee record and is regenerable.
+app.get('/api/myschedule.ics', (req, res) => {
+  const token = String(req.query.token || '');
+  if (token.length < 16) return res.status(400).type('text/plain').send('token required');
+  const state = loadState();
+  const emp = state.employees.find(e => e.calendarToken === token && e.active !== false);
+  if (!emp) return res.status(404).type('text/plain').send('not found');
+
+  const pub = loadJSON(PUBLISHED_FILE, null);
+  const shifts = [];
+  if (pub && pub.assignments) {
+    const jobsById = {};
+    (pub.jobs || []).forEach(j => { jobsById[j.id] = j; });
+    const empsById = {};
+    (pub.employees || []).forEach(e => { empsById[e.id] = e; });
+    for (const key in pub.assignments) {
+      const parts = key.split('_').map(Number);
+      const y = parts[0], m = parts[1];
+      const monthAsgns = pub.assignments[key];
+      for (const slot in monthAsgns) {
+        const sp = slot.split('_');
+        if (parseInt(sp[0]) === emp.id) {
+          const day = parseInt(sp[1]);
+          const shift = sp[2] || 'day';
+          const jid = monthAsgns[slot];
+          const job = jobsById[jid] || {};
+          // Find everyone ELSE on the same job, same day, same shift.
+          const partners = [];
+          for (const otherSlot in monthAsgns) {
+            if (otherSlot === slot) continue;
+            const osp = otherSlot.split('_');
+            if (parseInt(osp[1]) !== day) continue;
+            if ((osp[2] || 'day') !== shift) continue;
+            if (monthAsgns[otherSlot] !== jid) continue;
+            const pe = empsById[parseInt(osp[0])];
+            if (pe) partners.push(pe.name);
+          }
+          partners.sort();
+          shifts.push({
+            y, m, day, shift,
+            job: job.clientName || 'Job',
+            start: job.startTime || '07:00',
+            end:   job.endTime   || '17:00',
+            notes: job.notes || '',
+            partners,
+          });
+        }
+      }
+    }
+    shifts.sort((a, b) => a.y - b.y || a.m - b.m || a.day - b.day);
+  }
+
+  const pad = n => String(n).padStart(2, '0');
+  const esc = v => String(v == null ? '' : v).replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n');
+  const stamp = new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+  const lines = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//MarTech Rescue//Schedule//EN',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+    'X-WR-CALNAME:' + esc('My Schedule - ' + emp.name),
+    'X-WR-CALDESC:' + esc('Live schedule for ' + emp.name + ' — auto-syncs from MarTech Rescue'),
+    'X-PUBLISHED-TTL:PT1H',
+    'REFRESH-INTERVAL;VALUE=DURATION:PT1H',
+  ];
+  shifts.forEach(s => {
+    const dt = '' + s.y + pad(s.m + 1) + pad(s.day);
+    const st = (s.start || '07:00').replace(':', '') + '00';
+    const en = (s.end   || '17:00').replace(':', '') + '00';
+    // Stable UID per (employee, date, shift) - if the assignment changes, the
+    // SUMMARY updates in the subscriber's calendar without creating a duplicate.
+    const uid = 'martech-' + emp.id + '-' + dt + '-' + s.shift + '@martech-rescue.local';
+    // Compose a calendar title that surfaces the partner at a glance.
+    let summary = s.job;
+    if (s.partners.length === 1) {
+      summary = s.job + ' — with ' + s.partners[0];
+    } else if (s.partners.length === 2) {
+      summary = s.job + ' — with ' + s.partners[0] + ' & ' + s.partners[1];
+    } else if (s.partners.length > 2) {
+      summary = s.job + ' — with ' + s.partners[0] + ' +' + (s.partners.length - 1) + ' more';
+    }
+    // Full crew + hours go in DESCRIPTION (shown when you tap the event).
+    const crewLine = s.partners.length
+      ? 'Crew today: ' + emp.name + ', ' + s.partners.join(', ')
+      : 'Solo today';
+    const notesLine = s.notes ? '\\nNotes: ' + s.notes.replace(/\r?\n/g, ' ') : '';
+    const description = 'Job: ' + s.job + '\\n' + crewLine + '\\nHours: ' + s.start + ' – ' + s.end + notesLine;
+    lines.push(
+      'BEGIN:VEVENT',
+      'UID:' + uid,
+      'DTSTAMP:' + stamp,
+      'DTSTART:' + dt + 'T' + st,
+      'DTEND:'   + dt + 'T' + en,
+      'SUMMARY:' + esc(summary),
+      'DESCRIPTION:' + esc(description),
+      'END:VEVENT'
+    );
+  });
+  lines.push('END:VCALENDAR');
+
+  res.set('Cache-Control', 'public, max-age=300');
+  res.type('text/calendar; charset=utf-8');
+  res.send(lines.join('\r\n'));
+});
+
+// ============================================================
 // ADMIN ENDPOINTS
 // ============================================================
 
@@ -393,6 +534,7 @@ app.post('/api/publish', requireAdmin, (req, res) => {
     jobs: state.jobs.filter(j => j.active !== false).map(j => ({
       id: j.id, clientName: j.clientName, startDate: j.startDate, endDate: j.endDate,
       startTime: j.startTime, endTime: j.endTime, workDays: j.workDays, teamSize: j.teamSize,
+      notes: j.notes || '',
     })),
     assignments: state.assignments,
   };

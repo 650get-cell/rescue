@@ -635,7 +635,33 @@
         ".ms-day.on{color:#202124;font-weight:600;}" +
         ".ms-day .dow{display:none;}" +
         ".ms-day.on .j{font-size:28px;font-weight:700;line-height:1.05;text-align:center;margin-top:1px;width:100%;overflow-wrap:anywhere;word-break:break-word;}" +
+        ".ms-day.on{cursor:pointer;}" +
         ".ms-day.on .t{font-size:26px;opacity:.9;}" +
+        ".dd-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000;display:none;align-items:center;justify-content:center;padding:16px;}" +
+        ".dd-overlay.on{display:flex;}" +
+        ".dd-card{background:#fff;border-radius:14px;padding:22px 22px 18px;max-width:480px;width:100%;box-shadow:0 10px 30px rgba(0,0,0,.25);position:relative;font-family:system-ui,-apple-system,sans-serif;}" +
+        ".dd-close{position:absolute;top:8px;right:14px;font-size:28px;color:#999;cursor:pointer;line-height:1;background:none;border:none;padding:0;}" +
+        ".dd-close:hover{color:#333;}" +
+        ".dd-date{font-size:13px;color:#777;font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;}" +
+        ".dd-job{font-size:22px;font-weight:800;color:#1a4a2e;margin-bottom:6px;line-height:1.2;}" +
+        ".dd-hours{font-size:15px;color:#555;margin-bottom:14px;}" +
+        ".dd-sec{margin-bottom:12px;}" +
+        ".dd-lbl{font-size:11px;color:#777;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;}" +
+        ".dd-val{font-size:15px;color:#333;line-height:1.5;white-space:pre-wrap;}" +
+        ".ms-btns{display:flex;flex-direction:column;gap:8px;align-items:stretch;}" +
+        ".ms-sub{background:#1a4a2e;color:#fff;border:none;border-radius:8px;padding:11px 18px;font-size:15px;font-weight:700;cursor:pointer;}" +
+        ".ms-sub:hover{background:#0f3a22;}" +
+        ".sub-card{background:#fff;border-radius:10px;padding:14px;box-shadow:0 1px 4px rgba(0,0,0,.06);margin:14px 0;}" +
+        ".sub-title{font-weight:800;font-size:18px;margin-bottom:10px;color:#1a4a2e;}" +
+        ".sub-row{margin-bottom:14px;}" +
+        ".sub-label{font-size:12px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;}" +
+        ".sub-link{display:inline-block;padding:12px 16px;background:#1a4a2e;color:#fff !important;text-decoration:none;border-radius:8px;font-size:14px;font-weight:600;word-break:break-all;}" +
+        ".sub-link:hover{background:#0f3a22;}" +
+        ".sub-url{font-family:monospace;font-size:13px;background:#f4f4f4;padding:10px;border-radius:6px;word-break:break-all;color:#333;margin-bottom:8px;}" +
+        ".sub-copy{background:#1a4a2e;color:#fff;border:none;border-radius:6px;padding:8px 16px;font-size:14px;font-weight:600;cursor:pointer;}" +
+        ".sub-copy:hover{background:#0f3a22;}" +
+        ".sub-instructions{font-size:13px;color:#444;line-height:1.7;border-top:1px solid #eee;padding-top:10px;margin-top:4px;}" +
+        ".sub-instructions strong{color:#1a4a2e;}" +
         "@media (max-width:600px){" +
           "body{padding:12px;}" +
           ".ms-hd{align-items:stretch;}" +
@@ -672,7 +698,8 @@
               const t = s.start && s.end ? s.start + "-" + s.end : "";
               const col = s.color || "#a0c4ff";
               const dowName = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][new Date(y, m, d).getDay()];
-              html += '<div class="ms-day on" style="background:' + col + ';border-color:' + col + ';"><span class="n">' + d + '</span><span class="dow">' + dowName + '</span><span class="j">' + msEsc(s.job) + '</span><span class="t">' + msEsc(t) + "</span></div>";
+              const idx = shifts.indexOf(s);
+              html += '<div class="ms-day on" data-i="' + idx + '" style="background:' + col + ';border-color:' + col + ';"><span class="n">' + d + '</span><span class="dow">' + dowName + '</span><span class="j">' + msEsc(s.job) + '</span><span class="t">' + msEsc(t) + "</span></div>";
             } else {
               html += '<div class="ms-day"><span class="n">' + d + "</span></div>";
             }
@@ -706,12 +733,21 @@
         if (!win) { alert("Please allow pop-ups to open your schedule in a new window."); return; }
         try { win.document.write('<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><body style="font-family:system-ui,-apple-system,sans-serif;padding:24px;color:#666;">Loading your schedule…</body>'); } catch (e) {}
         const fail = (msg) => { try { win.document.body.innerHTML = '<div style="font-family:system-ui,-apple-system,sans-serif;padding:24px;color:#666;">' + msEsc(msg) + '</div>'; } catch (e) { alert(msg); } };
-        let snap;
+        let snap, subUrls = null;
         try {
-          const resp = await fetch("/api/published");
-          if (resp.status === 404) { fail("No schedule has been published yet."); return; }
-          if (!resp.ok) throw new Error("load");
-          snap = await resp.json();
+          // Fetch published schedule AND the per-crew subscribe URLs in parallel.
+          const [pubResp, subResp] = await Promise.all([
+            fetch("/api/published"),
+            fetch("/api/availability/subscribe-url", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ name: unlockedFor, phone: unlockedPhone }),
+            }),
+          ]);
+          if (pubResp.status === 404) { fail("No schedule has been published yet."); return; }
+          if (!pubResp.ok) throw new Error("load");
+          snap = await pubResp.json();
+          if (subResp.ok) { try { subUrls = await subResp.json(); } catch (_) {} }
         } catch (e) { fail("Could not load your schedule. Please try again."); return; }
         const me = (snap.employees || []).find((e) => e.name === unlockedFor);
         if (!me) { fail("You are not on the published schedule yet."); return; }
@@ -725,25 +761,83 @@
             if (parseInt(sp[0]) === me.id) {
               const jid = snap.assignments[key][slot];
               const job = jobsById[jid] || {};
-              shifts.push({ y, m, day: parseInt(sp[1]), job: job.clientName || "Job", start: job.startTime || "", end: job.endTime || "", color: jobColorById[jid] || "#a0c4ff" });
+              const day = parseInt(sp[1]);
+              const sh = sp[2] || 'day';
+              const monthAsgns = snap.assignments[key];
+              const partners = [];
+              for (const oslot in monthAsgns) {
+                if (oslot === slot) continue;
+                const osp = oslot.split("_");
+                if (parseInt(osp[1]) !== day) continue;
+                if ((osp[2] || 'day') !== sh) continue;
+                if (monthAsgns[oslot] !== jid) continue;
+                const pe = (snap.employees || []).find(e => e.id === parseInt(osp[0]));
+                if (pe) partners.push(pe.name);
+              }
+              partners.sort();
+              shifts.push({ y, m, day, job: job.clientName || "Job", start: job.startTime || "", end: job.endTime || "", color: jobColorById[jid] || "#a0c4ff", notes: job.notes || "", partners });
             }
           }
         }
         if (!shifts.length) { fail("You have no scheduled days in the published schedule yet."); return; }
         shifts.sort((a, b) => a.y - b.y || a.m - b.m || a.day - b.day);
-        // Self-contained popup: the .ics generator runs INSIDE the popup document
-        // (so its `document` refers to the popup) — this is what makes the download work.
+        // Self-contained popup: the .ics generator and the subscribe panel both
+        // run INSIDE the popup document (so `document` refers to the popup, which
+        // is what makes the download and the clipboard copy work).
         const popupScript = (
           "var SHIFTS=" + JSON.stringify(shifts) + ";" +
           "var NAME=" + JSON.stringify(unlockedFor) + ";" +
+          "var SUB=" + JSON.stringify(subUrls || {}) + ";" +
           "var downloadICS=" + downloadICS.toString() + ";" +
-          "document.getElementById('icsBtn').addEventListener('click',function(){downloadICS(SHIFTS,NAME);});"
+          "document.getElementById('icsBtn').addEventListener('click',function(){downloadICS(SHIFTS,NAME);});" +
+          "var subBtn=document.getElementById('subBtn');" +
+          "if(subBtn&&SUB&&SUB.https){subBtn.addEventListener('click',function(){var p=document.getElementById('subPanel');var open=p.style.display==='none';p.style.display=open?'block':'none';if(open){var w=document.getElementById('subWebcalLink');var h=document.getElementById('subHttpsUrl');if(w){w.href=SUB.webcal||SUB.https;w.textContent=SUB.webcal||SUB.https;}if(h){h.textContent=SUB.https;}}});}" +
+          "else if(subBtn){subBtn.disabled=true;subBtn.textContent='Subscribe unavailable';}" +
+          "var subCopy=document.getElementById('subCopy');" +
+          "if(subCopy){subCopy.addEventListener('click',function(){if(!SUB||!SUB.https)return;navigator.clipboard.writeText(SUB.https).then(function(){var old=subCopy.textContent;subCopy.textContent='Copied \\u2713';setTimeout(function(){subCopy.textContent=old;},1500);}).catch(function(){alert('Could not auto-copy. Long-press the link above to copy it manually.');});});}" +
+          "var DOW=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];" +
+          "var MNN=['January','February','March','April','May','June','July','August','September','October','November','December'];" +
+          "function showDayDetail(i){var s=SHIFTS[i];if(!s)return;var dt=new Date(s.y,s.m,s.day);document.getElementById('ddDate').textContent=DOW[dt.getDay()]+', '+MNN[s.m]+' '+s.day+', '+s.y;document.getElementById('ddJob').textContent=s.job;document.getElementById('ddHours').textContent=(s.start&&s.end)?(s.start+' \\u2013 '+s.end):'Time TBD';var crew=NAME+((s.partners&&s.partners.length)?(', '+s.partners.join(', ')):' (solo)');document.getElementById('ddCrew').textContent=crew;var ns=document.getElementById('ddNotesSec'),nv=document.getElementById('ddNotes');if(s.notes){ns.style.display='';nv.textContent=s.notes;}else{ns.style.display='none';}document.getElementById('dayDetailOverlay').classList.add('on');}" +
+          "function hideDayDetail(){document.getElementById('dayDetailOverlay').classList.remove('on');}" +
+          "document.getElementById('cal').addEventListener('click',function(ev){var el=ev.target;while(el&&el!==this){if(el.classList&&el.classList.contains('on')&&el.dataset&&el.dataset.i!==undefined){showDayDetail(+el.dataset.i);return;}el=el.parentNode;}});" +
+          "document.getElementById('dayDetailOverlay').addEventListener('click',function(ev){if(ev.target===this)hideDayDetail();});" +
+          "document.getElementById('ddClose').addEventListener('click',hideDayDetail);"
         ).replace(/</g, "\\u003c");
         const html =
           '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>My Schedule</title><style>' + MY_SCHED_CSS + '</style></head>' +
-          '<body><div class="ms-hd"><div><h1>My Schedule - ' + msEsc(unlockedFor) + '</h1><div class="ms-note">Tap &quot;Add to calendar&quot; to add these shifts to your phone.</div></div>' +
-          '<button id="icsBtn" class="ms-ics" type="button">Add to calendar (.ics)</button></div>' +
+          '<body><div class="ms-hd"><div><h1>My Schedule - ' + msEsc(unlockedFor) + '</h1><div class="ms-note">Subscribe to keep this calendar live in sync, or download a one-time copy.</div></div>' +
+          '<div class="ms-btns">' +
+            '<button id="subBtn" class="ms-sub" type="button">Subscribe to live calendar</button>' +
+            '<button id="icsBtn" class="ms-ics" type="button">Add to calendar (.ics)</button>' +
+          '</div></div>' +
+          '<div id="subPanel" style="display:none">' +
+            '<div class="sub-card">' +
+              '<div class="sub-title">Your private calendar feed</div>' +
+              '<div class="sub-row">' +
+                '<div class="sub-label">iPhone / iPad &mdash; tap to add:</div>' +
+                '<a id="subWebcalLink" class="sub-link" href="#"></a>' +
+              '</div>' +
+              '<div class="sub-row">' +
+                '<div class="sub-label">Google Calendar / Outlook &mdash; copy &amp; paste:</div>' +
+                '<div id="subHttpsUrl" class="sub-url"></div>' +
+                '<button id="subCopy" class="sub-copy" type="button">Copy link</button>' +
+              '</div>' +
+              '<div class="sub-instructions">' +
+                '<strong>Google Calendar:</strong> calendar.google.com &rarr; &ldquo;+&rdquo; next to Other calendars &rarr; From URL &rarr; paste &rarr; Add calendar.<br>' +
+                '<strong>Outlook (web):</strong> Calendar &rarr; Add calendar &rarr; Subscribe from web &rarr; paste.<br>' +
+                'Your phone refreshes the feed automatically &mdash; usually within an hour of any schedule change.' +
+              '</div>' +
+            '</div>' +
+          '</div>' +
           '<div id="cal">' + buildScheduleHTML(shifts) + '</div>' +
+          '<div id="dayDetailOverlay" class="dd-overlay"><div class="dd-card">' +
+            '<button id="ddClose" class="dd-close" type="button" aria-label="Close">&times;</button>' +
+            '<div class="dd-date" id="ddDate"></div>' +
+            '<div class="dd-job" id="ddJob"></div>' +
+            '<div class="dd-hours" id="ddHours"></div>' +
+            '<div class="dd-sec"><div class="dd-lbl">Crew today</div><div class="dd-val" id="ddCrew"></div></div>' +
+            '<div class="dd-sec" id="ddNotesSec"><div class="dd-lbl">Notes</div><div class="dd-val" id="ddNotes"></div></div>' +
+          '</div></div>' +
           '<scr' + 'ipt>' + popupScript + '</scr' + 'ipt></body></html>';
         const d = win.document;
         d.open();
