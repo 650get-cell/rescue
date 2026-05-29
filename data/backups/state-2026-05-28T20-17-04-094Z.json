@@ -209,7 +209,7 @@
       "startTime": "07:00",
       "endTime": "16:30",
       "active": true,
-      "notes": "job well done"
+      "notes": ""
     }
   ],
   "nextJobId": 6,
@@ -552,5 +552,5 @@
   "viewYear": 2026,
   "viewMonth": 4,
   "activeJobId": 5,
-  "version": 18
+  "version": 17
 }

@@ -1,5 +1,5 @@
 {
-  "publishedAt": "2026-05-28T16:36:48.591Z",
+  "publishedAt": "2026-05-28T20:17:08.976Z",
   "employees": [
     {
       "id": 1,
@@ -101,7 +101,8 @@
         4,
         5
       ],
-      "teamSize": 3
+      "teamSize": 3,
+      "notes": ""
     },
     {
       "id": 5,
@@ -117,7 +118,8 @@
         4,
         5
       ],
-      "teamSize": 2
+      "teamSize": 2,
+      "notes": "job well done"
     }
   ],
   "assignments": {
