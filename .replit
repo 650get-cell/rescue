@@ -1,5 +1,5 @@
 run = "npm start"
-modules = ["nodejs-20"]
+modules = ["nodejs-20", "python-3.11"]
 
 [nix]
 channel = "stable-23_11"
@@ -11,6 +11,7 @@ deploymentTarget = "cloudrun"
 [agent]
 expertMode = true
 stack = "BEST_EFFORT_FALLBACK"
+integrations = ["github:1.0.0"]
 
 [userenv]
 
