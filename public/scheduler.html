@@ -1864,6 +1864,11 @@ function buildMonthBlock(y,m){
 // ================================================================
 // DAY MODAL
 // ================================================================
+// True when the admin wants to see every active crew member in the day modal
+// and fill popup — not just those who submitted availability for this month.
+// Resets each page load so the safety net is the default.
+let _showAllCrew = false;
+
 function openDayModal(y,m,day){
   modalYear=y; modalMonth=m; modalDay2=day;
   const asgn=getA(y,m);
@@ -1871,11 +1876,29 @@ function openDayModal(y,m,day){
   const jobsHere=jobsOnDay(y,m,day);
   const exclMo = new Set(getExclMonth(y,m));
   const empAvail=sortedEmps().filter(e=>getAvDays(y,m,e.id).includes(day) && !exclMo.has(e.id));
+  // When the "Show all crew" toggle is on, pull from everyone active (still respecting
+  // month-exclusion). Otherwise stick with just those who submitted availability.
+  const empAll=sortedEmps().filter(e=>!exclMo.has(e.id));
+  const pool=_showAllCrew ? empAll : empAvail;
+  const availSet=new Set(empAvail.map(e=>e.id));
   const dateStr=new Date(y,m,day).toLocaleDateString('default',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
   document.getElementById('dmTitle').textContent=dateStr;
   document.getElementById('dmSub').textContent=jobsHere.length?`Jobs: ${jobsHere.map(j=>j.clientName).join(' · ')}`:`${empAvail.length} available — no jobs active this day`;
 
   const body=document.getElementById('dmBody'); body.innerHTML='';
+
+  // Show-all-crew toggle row — sits above all shifts so it controls every job picker below.
+  const toggleRow=document.createElement('div');
+  toggleRow.style.cssText='display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;margin-bottom:10px;font-size:12px;';
+  toggleRow.innerHTML=`<label style="display:flex;align-items:center;gap:8px;cursor:pointer;flex:1;">
+    <input type="checkbox" id="dmShowAllCrewToggle" ${_showAllCrew ? 'checked' : ''} style="cursor:pointer;">
+    <span>Show all crew &mdash; including those who haven't submitted availability for this month</span>
+  </label>`;
+  body.appendChild(toggleRow);
+  document.getElementById('dmShowAllCrewToggle').addEventListener('change', function(){
+    _showAllCrew = this.checked;
+    openDayModal(modalYear, modalMonth, modalDay2);
+  });
 
   function buildShift(shift,icon){
     const sec=document.createElement('div');
@@ -1884,7 +1907,7 @@ function openDayModal(y,m,day){
         const p=paletteFor(job.id);
         const sz=job.teamSize;
         const assigned=state.employees.filter(e=>(asgn[`${e.id}_${day}_${shift}`]||0)===job.id);
-        const unassigned=empAvail.filter(e=>!assigned.find(a=>a.id===e.id)
+        const unassigned=pool.filter(e=>!assigned.find(a=>a.id===e.id)
           && !(asgn[`${e.id}_${day}_${shift}`])  // not already on another job this shift
           && !(job.excludedEmployees||[]).includes(e.id));
         const jl=document.createElement('div'); jl.style.cssText=`font-size:13px;color:${p.banner};font-weight:600;margin:10px 0 5px;`;
@@ -1904,10 +1927,14 @@ function openDayModal(y,m,day){
         if(unassigned.length && assigned.length<sz){
           const al=document.createElement('div'); al.style.cssText='font-size:11px;color:var(--muted);margin:8px 0 4px;'; al.textContent='Available to add:'; sec.appendChild(al);
           unassigned.forEach(emp=>{
-            const bc='#4aaa70';
+            const noAvail = !availSet.has(emp.id);
+            const bc = noAvail ? '#b8a040' : '#4aaa70';
+            const badge = noAvail
+              ? '<span style="font-size:10px;font-weight:600;color:#8a6010;background:#fff3c4;border:1px solid #e0c060;border-radius:3px;padding:1px 6px;margin-right:6px;">no avail</span>'
+              : '';
             const row=document.createElement('div'); row.className='modal-emp-row';
             row.innerHTML=`<div style="width:9px;height:9px;border-radius:50%;background:${bc};flex-shrink:0;"></div>
-              <span style="flex:1;">${escapeHtml(emp.name)}</span>
+              <span style="flex:1;">${badge}${escapeHtml(emp.name)}</span>
               <button style="font-size:11px;padding:3px 8px;border-radius:4px;border:1px solid ${p.banner};background:transparent;cursor:pointer;color:${p.banner};"
                 onclick="addAssign2(${emp.id},${day},'${shift}',${job.id},event)">+ Add</button>`;
             sec.appendChild(row);
@@ -1996,12 +2023,16 @@ function openFillPopup(x,y, yr, m, day, jobId, shift) {
   }
 
   const candidates = state.employees.filter(e=>{
+    if (e.active === false) return false;
     if (exclMo.has(e.id)) return false;
     if ((job.excludedEmployees||[]).includes(e.id)) return false;
-    if (!getAvDays(yr, m, e.id).includes(day)) return false;
+    // Only apply the availability filter when the "Show all crew" toggle is OFF.
+    if (!_showAllCrew && !getAvDays(yr, m, e.id).includes(day)) return false;
     if (busy.has(e.id)) return false;
     return true;
   });
+  // For the badge — true if this crew member did NOT submit availability for this day.
+  function _fpNoAvail(eid){ return !getAvDays(yr, m, eid).includes(day); }
   candidates.sort((a,b)=>{
     const sa = scheduled[a.id]||0, sb = scheduled[b.id]||0;
     if (sa !== sb) return sa - sb;
@@ -2010,13 +2041,19 @@ function openFillPopup(x,y, yr, m, day, jobId, shift) {
   });
 
   let html = `<div class="fill-popup-header">${escapeHtml(job.clientName)} · ${fmtDate(yr,m,day)}</div>`;
+  html += `<label style="display:flex;align-items:center;gap:6px;padding:6px 10px;background:var(--surface2);border-bottom:1px solid var(--border);font-size:11px;cursor:pointer;">
+    <input type="checkbox" id="fpShowAllCrewToggle" ${_showAllCrew ? 'checked' : ''} style="cursor:pointer;">
+    <span>Show all crew</span>
+  </label>`;
   if (candidates.length === 0) {
     html += '<div class="empty-msg">No one available this day.</div>';
   } else {
     candidates.forEach(emp=>{
       const s = scheduled[emp.id]||0;
+      const noAvail = _fpNoAvail(emp.id);
+      const badge = noAvail ? '<span style="font-size:9px;font-weight:600;color:#8a6010;background:#fff3c4;border:1px solid #e0c060;border-radius:3px;padding:1px 5px;margin-right:5px;">no avail</span>' : '';
       html += `<button data-emp="${emp.id}">
-        <span>${escapeHtml(emp.name)}</span>
+        <span>${badge}${escapeHtml(emp.name)}</span>
         <span class="count">${s}s</span>
       </button>`;
     });
@@ -2043,6 +2080,13 @@ function openFillPopup(x,y, yr, m, day, jobId, shift) {
       rerenderAt(yr,m); updateStatus();
     });
   });
+  const fpToggle = document.getElementById('fpShowAllCrewToggle');
+  if (fpToggle) {
+    fpToggle.addEventListener('change', function(){
+      _showAllCrew = this.checked;
+      openFillPopup(x, y, yr, m, day, jobId, shift);
+    });
+  }
 }
 function closeFillPopup(){ document.getElementById('fillPopup').classList.remove('active'); }
 
