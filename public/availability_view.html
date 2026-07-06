@@ -1,1179 +1,798 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MarTech Rescue — Availability View</title>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap"
-      rel="stylesheet"
-    />
-    <style>
-      :root {
-        --bg: #e8e8e8;
-        --surface: #ffffff;
-        --surface2: #f2f2f2;
-        --border: #d8d8d8;
-        --text: #1a1a1a;
-        --muted: #666666;
-        --accent: #c01010;
-      }
-      * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
-      body {
-        background: var(--bg);
-        color: var(--text);
-        font-family: "Inter", sans-serif;
-        font-size: 14px;
-        min-height: 100vh;
-      }
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MarTech Rescue — Availability View</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#e8e8e8;
+    --surface:#ffffff;
+    --surface2:#f2f2f2;
+    --border:#d8d8d8;
+    --text:#1a1a1a;
+    --muted:#666666;
+    --accent:#c01010;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; font-size:14px; min-height:100vh; }
 
-      /* HEADER */
-      .header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 14px 22px;
-        border-bottom: 3px solid #c01010;
-        position: sticky;
-        top: 0;
-        background: #1a1a1a;
-        z-index: 100;
-        gap: 10px;
-        flex-wrap: wrap;
-      }
-      .logo {
-        font-family: "Syne", sans-serif;
-        font-weight: 800;
-        font-size: 20px;
-        letter-spacing: -0.03em;
-        white-space: nowrap;
-      }
-      .logo .mar {
-        color: #c01010;
-      }
-      .logo .tech {
-        color: #ffffff;
-      }
-      .logo .rescue {
-        color: #aaaaaa;
-        font-weight: 700;
-      }
-      .logo .sub {
-        color: #888;
-        font-family: "Inter", sans-serif;
-        font-weight: 400;
-        font-size: 12px;
-        letter-spacing: 0.1em;
-        margin-left: 8px;
-        text-transform: uppercase;
-      }
+  /* HEADER */
+  .header {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 22px; border-bottom:3px solid #c01010;
+    position:sticky; top:0; background:#1a1a1a; z-index:100; gap:10px; flex-wrap:wrap;
+  }
+  .logo { font-family:'Syne',sans-serif; font-weight:800; font-size:20px; letter-spacing:-0.03em; white-space:nowrap; }
+  .logo .mar    { color:#c01010; }
+  .logo .tech   { color:#ffffff; }
+  .logo .rescue { color:#aaaaaa; font-weight:700; }
+  .logo .sub { color:#888; font-family:'Inter',sans-serif; font-weight:400; font-size:12px; letter-spacing:0.1em; margin-left:8px; text-transform:uppercase; }
 
-      .scroll-controls {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-      .nav-btn {
-        background: rgba(255, 255, 255, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        color: #fff;
-        width: 32px;
-        height: 32px;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 15px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-      .nav-btn:hover {
-        background: rgba(255, 255, 255, 0.2);
-      }
-      .scroll-label {
-        font-family: "Syne", sans-serif;
-        font-weight: 700;
-        font-size: 14px;
-        color: #aaa;
-        white-space: nowrap;
-      }
+  .scroll-controls { display:flex; align-items:center; gap:8px; }
+  .nav-btn { background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); color:#fff; width:32px; height:32px; border-radius:6px; cursor:pointer; font-size:15px; display:flex; align-items:center; justify-content:center; }
+  .nav-btn:hover { background:rgba(255,255,255,0.2); }
+  .scroll-label { font-family:'Syne',sans-serif; font-weight:700; font-size:14px; color:#aaa; white-space:nowrap; }
 
-      .header-actions {
-        display: flex;
-        gap: 8px;
-        align-items: center;
-        flex-wrap: wrap;
-      }
-      .btn {
-        font-family: "Inter", sans-serif;
-        font-size: 13px;
-        font-weight: 500;
-        padding: 7px 14px;
-        border-radius: 6px;
-        cursor: pointer;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        white-space: nowrap;
-        background: transparent;
-        color: #aaa;
-      }
-      .btn:hover {
-        border-color: rgba(255, 255, 255, 0.5);
-        color: #fff;
-      }
-      .btn-accent {
-        background: #c01010;
-        color: #fff;
-        border-color: #c01010;
-        font-weight: 600;
-      }
-      .btn-accent:hover {
-        background: #a00c0c;
-        border-color: #a00c0c;
-      }
+  .header-actions { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .btn { font-family:'Inter',sans-serif; font-size:13px; font-weight:500; padding:7px 14px; border-radius:6px; cursor:pointer; border:1px solid rgba(255,255,255,0.2); white-space:nowrap; background:transparent; color:#aaa; }
+  .btn:hover { border-color:rgba(255,255,255,0.5); color:#fff; }
+  .btn-accent { background:#c01010; color:#fff; border-color:#c01010; font-weight:600; }
+  .btn-accent:hover { background:#a00c0c; border-color:#a00c0c; }
 
-      /* CALENDAR SCROLL AREA */
-      .wrap {
-        padding: 20px 24px 60px;
-        max-width: 1400px;
-        margin: 0 auto;
-      }
+  /* CALENDAR SCROLL AREA */
+  .wrap { padding:20px 24px 60px; max-width:1400px; margin:0 auto; }
 
-      .month-block {
-        margin-bottom: 40px;
-      }
-      .month-block-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 10px 4px 8px;
-        border-bottom: 2px solid var(--border);
-        margin-bottom: 8px;
-      }
-      .month-block-title {
-        font-family: "Syne", sans-serif;
-        font-weight: 800;
-        font-size: 20px;
-        color: #1a1a1a;
-      }
-      .month-block-summary {
-        font-size: 12px;
-        color: var(--muted);
-      }
+  .month-block { margin-bottom:40px; }
+  .month-block-header {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:10px 4px 8px;
+    border-bottom:2px solid var(--border); margin-bottom:8px;
+  }
+  .month-block-title { font-family:'Syne',sans-serif; font-weight:800; font-size:20px; color:#1a1a1a; }
+  .month-block-summary { font-size:12px; color:var(--muted); }
 
-      .calendar-grid {
-        display: grid;
-        grid-template-columns: repeat(7, 1fr);
-        gap: 3px;
-      }
-      .day-header {
-        text-align: center;
-        font-family: "Syne", sans-serif;
-        font-size: 11px;
-        font-weight: 700;
-        letter-spacing: 0.08em;
-        color: var(--muted);
-        padding: 0 0 5px;
-        text-transform: uppercase;
-      }
+  .calendar-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:3px; }
+  .day-header { text-align:center; font-family:'Syne',sans-serif; font-size:11px; font-weight:700; letter-spacing:.08em; color:var(--muted); padding:0 0 5px; text-transform:uppercase; }
 
-      .day-cell {
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: 6px;
-        min-height: 110px;
-        padding: 6px 8px;
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-        overflow: hidden;
-      }
-      .day-cell.empty {
-        background: transparent;
-        border-color: transparent;
-      }
-      .day-cell.today {
-        border-color: #c01010;
-        border-width: 2px;
-      }
-      .day-cell.no-avail {
-        background: var(--surface2);
-      }
+  .day-cell {
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:6px;
+    min-height:110px;
+    padding:6px 8px;
+    display:flex; flex-direction:column; gap:2px;
+    overflow:hidden;
+  }
+  .day-cell.empty { background:transparent; border-color:transparent; }
+  .day-cell.today { border-color:#c01010; border-width:2px; }
+  .day-cell.no-avail { background:var(--surface2); }
 
-      .day-head {
-        display: flex;
-        justify-content: space-between;
-        align-items: baseline;
-        margin-bottom: 3px;
-      }
-      .day-num {
-        font-family: "Syne", sans-serif;
-        font-size: 15px;
-        font-weight: 800;
-        color: #555;
-        line-height: 1;
-      }
-      .day-cell.today .day-num {
-        color: var(--accent);
-      }
-      .day-count {
-        font-size: 10px;
-        font-weight: 600;
-        color: var(--muted);
-        background: #ececec;
-        padding: 1px 6px;
-        border-radius: 10px;
-      }
-      .day-cell.today .day-count {
-        background: #fee;
-        color: var(--accent);
-      }
+  .day-head { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:3px; }
+  .day-num { font-family:'Syne',sans-serif; font-size:15px; font-weight:800; color:#555; line-height:1; }
+  .day-cell.today .day-num { color:var(--accent); }
+  .day-count { font-size:10px; font-weight:600; color:var(--muted); background:#ececec; padding:1px 6px; border-radius:10px; }
+  .day-cell.today .day-count { background:#fee; color:var(--accent); }
 
-      .avail-name {
-        font-size: 12px;
-        padding: 2px 6px;
-        background: #eaf5ee;
-        color: #1a5a33;
-        border-left: 2px solid #4aaa70;
-        border-radius: 3px;
-        line-height: 1.3;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-      .day-empty-msg {
-        font-size: 10px;
-        color: #aaa;
-        font-style: italic;
-        padding: 4px 0;
-      }
+  .avail-name {
+    font-size:12px;
+    padding:2px 6px;
+    background:#eaf5ee;
+    color:#1a5a33;
+    border-left:2px solid #4aaa70;
+    border-radius:3px;
+    line-height:1.3;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .day-empty-msg {
+    font-size:10px;
+    color:#aaa;
+    font-style:italic;
+    padding:4px 0;
+  }
 
-      /* "No one submitted" empty state */
-      .no-data-block {
-        padding: 40px;
-        text-align: center;
-        background: var(--surface);
-        border: 1px dashed var(--border);
-        border-radius: 10px;
-        color: var(--muted);
-        font-size: 14px;
-        margin: 20px 0;
-      }
-      .no-data-block strong {
-        color: var(--text);
-        display: block;
-        margin-bottom: 8px;
-        font-family: "Syne", sans-serif;
-        font-size: 16px;
-      }
+  /* "No one submitted" empty state */
+  .no-data-block {
+    padding:40px;
+    text-align:center;
+    background:var(--surface);
+    border:1px dashed var(--border);
+    border-radius:10px;
+    color:var(--muted);
+    font-size:14px;
+    margin:20px 0;
+  }
+  .no-data-block strong { color:var(--text); display:block; margin-bottom:8px; font-family:'Syne',sans-serif; font-size:16px; }
 
-      /* EDIT MODAL */
-      .modal-overlay {
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.45);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 200;
-        opacity: 0;
-        pointer-events: none;
-        transition: opacity 0.2s;
-      }
-      .modal-overlay.open {
-        opacity: 1;
-        pointer-events: all;
-      }
-      .modal {
-        background: var(--surface);
-        border-radius: 12px;
-        width: 560px;
-        max-width: 92vw;
-        max-height: 88vh;
-        overflow-y: auto;
-        padding: 24px;
-        transform: translateY(10px);
-        transition: transform 0.2s;
-        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.16);
-      }
-      .modal-overlay.open .modal {
-        transform: translateY(0);
-      }
-      .modal-title {
-        font-family: "Syne", sans-serif;
-        font-weight: 700;
-        font-size: 18px;
-        margin-bottom: 4px;
-      }
-      .modal-sub {
-        color: var(--muted);
-        font-size: 13px;
-        margin-bottom: 16px;
-      }
-      .modal-row {
-        display: flex;
-        gap: 10px;
-        margin-bottom: 14px;
-      }
-      .modal-field {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        gap: 5px;
-      }
-      .modal-field label {
-        font-size: 11px;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        color: var(--muted);
-        font-weight: 600;
-      }
-      .modal-field select {
-        padding: 9px 12px;
-        border: 1.5px solid var(--border);
-        border-radius: 6px;
-        font-family: inherit;
-        font-size: 14px;
-        background: #f8f8f8;
-        cursor: pointer;
-        appearance: none;
-        -webkit-appearance: none;
-        padding-right: 32px;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23666' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-        background-repeat: no-repeat;
-        background-position: right 12px center;
-      }
-      .modal-field select:focus {
-        outline: none;
-        border-color: var(--accent);
-        background-color: #fff;
-      }
-      .edit-day-grid {
-        display: grid;
-        grid-template-columns: repeat(7, 1fr);
-        gap: 5px;
-        margin: 6px 0 14px;
-      }
-      .edit-day-btn {
-        aspect-ratio: 1;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-family: inherit;
-        font-size: 13px;
-        font-weight: 600;
-        border: 1.5px solid var(--border);
-        background: #f8f8f8;
-        color: #555;
-        border-radius: 6px;
-        cursor: pointer;
-        user-select: none;
-        transition: all 0.12s;
-      }
-      .edit-day-btn:hover {
-        border-color: #c01010;
-        color: #c01010;
-        background: #fff5f5;
-      }
-      .edit-day-btn.selected {
-        background: #c01010;
-        border-color: #c01010;
-        color: #fff;
-      }
-      .edit-day-btn.hidden {
-        visibility: hidden;
-      }
-      .edit-day-header {
-        text-align: center;
-        font-size: 11px;
-        font-weight: 700;
-        color: #999;
-        padding: 2px 0;
-      }
-      .edit-day-blank {
-        aspect-ratio: 1;
-      }
-      .modal-actions {
-        display: flex;
-        gap: 8px;
-        justify-content: flex-end;
-        margin-top: 14px;
-        padding-top: 14px;
-        border-top: 1px solid var(--border);
-      }
-      .btn-modal {
-        padding: 9px 16px;
-        border-radius: 6px;
-        font-family: inherit;
-        font-size: 13px;
-        font-weight: 500;
-        cursor: pointer;
-        border: 1px solid var(--border);
-        background: transparent;
-        color: var(--text);
-      }
-      .btn-modal.primary {
-        background: var(--accent);
-        color: #fff;
-        border-color: var(--accent);
-        font-weight: 600;
-      }
-      .btn-modal.primary:hover {
-        background: #a00c0c;
-      }
-      .btn-modal.danger {
-        color: #c01010;
-        border-color: #f0c0c0;
-      }
-      .btn-modal.danger:hover {
-        background: #fef0f0;
-      }
-      .modal-info {
-        font-size: 12px;
-        color: var(--muted);
-        padding: 10px 14px;
-        background: #f8f8f8;
-        border-radius: 6px;
-        margin-bottom: 12px;
-      }
-      .modal-info strong {
-        color: var(--text);
-      }
+  /* VIEW TOGGLE */
+  .view-toggle { display:flex; border:1px solid rgba(255,255,255,0.3); border-radius:7px; overflow:hidden; }
+  .vt-btn { background:transparent; border:none; color:rgba(255,255,255,0.7); padding:7px 13px; font-family:inherit; font-size:13px; font-weight:600; cursor:pointer; }
+  .vt-btn.active { background:#c01010; color:#fff; }
 
-      ::-webkit-scrollbar {
-        width: 5px;
-        height: 5px;
-      }
-      ::-webkit-scrollbar-track {
-        background: transparent;
-      }
-      ::-webkit-scrollbar-thumb {
-        background: var(--border);
-        border-radius: 4px;
-      }
+  /* EMPLOYEE TABLE VIEW */
+  .emp-table-wrap { background:var(--surface); border-radius:10px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.07); }
+  .emp-table { width:100%; border-collapse:collapse; }
+  .emp-table th { text-align:left; font-family:'Syne',sans-serif; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); padding:12px 14px 8px; border-bottom:2px solid var(--border); }
+  .emp-table td { padding:10px 14px; border-bottom:1px solid var(--border); font-size:14px; vertical-align:top; }
+  .emp-table tr:last-child td { border-bottom:none; }
+  .emp-table tr.not-submitted { background:#fff5f5; }
+  .emp-table tr.not-submitted td:first-child { border-left:3px solid #c01010; }
+  .emp-name-cell { font-weight:600; white-space:nowrap; }
+  .emp-status-ok { color:#1a5a33; font-size:12px; font-weight:600; }
+  .emp-status-none { color:#c01010; font-size:12px; font-weight:700; }
+  .emp-count-badge { display:inline-block; background:#e1f5ee; color:#0a5030; font-weight:700; font-size:12px; padding:2px 9px; border-radius:11px; }
+  .emp-count-badge.zero { background:#fceaea; color:#a32d2d; }
+  .emp-days-cell { color:#444; font-size:12.5px; line-height:1.7; }
+  .emp-day-chip { display:inline-block; background:#f0f0ec; border-radius:4px; padding:1px 6px; margin:0 3px 3px 0; font-weight:600; font-size:11.5px; }
+  .emp-summary-bar { display:flex; gap:16px; padding:10px 4px 14px; font-size:13px; color:var(--muted); flex-wrap:wrap; }
+  .emp-summary-bar strong { color:var(--text); }
 
-      @media print {
-        .header {
-          display: none !important;
-        }
-        body {
-          background: white !important;
-        }
-        .wrap {
-          padding: 0 !important;
-          max-width: none !important;
-        }
-        .month-block {
-          page-break-after: always;
-          break-after: page;
-        }
-        .month-block:last-child {
-          page-break-after: avoid;
-          break-after: avoid;
-        }
-        .day-cell {
-          background: white !important;
-          border: 1px solid #ccc !important;
-          break-inside: avoid;
-        }
-        .day-cell.no-avail {
-          background: #f8f8f8 !important;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <div class="header">
-      <div class="logo">
-        <span class="mar">Mar</span><span class="tech">Tech</span>
-        <span class="rescue">Rescue</span>
-        <span class="sub">Availability view</span>
+  /* EDIT MODAL */
+  .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.45); display:flex; align-items:center; justify-content:center; z-index:200; opacity:0; pointer-events:none; transition:opacity .2s; }
+  .modal-overlay.open { opacity:1; pointer-events:all; }
+  .modal { background:var(--surface); border-radius:12px; width:560px; max-width:92vw; max-height:88vh; overflow-y:auto; padding:24px; transform:translateY(10px); transition:transform .2s; box-shadow:0 4px 24px rgba(0,0,0,0.16); }
+  .modal-overlay.open .modal { transform:translateY(0); }
+  .modal-title { font-family:'Syne',sans-serif; font-weight:700; font-size:18px; margin-bottom:4px; }
+  .modal-sub { color:var(--muted); font-size:13px; margin-bottom:16px; }
+  .modal-row { display:flex; gap:10px; margin-bottom:14px; }
+  .modal-field { flex:1; display:flex; flex-direction:column; gap:5px; }
+  .modal-field label { font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); font-weight:600; }
+  .modal-field select { padding:9px 12px; border:1.5px solid var(--border); border-radius:6px; font-family:inherit; font-size:14px; background:#f8f8f8; cursor:pointer; appearance:none; -webkit-appearance:none; padding-right:32px;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23666' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat; background-position:right 12px center; }
+  .modal-field select:focus { outline:none; border-color:var(--accent); background-color:#fff; }
+  .edit-day-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:5px; margin:6px 0 14px; }
+  .edit-day-btn { aspect-ratio:1; display:flex; align-items:center; justify-content:center; font-family:inherit; font-size:13px; font-weight:600; border:1.5px solid var(--border); background:#f8f8f8; color:#555; border-radius:6px; cursor:pointer; user-select:none; transition:all .12s; }
+  .edit-day-btn:hover { border-color:#c01010; color:#c01010; background:#fff5f5; }
+  .edit-day-btn.selected { background:#c01010; border-color:#c01010; color:#fff; }
+  .edit-day-btn.hidden { visibility:hidden; }
+  .modal-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:14px; padding-top:14px; border-top:1px solid var(--border); }
+  .btn-modal { padding:9px 16px; border-radius:6px; font-family:inherit; font-size:13px; font-weight:500; cursor:pointer; border:1px solid var(--border); background:transparent; color:var(--text); }
+  .btn-modal.primary { background:var(--accent); color:#fff; border-color:var(--accent); font-weight:600; }
+  .btn-modal.primary:hover { background:#a00c0c; }
+  .btn-modal.danger { color:#c01010; border-color:#f0c0c0; }
+  .btn-modal.danger:hover { background:#fef0f0; }
+  .modal-info { font-size:12px; color:var(--muted); padding:10px 14px; background:#f8f8f8; border-radius:6px; margin-bottom:12px; }
+  .modal-info strong { color:var(--text); }
+
+  ::-webkit-scrollbar { width:5px; height:5px; }
+  ::-webkit-scrollbar-track { background:transparent; }
+  ::-webkit-scrollbar-thumb { background:var(--border); border-radius:4px; }
+
+  @media print {
+    .header { display:none!important; }
+    body { background:white!important; }
+    .wrap { padding:0!important; max-width:none!important; }
+    .month-block { page-break-after:always; break-after:page; }
+    .month-block:last-child { page-break-after:avoid; break-after:avoid; }
+    .day-cell { background:white!important; border:1px solid #ccc!important; break-inside:avoid; }
+    .day-cell.no-avail { background:#f8f8f8!important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">
+    <span class="mar">Mar</span><span class="tech">Tech</span> <span class="rescue">Rescue</span>
+    <span class="sub">Availability view</span>
+  </div>
+
+  <div class="scroll-controls">
+    <button class="nav-btn" onclick="shiftView(-1)" title="Earlier">&#8592;</button>
+    <span class="scroll-label" id="viewRangeLabel"></span>
+    <button class="nav-btn" onclick="shiftView(1)" title="Later">&#8594;</button>
+  </div>
+
+  <div class="header-actions">
+    <div class="view-toggle">
+      <button class="vt-btn active" id="vtDay" onclick="setViewMode('day')">By day</button>
+      <button class="vt-btn" id="vtEmp" onclick="setViewMode('employee')">By employee</button>
+    </div>
+    <button class="btn" onclick="openEditModal()" style="border-color:rgba(255,255,255,0.4);color:#fff;">Edit submission</button>
+    <button class="btn" onclick="window.print()">Print</button>
+    <a class="btn btn-accent" href="scheduler.html">&larr; Scheduler</a>
+  </div>
+</div>
+
+<div class="wrap" id="wrap"></div>
+
+<!-- Edit Submission modal -->
+<div class="modal-overlay" id="editModal" onclick="onEditOverlayClick(event)">
+  <div class="modal">
+    <div class="modal-title">Edit availability submission</div>
+    <div class="modal-sub">Add, change, or remove someone's available days for a given month. Saves immediately on click.</div>
+
+    <div class="modal-row">
+      <div class="modal-field">
+        <label>Employee</label>
+        <select id="editEmpSelect" onchange="onEditEmpChange()"></select>
       </div>
-
-      <div class="scroll-controls">
-        <button class="nav-btn" onclick="shiftView(-1)" title="Earlier">
-          &#8592;
-        </button>
-        <span class="scroll-label" id="viewRangeLabel"></span>
-        <button class="nav-btn" onclick="shiftView(1)" title="Later">
-          &#8594;
-        </button>
+      <div class="modal-field">
+        <label>Month</label>
+        <select id="editMonthSelect" onchange="onEditMonthChange()"></select>
       </div>
-
-      <div class="header-actions">
-        <button
-          class="btn"
-          onclick="openEditModal()"
-          style="border-color: rgba(255, 255, 255, 0.4); color: #fff"
-        >
-          Edit submission
-        </button>
-        <button class="btn" onclick="window.print()">Print</button>
-        <button class="btn" onclick="clearAllAvailability()" style="border-color:#c04040;color:#ff9090;" title="Testing only — wipes all submitted availability">&#x1F9F9; Clear All Availability</button>
-        <a class="btn btn-accent" href="scheduler.html">&larr; Scheduler</a>
+      <div class="modal-field">
+        <label>Year</label>
+        <select id="editYearSelect" onchange="onEditMonthChange()"></select>
       </div>
     </div>
 
-    <div class="wrap" id="wrap"></div>
+    <div class="modal-info" id="editInfo"></div>
 
-    <!-- Edit Submission modal -->
-    <div
-      class="modal-overlay"
-      id="editModal"
-      onclick="onEditOverlayClick(event)"
-    >
-      <div class="modal">
-        <div class="modal-title">Edit availability submission</div>
-        <div class="modal-sub">
-          Add, change, or remove someone's available days for a given month.
-          Saves immediately on click.
-        </div>
-
-        <div class="modal-row">
-          <div class="modal-field">
-            <label>Employee</label>
-            <select id="editEmpSelect" onchange="onEditEmpChange()"></select>
-          </div>
-          <div class="modal-field">
-            <label>Month</label>
-            <select
-              id="editMonthSelect"
-              onchange="onEditMonthChange()"
-            ></select>
-          </div>
-          <div class="modal-field">
-            <label>Year</label>
-            <select id="editYearSelect" onchange="onEditMonthChange()"></select>
-          </div>
-        </div>
-
-        <div class="modal-info" id="editInfo"></div>
-
-        <div class="modal-row" style="margin-bottom: 6px">
-          <button
-            class="btn-modal"
-            type="button"
-            onclick="editSelectAll()"
-            style="flex: 1"
-          >
-            Select all
-          </button>
-          <button
-            class="btn-modal"
-            type="button"
-            onclick="editClearAll()"
-            style="flex: 1"
-          >
-            Clear all
-          </button>
-        </div>
-
-        <div class="edit-day-grid" id="editDayGrid"></div>
-
-        <div class="modal-actions">
-          <button class="btn-modal danger" onclick="editDeleteSubmission()">
-            Delete submission
-          </button>
-          <div style="flex: 1"></div>
-          <button class="btn-modal" onclick="closeEditModal()">Done</button>
-        </div>
-      </div>
+    <div class="modal-row" style="margin-bottom:6px;">
+      <button class="btn-modal" type="button" onclick="editSelectAll()" style="flex:1;">Select all workdays</button>
+      <button class="btn-modal" type="button" onclick="editClearAll()" style="flex:1;">Clear all</button>
     </div>
 
-    <script>
-      // Replit version — talks to /api/state, requires admin password.
-      let ADMIN_PW = sessionStorage.getItem("martech_admin_pw") || "";
-      let _cachedState = null; // last fetched state, kept in memory between renders
-      let _saveTimer = null;
+    <div class="edit-day-grid" id="editDayGrid"></div>
 
-      const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-      const MONTH_NAMES = [
-        "January",
-        "February",
-        "March",
-        "April",
-        "May",
-        "June",
-        "July",
-        "August",
-        "September",
-        "October",
-        "November",
-        "December",
-      ];
+    <div class="modal-actions">
+      <button class="btn-modal danger" onclick="editDeleteSubmission()">Delete submission</button>
+      <div style="flex:1;"></div>
+      <button class="btn-modal" onclick="closeEditModal()">Done</button>
+    </div>
+  </div>
+</div>
 
-      let viewYear = new Date().getFullYear();
-      let viewMonth = new Date().getMonth();
-      let NUM_MONTHS = 4;
+<script>
+// Replit version — talks to /api/state, requires admin password.
+let ADMIN_PW = sessionStorage.getItem('martech_admin_pw') || '';
+let _cachedState = null;     // last fetched state, kept in memory between renders
+let _saveTimer = null;
 
-      async function apiCheckPw(pw) {
-        try {
-          const r = await fetch("/api/admin/check", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ password: pw }),
-          });
-          return r.ok;
-        } catch {
-          return false;
-        }
-      }
-      async function apiGetState() {
-        const r = await fetch("/api/state", {
-          headers: { "X-Admin-Password": ADMIN_PW },
-        });
-        if (r.status === 401) throw new Error("AUTH");
-        if (!r.ok) throw new Error("Failed to load state");
-        return r.json();
-      }
-      async function apiPutState(state) {
-        const r = await fetch("/api/state", {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            "X-Admin-Password": ADMIN_PW,
-          },
-          body: JSON.stringify(state),
-        });
-        if (r.status === 409) {
-          alert("Heads up: the schedule was changed in another window (or by a crew submission) since this page loaded.\n\nTo avoid overwriting those changes, your most recent edit was NOT saved. This page will now reload the current data.");
-          location.reload();
-          throw new Error("STALE");
-        }
-        if (!r.ok) throw new Error("Save failed");
-        const data = await r.json().catch(() => null);
-        if (data && typeof data.version === "number") state.version = data.version;
-      }
+const DAY_NAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
-      // Synchronous accessor used by render() and the modal — returns the in-memory cache.
-      function loadState() {
-        return _cachedState;
-      }
+let viewYear  = new Date().getFullYear();
+let viewMonth = new Date().getMonth();
+let NUM_MONTHS = 4;
 
-      // Save cached state to server, debounced so quick clicks don't spam the network.
-      function saveStateLocal(state) {
-        _cachedState = state;
-        if (_saveTimer) clearTimeout(_saveTimer);
-        _saveTimer = setTimeout(async () => {
-          try {
-            await apiPutState(state);
-          } catch (e) {
-            alert("Could not save changes to server: " + e.message);
-          }
-        }, 350);
-      }
+async function apiCheckPw(pw) {
+  try {
+    const r = await fetch('/api/admin/check', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pw }),
+    });
+    return r.ok;
+  } catch { return false; }
+}
+async function apiGetState() {
+  const r = await fetch('/api/state', { headers: { 'X-Admin-Password': ADMIN_PW } });
+  if (r.status === 401) throw new Error('AUTH');
+  if (!r.ok) throw new Error('Failed to load state');
+  return r.json();
+}
+async function apiPutState(state) {
+  const r = await fetch('/api/state', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', 'X-Admin-Password': ADMIN_PW },
+    body: JSON.stringify(state),
+  });
+  if (!r.ok) throw new Error('Save failed');
+}
 
-      function mk(y, m) {
-        return `${y}_${m}`;
-      }
-      function dimOf(y, m) {
-        return new Date(y, m + 1, 0).getDate();
-      }
+// Synchronous accessor used by render() and the modal — returns the in-memory cache.
+function loadState() {
+  return _cachedState;
+}
 
-      function updateViewLabel() {
-        const endM = (viewMonth + NUM_MONTHS - 1) % 12;
-        const endY = viewYear + Math.floor((viewMonth + NUM_MONTHS - 1) / 12);
-        document.getElementById("viewRangeLabel").textContent =
-          `${MONTH_NAMES[viewMonth].slice(0, 3)} ${viewYear} — ${MONTH_NAMES[endM].slice(0, 3)} ${endY}`;
-      }
+// NOTE: this page intentionally has no full-state save. All writes go through
+// the targeted /api/availability/admin-set endpoint so crew submissions arriving
+// in parallel can never be overwritten by a stale copy of the state.
 
-      function shiftView(dir) {
-        viewMonth += dir;
-        while (viewMonth > 11) {
-          viewMonth = 0;
-          viewYear++;
-        }
-        while (viewMonth < 0) {
-          viewMonth = 11;
-          viewYear--;
-        }
-        render();
-      }
+function mk(y,m) { return `${y}_${m}`; }
+function escapeHtml(s) {
+  return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function dimOf(y,m) { return new Date(y,m+1,0).getDate(); }
 
-      function render() {
-        updateViewLabel();
-        const wrap = document.getElementById("wrap");
-        wrap.innerHTML = "";
+function updateViewLabel() {
+  const endM = (viewMonth + NUM_MONTHS - 1) % 12;
+  const endY = viewYear + Math.floor((viewMonth + NUM_MONTHS - 1) / 12);
+  document.getElementById('viewRangeLabel').textContent =
+    `${MONTH_NAMES[viewMonth].slice(0,3)} ${viewYear} — ${MONTH_NAMES[endM].slice(0,3)} ${endY}`;
+}
 
-        const state = loadState();
-        if (!state || !state.employees || !state.availability) {
-          wrap.innerHTML = `<div class="no-data-block">
+function shiftView(dir) {
+  viewMonth += dir;
+  while (viewMonth > 11) { viewMonth = 0; viewYear++; }
+  while (viewMonth < 0)  { viewMonth = 11; viewYear--; }
+  render();
+}
+
+let viewMode = 'day'; // 'day' | 'employee'
+
+function setViewMode(mode) {
+  viewMode = mode;
+  document.getElementById('vtDay').classList.toggle('active', mode === 'day');
+  document.getElementById('vtEmp').classList.toggle('active', mode === 'employee');
+  render();
+}
+
+function render() {
+  updateViewLabel();
+  const wrap = document.getElementById('wrap');
+  wrap.innerHTML = '';
+
+  const state = loadState();
+  if (!state || !state.employees || !state.availability) {
+    wrap.innerHTML = `<div class="no-data-block">
       <strong>No availability data yet</strong>
       This view reads from the scheduler's local storage. Open the scheduler and import or enter some availability first, then come back here.
     </div>`;
-          return;
-        }
+    return;
+  }
 
-        for (let i = 0; i < NUM_MONTHS; i++) {
-          let m = viewMonth + i,
-            y = viewYear;
-          while (m > 11) {
-            m -= 12;
-            y++;
-          }
-          wrap.appendChild(buildMonthBlock(state, y, m));
-        }
+  if (viewMode === 'employee') {
+    for (let i = 0; i < NUM_MONTHS; i++) {
+      let m = viewMonth + i, y = viewYear;
+      while (m > 11) { m -= 12; y++; }
+      wrap.appendChild(buildEmployeeTable(state, y, m));
+    }
+    return;
+  }
+
+  for (let i = 0; i < NUM_MONTHS; i++) {
+    let m = viewMonth + i, y = viewYear;
+    while (m > 11) { m -= 12; y++; }
+    wrap.appendChild(buildMonthBlock(state, y, m));
+  }
+}
+
+// Per-employee table for one month: every active employee, submitted or not.
+function buildEmployeeTable(state, y, m) {
+  const block = document.createElement('div');
+  block.className = 'month-block';
+
+  const hdr = document.createElement('div');
+  hdr.className = 'month-block-header';
+  const title = document.createElement('div');
+  title.className = 'month-block-title';
+  title.textContent = `${MONTH_NAMES[m]} ${y}`;
+  hdr.appendChild(title);
+  block.appendChild(hdr);
+
+  const monthAvail = (state.availability || {})[mk(y, m)] || {};
+  const crew = state.employees
+    .filter(e => e.active !== false)
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+  let submittedCount = 0;
+  let rowsHtml = '';
+  crew.forEach(emp => {
+    const record = monthAvail[emp.id];
+    const submitted = record !== undefined;
+    if (submitted) submittedCount++;
+    const days = !record ? [] : (Array.isArray(record) ? record : (record.days || []));
+    const submittedAt = (record && !Array.isArray(record) && record.submittedAt)
+      ? new Date(record.submittedAt).toLocaleDateString() : null;
+    const editedByAdmin = record && !Array.isArray(record) && record.lastEditedBy === 'admin';
+
+    let statusHtml;
+    if (!submitted) {
+      statusHtml = '<span class="emp-status-none">Not submitted</span>';
+    } else {
+      let s = '<span class="emp-status-ok">Submitted';
+      if (submittedAt) s += ' ' + submittedAt;
+      s += '</span>';
+      if (editedByAdmin) s += '<div style="font-size:11px;color:#8a5010;">edited by admin</div>';
+      statusHtml = s;
+    }
+
+    const chips = days.map(d => `<span class="emp-day-chip">${d}</span>`).join('');
+    rowsHtml += `<tr class="${submitted ? '' : 'not-submitted'}">
+      <td class="emp-name-cell">${escapeHtml(emp.name)}</td>
+      <td>${statusHtml}</td>
+      <td><span class="emp-count-badge${days.length === 0 ? ' zero' : ''}">${days.length}</span></td>
+      <td class="emp-days-cell">${chips || '<span style="color:#aaa;">—</span>'}</td>
+    </tr>`;
+  });
+
+  const summary = document.createElement('div');
+  summary.className = 'emp-summary-bar';
+  summary.innerHTML = `<span><strong>${submittedCount}</strong> of <strong>${crew.length}</strong> submitted</span>
+    <span><strong>${crew.length - submittedCount}</strong> outstanding</span>`;
+  block.appendChild(summary);
+
+  const tableWrap = document.createElement('div');
+  tableWrap.className = 'emp-table-wrap';
+  tableWrap.innerHTML = `<table class="emp-table">
+    <thead><tr><th>Name</th><th>Status</th><th>Days</th><th>Available on</th></tr></thead>
+    <tbody>${rowsHtml}</tbody>
+  </table>`;
+  block.appendChild(tableWrap);
+
+  return block;
+}
+
+function buildMonthBlock(state, y, m) {
+  const block = document.createElement('div');
+  block.className = 'month-block';
+
+  const key = mk(y, m);
+  const monthAvail = (state.availability || {})[key] || {};
+  // Only count employees who actually submitted for this month
+  const submittedEmpIds = Object.keys(monthAvail).map(Number);
+  const submittedCount = submittedEmpIds.length;
+  // Build a map: empId -> employee object, for fast lookup
+  const empById = {};
+  state.employees.forEach(e => { empById[e.id] = e; });
+
+  // Header
+  const hdr = document.createElement('div'); hdr.className = 'month-block-header';
+  const title = document.createElement('div');
+  title.className = 'month-block-title';
+  title.textContent = `${MONTH_NAMES[m]} ${y}`;
+  hdr.appendChild(title);
+
+  const summary = document.createElement('div');
+  summary.className = 'month-block-summary';
+  if (submittedCount === 0) {
+    summary.textContent = 'No submissions';
+  } else {
+    summary.textContent = `${submittedCount} crew member${submittedCount!==1?'s':''} submitted availability`;
+  }
+  hdr.appendChild(summary);
+  block.appendChild(hdr);
+
+  // No submissions? Show message and skip calendar
+  if (submittedCount === 0) {
+    const msg = document.createElement('div');
+    msg.className = 'no-data-block';
+    msg.innerHTML = `<strong>${MONTH_NAMES[m]} ${y}</strong>No one has submitted availability for this month yet.`;
+    block.appendChild(msg);
+    return block;
+  }
+
+  // Calendar grid
+  const grid = document.createElement('div'); grid.className = 'calendar-grid';
+  DAY_NAMES.forEach(d => {
+    const h = document.createElement('div');
+    h.className = 'day-header';
+    h.textContent = d;
+    grid.appendChild(h);
+  });
+
+  const firstDay = new Date(y, m, 1).getDay();
+  const d = dimOf(y, m);
+  const today = new Date();
+
+  for (let i = 0; i < firstDay; i++) {
+    const e = document.createElement('div');
+    e.className = 'day-cell empty';
+    grid.appendChild(e);
+  }
+
+  for (let day = 1; day <= d; day++) {
+    const isToday = today.getDate() === day && today.getMonth() === m && today.getFullYear() === y;
+
+    // Find everyone available this day (from those who submitted)
+    const availableThisDay = [];
+    submittedEmpIds.forEach(eid => {
+      const emp = empById[eid];
+      if (!emp) return;
+      const record = monthAvail[eid];
+      const days = Array.isArray(record) ? record : (record && record.days) || [];
+      if (days.includes(day)) availableThisDay.push(emp);
+    });
+    availableThisDay.sort((a,b) => a.name.localeCompare(b.name));
+
+    const cell = document.createElement('div');
+    cell.className = 'day-cell' + (isToday ? ' today' : '') + (availableThisDay.length === 0 ? ' no-avail' : '');
+
+    const head = document.createElement('div');
+    head.className = 'day-head';
+    const num = document.createElement('div'); num.className = 'day-num'; num.textContent = day;
+    head.appendChild(num);
+    if (availableThisDay.length > 0) {
+      const cnt = document.createElement('div');
+      cnt.className = 'day-count';
+      cnt.textContent = availableThisDay.length;
+      head.appendChild(cnt);
+    }
+    cell.appendChild(head);
+
+    if (availableThisDay.length === 0) {
+      const em = document.createElement('div');
+      em.className = 'day-empty-msg';
+      em.textContent = 'nobody';
+      cell.appendChild(em);
+    } else {
+      availableThisDay.forEach(emp => {
+        const n = document.createElement('div');
+        n.className = 'avail-name';
+        n.textContent = emp.name;
+        n.title = emp.name;
+        cell.appendChild(n);
+      });
+    }
+
+    grid.appendChild(cell);
+  }
+
+  block.appendChild(grid);
+  return block;
+}
+
+// ============================================================
+// EDIT SUBMISSION MODAL (admin only)
+// ============================================================
+let editSelectedDays = new Set();
+let editEmpId = null;
+
+function openEditModal() {
+  const state = loadState();
+  if (!state || !state.employees || state.employees.length === 0) {
+    alert('No data found. Open the scheduler first to set up the roster.');
+    return;
+  }
+
+  // Populate employee dropdown
+  const empSel = document.getElementById('editEmpSelect');
+  empSel.innerHTML = '';
+  // Active employees first, alphabetical
+  const sorted = [...state.employees]
+    .filter(e => e.active !== false)
+    .sort((a, b) => a.name.localeCompare(b.name));
+  sorted.forEach(e => {
+    const o = document.createElement('option');
+    o.value = e.id;
+    o.textContent = e.name;
+    empSel.appendChild(o);
+  });
+
+  // Populate month/year dropdowns
+  const monSel = document.getElementById('editMonthSelect');
+  const yrSel = document.getElementById('editYearSelect');
+  monSel.innerHTML = '';
+  yrSel.innerHTML = '';
+  for (let i = 0; i < 12; i++) {
+    const o = document.createElement('option');
+    o.value = i;
+    o.textContent = MONTH_NAMES[i];
+    if (i === viewMonth) o.selected = true;
+    monSel.appendChild(o);
+  }
+  const thisYear = new Date().getFullYear();
+  for (let y = thisYear - 1; y <= thisYear + 2; y++) {
+    const o = document.createElement('option');
+    o.value = y;
+    o.textContent = y;
+    if (y === viewYear) o.selected = true;
+    yrSel.appendChild(o);
+  }
+
+  editEmpId = parseInt(empSel.value);
+  loadEditSubmission();
+  document.getElementById('editModal').classList.add('open');
+}
+
+function closeEditModal() {
+  document.getElementById('editModal').classList.remove('open');
+  // Re-render so changes show up
+  render();
+}
+
+function onEditOverlayClick(e) {
+  if (e.target === document.getElementById('editModal')) closeEditModal();
+}
+
+function onEditEmpChange() {
+  editEmpId = parseInt(document.getElementById('editEmpSelect').value);
+  loadEditSubmission();
+}
+
+function onEditMonthChange() {
+  loadEditSubmission();
+}
+
+function loadEditSubmission() {
+  // Load existing days for this employee/month, render day grid
+  const state = loadState();
+  if (!state) return;
+  const m = parseInt(document.getElementById('editMonthSelect').value);
+  const y = parseInt(document.getElementById('editYearSelect').value);
+  const key = `${y}_${m}`;
+  const monthAvail = (state.availability || {})[key] || {};
+
+  // The data shape for an employee can be either an array of days, or { days, phone, email, submittedAt }
+  // (the Replit server uses the object form; the standalone scheduler used arrays)
+  let existing = monthAvail[editEmpId];
+  let daysArr = [];
+  let metaInfo = '';
+
+  if (existing) {
+    if (Array.isArray(existing)) {
+      daysArr = existing;
+      metaInfo = '<strong>Existing submission</strong> — ' + daysArr.length + ' day' + (daysArr.length!==1?'s':'') + '. (Origin unknown — added before contact info was tracked.)';
+    } else if (typeof existing === 'object') {
+      daysArr = existing.days || [];
+      const submittedDate = existing.submittedAt ? new Date(existing.submittedAt).toLocaleDateString() : null;
+      metaInfo = '<strong>Existing submission</strong> — ' + daysArr.length + ' day' + (daysArr.length!==1?'s':'');
+      if (submittedDate) metaInfo += ', last updated ' + submittedDate;
+      if (existing.phone) metaInfo += ' · phone on file';
+      if (existing.email) metaInfo += ' · email on file';
+    }
+  } else {
+    metaInfo = '<strong>No prior submission</strong> for this person/month. Click days below to add one.';
+  }
+
+  document.getElementById('editInfo').innerHTML = metaInfo;
+
+  editSelectedDays = new Set(daysArr);
+
+  // Build day grid
+  const grid = document.getElementById('editDayGrid');
+  grid.innerHTML = '';
+  const dim = dimOf(y, m);
+  for (let d = 1; d <= 31; d++) {
+    const btn = document.createElement('div');
+    btn.className = 'edit-day-btn' + (editSelectedDays.has(d) ? ' selected' : '') + (d > dim ? ' hidden' : '');
+    btn.textContent = d;
+    btn.dataset.day = d;
+    btn.addEventListener('click', () => {
+      if (btn.classList.contains('hidden')) return;
+      const dayNum = parseInt(btn.dataset.day);
+      if (editSelectedDays.has(dayNum)) {
+        editSelectedDays.delete(dayNum);
+        btn.classList.remove('selected');
+      } else {
+        editSelectedDays.add(dayNum);
+        btn.classList.add('selected');
       }
+      saveEditChanges();
+    });
+    grid.appendChild(btn);
+  }
+}
 
-      function buildMonthBlock(state, y, m) {
-        const block = document.createElement("div");
-        block.className = "month-block";
+// Debounced targeted save — updates local cache immediately, sends only this
+// employee/month record to the server. Never PUTs full state, so crew submissions
+// arriving in parallel can't be clobbered.
+let _editSaveTimer = null;
+function saveEditChanges() {
+  const state = loadState();
+  if (!state) return;
+  const m = parseInt(document.getElementById('editMonthSelect').value);
+  const y = parseInt(document.getElementById('editYearSelect').value);
+  const key = `${y}_${m}`;
+  const days = [...editSelectedDays].sort((a, b) => a - b);
 
-        const key = mk(y, m);
-        const monthAvail = (state.availability || {})[key] || {};
-        // Only count employees who actually submitted for this month
-        const submittedEmpIds = Object.keys(monthAvail).map(Number);
-        const submittedCount = submittedEmpIds.length;
-        // Build a map: empId -> employee object, for fast lookup
-        const empById = {};
-        state.employees.forEach((e) => {
-          empById[e.id] = e;
-        });
+  // Optimistic local update so the calendar re-renders instantly
+  if (!state.availability) state.availability = {};
+  if (!state.availability[key]) state.availability[key] = {};
+  const existing = state.availability[key][editEmpId];
+  if (existing && typeof existing === 'object' && !Array.isArray(existing)) {
+    existing.days = days;
+    existing.lastEditedBy = 'admin';
+    existing.lastEditedAt = new Date().toISOString();
+  } else {
+    state.availability[key][editEmpId] = days;
+  }
+  _cachedState = state;
 
-        // Header
-        const hdr = document.createElement("div");
-        hdr.className = "month-block-header";
-        const title = document.createElement("div");
-        title.className = "month-block-title";
-        title.textContent = `${MONTH_NAMES[m]} ${y}`;
-        hdr.appendChild(title);
-
-        const summary = document.createElement("div");
-        summary.className = "month-block-summary";
-        if (submittedCount === 0) {
-          summary.textContent = "No submissions";
-        } else {
-          summary.textContent = `${submittedCount} crew member${submittedCount !== 1 ? "s" : ""} submitted availability`;
-        }
-        hdr.appendChild(summary);
-        block.appendChild(hdr);
-
-        // No submissions? Show message and skip calendar
-        if (submittedCount === 0) {
-          const msg = document.createElement("div");
-          msg.className = "no-data-block";
-          msg.innerHTML = `<strong>${MONTH_NAMES[m]} ${y}</strong>No one has submitted availability for this month yet.`;
-          block.appendChild(msg);
-          return block;
-        }
-
-        // Calendar grid
-        const grid = document.createElement("div");
-        grid.className = "calendar-grid";
-        DAY_NAMES.forEach((d) => {
-          const h = document.createElement("div");
-          h.className = "day-header";
-          h.textContent = d;
-          grid.appendChild(h);
-        });
-
-        const firstDay = new Date(y, m, 1).getDay();
-        const d = dimOf(y, m);
-        const today = new Date();
-
-        for (let i = 0; i < firstDay; i++) {
-          const e = document.createElement("div");
-          e.className = "day-cell empty";
-          grid.appendChild(e);
-        }
-
-        for (let day = 1; day <= d; day++) {
-          const isToday =
-            today.getDate() === day &&
-            today.getMonth() === m &&
-            today.getFullYear() === y;
-
-          // Find everyone available this day (from those who submitted)
-          const availableThisDay = [];
-          submittedEmpIds.forEach((eid) => {
-            const emp = empById[eid];
-            if (!emp) return;
-            const record = monthAvail[eid];
-            const days = Array.isArray(record)
-              ? record
-              : (record && record.days) || [];
-            if (days.includes(day)) availableThisDay.push(emp);
-          });
-          availableThisDay.sort((a, b) => a.name.localeCompare(b.name));
-
-          const cell = document.createElement("div");
-          cell.className =
-            "day-cell" +
-            (isToday ? " today" : "") +
-            (availableThisDay.length === 0 ? " no-avail" : "");
-
-          const head = document.createElement("div");
-          head.className = "day-head";
-          const num = document.createElement("div");
-          num.className = "day-num";
-          num.textContent = day;
-          head.appendChild(num);
-          if (availableThisDay.length > 0) {
-            const cnt = document.createElement("div");
-            cnt.className = "day-count";
-            cnt.textContent = availableThisDay.length;
-            head.appendChild(cnt);
-          }
-          cell.appendChild(head);
-
-          if (availableThisDay.length === 0) {
-            const em = document.createElement("div");
-            em.className = "day-empty-msg";
-            em.textContent = "nobody";
-            cell.appendChild(em);
-          } else {
-            availableThisDay.forEach((emp) => {
-              const n = document.createElement("div");
-              n.className = "avail-name";
-              n.textContent = emp.name;
-              n.title = emp.name;
-              cell.appendChild(n);
-            });
-          }
-
-          grid.appendChild(cell);
-        }
-
-        block.appendChild(grid);
-        return block;
+  // Debounced targeted server write
+  if (_editSaveTimer) clearTimeout(_editSaveTimer);
+  _editSaveTimer = setTimeout(async () => {
+    try {
+      const r = await fetch('/api/availability/admin-set', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Admin-Password': ADMIN_PW },
+        body: JSON.stringify({ empId: editEmpId, year: y, monthIndex: m, days }),
+      });
+      if (!r.ok) {
+        const e = await r.json().catch(() => ({}));
+        throw new Error(e.error || 'Save failed');
       }
+    } catch (e) {
+      alert('Could not save to server: ' + e.message);
+    }
+  }, 350);
 
-      // ============================================================
-      // EDIT SUBMISSION MODAL (admin only)
-      // ============================================================
-      let editSelectedDays = new Set();
-      let editEmpId = null;
+  const cnt = days.length;
+  document.getElementById('editInfo').innerHTML = '<strong>Saved</strong> — ' + cnt + ' day' + (cnt!==1?'s':'') + ' marked available. (Edited by admin.)';
+}
 
-      function openEditModal() {
-        const state = loadState();
-        if (!state || !state.employees || state.employees.length === 0) {
-          alert(
-            "No data found. Open the scheduler first to set up the roster.",
-          );
-          return;
-        }
+function editSelectAll() {
+  const m = parseInt(document.getElementById('editMonthSelect').value);
+  const y = parseInt(document.getElementById('editYearSelect').value);
+  const dim = dimOf(y, m);
+  // "Workdays" = Mon-Fri (1-5)
+  editSelectedDays.clear();
+  for (let d = 1; d <= dim; d++) {
+    const dow = new Date(y, m, d).getDay();
+    if (dow >= 1 && dow <= 5) editSelectedDays.add(d);
+  }
+  // Sync the buttons
+  document.querySelectorAll('.edit-day-btn').forEach(btn => {
+    const dayNum = parseInt(btn.dataset.day);
+    if (editSelectedDays.has(dayNum)) btn.classList.add('selected');
+    else btn.classList.remove('selected');
+  });
+  saveEditChanges();
+}
 
-        // Populate employee dropdown
-        const empSel = document.getElementById("editEmpSelect");
-        empSel.innerHTML = "";
-        // Active employees first, alphabetical
-        const sorted = [...state.employees]
-          .filter((e) => e.active !== false)
-          .sort((a, b) => a.name.localeCompare(b.name));
-        sorted.forEach((e) => {
-          const o = document.createElement("option");
-          o.value = e.id;
-          o.textContent = e.name;
-          empSel.appendChild(o);
-        });
+function editClearAll() {
+  editSelectedDays.clear();
+  document.querySelectorAll('.edit-day-btn').forEach(btn => btn.classList.remove('selected'));
+  saveEditChanges();
+}
 
-        // Populate month/year dropdowns
-        const monSel = document.getElementById("editMonthSelect");
-        const yrSel = document.getElementById("editYearSelect");
-        monSel.innerHTML = "";
-        yrSel.innerHTML = "";
-        for (let i = 0; i < 12; i++) {
-          const o = document.createElement("option");
-          o.value = i;
-          o.textContent = MONTH_NAMES[i];
-          if (i === viewMonth) o.selected = true;
-          monSel.appendChild(o);
-        }
-        const thisYear = new Date().getFullYear();
-        for (let y = thisYear - 1; y <= thisYear + 2; y++) {
-          const o = document.createElement("option");
-          o.value = y;
-          o.textContent = y;
-          if (y === viewYear) o.selected = true;
-          yrSel.appendChild(o);
-        }
+function editDeleteSubmission() {
+  const empName = document.getElementById('editEmpSelect').selectedOptions[0]?.textContent || 'this person';
+  const m = parseInt(document.getElementById('editMonthSelect').value);
+  const y = parseInt(document.getElementById('editYearSelect').value);
+  if (!confirm(`Delete ${empName}'s availability submission for ${MONTH_NAMES[m]} ${y}? They will not appear on any day in this month until they (or you) submit again.`)) return;
 
-        editEmpId = parseInt(empSel.value);
-        loadEditSubmission();
-        document.getElementById("editModal").classList.add("open");
-      }
+  // Local cache update for instant re-render
+  const state = loadState();
+  if (state && state.availability && state.availability[`${y}_${m}`]) {
+    delete state.availability[`${y}_${m}`][editEmpId];
+    _cachedState = state;
+  }
 
-      function closeEditModal() {
-        document.getElementById("editModal").classList.remove("open");
-        // Re-render so changes show up
-        render();
-      }
+  // Targeted server delete
+  fetch('/api/availability/admin-set', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-Admin-Password': ADMIN_PW },
+    body: JSON.stringify({ empId: editEmpId, year: y, monthIndex: m, days: null }),
+  }).then(r => {
+    if (!r.ok) return r.json().then(e => { throw new Error(e.error || 'Delete failed'); });
+  }).catch(e => alert('Could not delete on server: ' + e.message));
 
-      function onEditOverlayClick(e) {
-        if (e.target === document.getElementById("editModal")) closeEditModal();
-      }
+  loadEditSubmission(); // will show "no prior submission"
+}
 
-      function onEditEmpChange() {
-        editEmpId = parseInt(document.getElementById("editEmpSelect").value);
-        loadEditSubmission();
-      }
+// ============================================================
+// BOOT — auth + load state from server
+// ============================================================
+async function boot() {
+  // Verify cached password if any
+  if (ADMIN_PW) {
+    const ok = await apiCheckPw(ADMIN_PW);
+    if (!ok) { sessionStorage.removeItem('martech_admin_pw'); ADMIN_PW = ''; }
+  }
+  // Prompt until valid password is entered
+  while (!ADMIN_PW) {
+    const pw = prompt('Admin password:');
+    if (pw === null) {
+      document.body.innerHTML = '<div style="padding:60px;text-align:center;font-family:sans-serif;color:#666;">Login cancelled. Refresh to try again.</div>';
+      return;
+    }
+    const ok = await apiCheckPw(pw);
+    if (ok) {
+      ADMIN_PW = pw;
+      sessionStorage.setItem('martech_admin_pw', pw);
+      break;
+    }
+    alert('Wrong password.');
+  }
 
-      function onEditMonthChange() {
-        loadEditSubmission();
-      }
+  await refresh();
+  // Refetch when window regains focus — picks up scheduler edits made elsewhere
+  window.addEventListener('focus', refresh);
+}
 
-      function loadEditSubmission() {
-        // Load existing days for this employee/month, render day grid
-        const state = loadState();
-        if (!state) return;
-        const m = parseInt(document.getElementById("editMonthSelect").value);
-        const y = parseInt(document.getElementById("editYearSelect").value);
-        const key = `${y}_${m}`;
-        const monthAvail = (state.availability || {})[key] || {};
+async function refresh() {
+  try {
+    _cachedState = await apiGetState();
+    render();
+  } catch (e) {
+    if (e.message === 'AUTH') {
+      sessionStorage.removeItem('martech_admin_pw');
+      ADMIN_PW = '';
+      return boot();
+    }
+    document.getElementById('wrap').innerHTML = '<div style="padding:60px;text-align:center;color:#c01010;font-family:sans-serif;">Could not load data: ' + e.message + '</div>';
+  }
+}
 
-        // The data shape for an employee can be either an array of days, or { days, phone, email, submittedAt }
-        // (the Replit server uses the object form; the standalone scheduler used arrays)
-        let existing = monthAvail[editEmpId];
-        let daysArr = [];
-        let metaInfo = "";
-
-        if (existing) {
-          if (Array.isArray(existing)) {
-            daysArr = existing;
-            metaInfo =
-              "<strong>Existing submission</strong> — " +
-              daysArr.length +
-              " day" +
-              (daysArr.length !== 1 ? "s" : "") +
-              ". (Origin unknown — added before contact info was tracked.)";
-          } else if (typeof existing === "object") {
-            daysArr = existing.days || [];
-            const submittedDate = existing.submittedAt
-              ? new Date(existing.submittedAt).toLocaleDateString()
-              : null;
-            metaInfo =
-              "<strong>Existing submission</strong> — " +
-              daysArr.length +
-              " day" +
-              (daysArr.length !== 1 ? "s" : "");
-            if (submittedDate) metaInfo += ", last updated " + submittedDate;
-            if (existing.phone) metaInfo += " · phone on file";
-            if (existing.email) metaInfo += " · email on file";
-          }
-        } else {
-          metaInfo =
-            "<strong>No prior submission</strong> for this person/month. Click days below to add one.";
-        }
-
-        document.getElementById("editInfo").innerHTML = metaInfo;
-
-        editSelectedDays = new Set(daysArr);
-
-        // Build day grid
-        const grid = document.getElementById("editDayGrid");
-        grid.innerHTML = "";
-        const dim = dimOf(y, m);
-        const firstDay = new Date(y, m, 1).getDay();
-        ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].forEach((h) => {
-          const hd = document.createElement("div");
-          hd.className = "edit-day-header";
-          hd.textContent = h;
-          grid.appendChild(hd);
-        });
-        for (let i = 0; i < firstDay; i++) {
-          const blank = document.createElement("div");
-          blank.className = "edit-day-blank";
-          grid.appendChild(blank);
-        }
-        for (let d = 1; d <= dim; d++) {
-          const btn = document.createElement("div");
-          btn.className =
-            "edit-day-btn" + (editSelectedDays.has(d) ? " selected" : "");
-          btn.textContent = d;
-          btn.dataset.day = d;
-          btn.addEventListener("click", () => {
-            const dayNum = parseInt(btn.dataset.day);
-            if (editSelectedDays.has(dayNum)) {
-              editSelectedDays.delete(dayNum);
-              btn.classList.remove("selected");
-            } else {
-              editSelectedDays.add(dayNum);
-              btn.classList.add("selected");
-            }
-            saveEditChanges();
-          });
-          grid.appendChild(btn);
-        }
-      }
-
-      function saveEditChanges() {
-        // Save current selection back to localStorage
-        const state = loadState();
-        if (!state) return;
-        const m = parseInt(document.getElementById("editMonthSelect").value);
-        const y = parseInt(document.getElementById("editYearSelect").value);
-        const key = `${y}_${m}`;
-
-        if (!state.availability) state.availability = {};
-        if (!state.availability[key]) state.availability[key] = {};
-
-        const days = [...editSelectedDays].sort((a, b) => a - b);
-
-        if (days.length === 0) {
-          // Empty — leave the record as a 0-day submission rather than deleting silently.
-          // (Use the explicit Delete button to remove entirely.)
-          if (state.availability[key][editEmpId]) {
-            const existing = state.availability[key][editEmpId];
-            if (Array.isArray(existing)) {
-              state.availability[key][editEmpId] = [];
-            } else {
-              existing.days = [];
-              existing.lastEditedBy = "admin";
-              existing.lastEditedAt = new Date().toISOString();
-            }
-          }
-        } else {
-          const existing = state.availability[key][editEmpId];
-          if (
-            existing &&
-            typeof existing === "object" &&
-            !Array.isArray(existing)
-          ) {
-            // Preserve phone/email/submittedAt
-            existing.days = days;
-            existing.lastEditedBy = "admin";
-            existing.lastEditedAt = new Date().toISOString();
-          } else {
-            state.availability[key][editEmpId] = days;
-          }
-        }
-
-        saveStateLocal(state);
-        // Update info line
-        const cnt = days.length;
-        document.getElementById("editInfo").innerHTML =
-          "<strong>Saved</strong> — " +
-          cnt +
-          " day" +
-          (cnt !== 1 ? "s" : "") +
-          " marked available. (Edited by admin.)";
-      }
-
-      function editSelectAll() {
-        const m = parseInt(document.getElementById("editMonthSelect").value);
-        const y = parseInt(document.getElementById("editYearSelect").value);
-        const dim = dimOf(y, m);
-        // Select every day in the month
-        editSelectedDays.clear();
-        for (let d = 1; d <= dim; d++) {
-          editSelectedDays.add(d);
-        }
-        // Sync the buttons
-        document.querySelectorAll(".edit-day-btn").forEach((btn) => {
-          const dayNum = parseInt(btn.dataset.day);
-          if (editSelectedDays.has(dayNum)) btn.classList.add("selected");
-          else btn.classList.remove("selected");
-        });
-        saveEditChanges();
-      }
-
-      function editClearAll() {
-        editSelectedDays.clear();
-        document
-          .querySelectorAll(".edit-day-btn")
-          .forEach((btn) => btn.classList.remove("selected"));
-        saveEditChanges();
-      }
-
-      function editDeleteSubmission() {
-        const empName =
-          document.getElementById("editEmpSelect").selectedOptions[0]
-            ?.textContent || "this person";
-        const m = parseInt(document.getElementById("editMonthSelect").value);
-        const y = parseInt(document.getElementById("editYearSelect").value);
-        if (
-          !confirm(
-            `Delete ${empName}'s availability submission for ${MONTH_NAMES[m]} ${y}? They will not appear on any day in this month until they (or you) submit again.`,
-          )
-        )
-          return;
-
-        const state = loadState();
-        if (!state) return;
-        const key = `${y}_${m}`;
-        if (state.availability && state.availability[key]) {
-          delete state.availability[key][editEmpId];
-        }
-        saveStateLocal(state);
-        loadEditSubmission(); // will show "no prior submission"
-      }
-
-      // ============================================================
-      // BOOT — auth + load state from server
-      // ============================================================
-      async function boot() {
-        // Verify cached password if any
-        if (ADMIN_PW) {
-          const ok = await apiCheckPw(ADMIN_PW);
-          if (!ok) {
-            sessionStorage.removeItem("martech_admin_pw");
-            ADMIN_PW = "";
-          }
-        }
-        // Prompt until valid password is entered
-        while (!ADMIN_PW) {
-          const pw = prompt("Admin password:");
-          if (pw === null) {
-            document.body.innerHTML =
-              '<div style="padding:60px;text-align:center;font-family:sans-serif;color:#666;">Login cancelled. Refresh to try again.</div>';
-            return;
-          }
-          const ok = await apiCheckPw(pw);
-          if (ok) {
-            ADMIN_PW = pw;
-            sessionStorage.setItem("martech_admin_pw", pw);
-            break;
-          }
-          alert("Wrong password.");
-        }
-
-        await refresh();
-        // Refetch when window regains focus
-        // (catches edits from other tabs and new crew submissions)
-        window.addEventListener("focus", () => { refresh(); });
-        document.addEventListener("visibilitychange", () => {
-          if (!document.hidden) refresh();
-        });
-      }
-
-      // ============================================================
-      // REFRESH — pull latest state from server and re-render
-      // ============================================================
-      async function refresh() {
-        try {
-          const state = await apiGetState();
-          _cachedState = state;
-          render();
-        } catch (e) {
-          if (e.message === "AUTH") {
-            sessionStorage.removeItem("martech_admin_pw");
-            ADMIN_PW = "";
-            location.reload();
-            return;
-          }
-          const wrap = document.getElementById("wrap");
-          if (wrap) {
-            wrap.innerHTML = '<div class="no-data-block"><strong>Could not load availability data.</strong><br>' + (e && e.message ? e.message : "Unknown error") + '</div>';
-          }
-        }
-      }
-
-      // ============================================================
-      // CLEAR ALL — wipe every submission across every month
-      // ============================================================
-      async function clearAllAvailability() {
-        if (!confirm("Wipe ALL submitted availability for ALL employees across ALL months?\n\nThis cannot be undone from the UI. (The server keeps automatic backups in data/backups/ on disk.)")) return;
-        const state = loadState();
-        if (!state) return;
-        state.availability = {};
-        saveStateLocal(state);
-        render();
-      }
-
-      // Kick everything off
-      boot();
-    </script>
-  </body>
+boot();
+</script>
+</body>
 </html>

@@ -4,7 +4,7 @@
       "id": 1,
       "name": "Chris Wright",
       "email": "christopher.wright@example.com",
-      "phone": "209-747-2232",
+      "phone": "209-747-2233",
       "dep": false,
       "active": true
     },
@@ -30,7 +30,8 @@
       "email": "bellaklava@gmail.com",
       "phone": "916-479-3029",
       "dep": false,
-      "active": true
+      "active": true,
+      "calendarToken": "t3F0vFj_YuxP3dioYWvb3ir0rPgEKumL"
     },
     {
       "id": 5,
@@ -207,10 +208,30 @@
       "endDate": "2026-05-28",
       "startTime": "07:00",
       "endTime": "16:30",
+      "active": true,
+      "notes": "job well done"
+    },
+    {
+      "id": 6,
+      "clientName": "PCWA",
+      "workDays": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "teamSize": 3,
+      "runLength": 3,
+      "excludedEmployees": [],
+      "startDate": "2026-06-22",
+      "endDate": "2026-06-26",
+      "startTime": "07:00",
+      "endTime": "16:00",
       "active": true
     }
   ],
-  "nextJobId": 6,
+  "nextJobId": 7,
   "assignments": {
     "2026_3": {},
     "2026_4": {
@@ -261,7 +282,21 @@
       "4_19_day": 4,
       "6_19_day": 4,
       "6_15_day": 4,
-      "4_9_day": 4
+      "4_9_day": 4,
+      "9_15_day": 4,
+      "9_16_day": 4,
+      "9_17_day": 4,
+      "9_18_day": 4,
+      "9_19_day": 4,
+      "4_22_day": 6,
+      "4_23_day": 6,
+      "4_24_day": 6,
+      "4_25_day": 6,
+      "4_26_day": 6,
+      "3_22_day": 6,
+      "3_23_day": 6,
+      "3_24_day": 6,
+      "3_25_day": 6
     },
     "2026_6": {},
     "2026_7": {},
@@ -549,6 +584,6 @@
   },
   "viewYear": 2026,
   "viewMonth": 5,
-  "activeJobId": 4,
-  "version": 2
+  "activeJobId": 6,
+  "version": 39
 }
