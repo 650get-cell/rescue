@@ -1,385 +1,904 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MarTech Rescue — Availability</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
-<style>
-  * { box-sizing:border-box; margin:0; padding:0; }
-  body { font-family:'Inter',sans-serif; background:#e8e8e8; min-height:100vh; padding:32px 16px 60px; color:#1a1a1a; }
-  .card { max-width:520px; margin:0 auto; background:#fff; border-radius:14px; overflow:hidden; box-shadow:0 4px 24px rgba(0,0,0,0.12); }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MarTech Rescue — Availability</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Syne:wght@700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: "Inter", sans-serif;
+        background: #e8e8e8;
+        min-height: 100vh;
+        padding: 32px 16px 60px;
+        color: #1a1a1a;
+      }
+      .card {
+        max-width: 520px;
+        margin: 0 auto;
+        background: #fff;
+        border-radius: 14px;
+        overflow: hidden;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
+      }
 
-  .header { background:#1a1a1a; padding:28px 32px 24px; border-bottom:3px solid #c01010; }
-  .logo { font-family:'Syne',sans-serif; font-size:22px; font-weight:800; margin-bottom:6px; }
-  .logo .mar  { color:#c01010; }
-  .logo .tech { color:#ffffff; }
-  .logo .res  { color:#aaaaaa; font-weight:700; }
-  .header-sub { font-size:13px; color:#888; letter-spacing:.03em; }
-  .header-link { font-size:11px; color:#888; margin-top:4px; }
-  .header-link a { color:#c89090; text-decoration:underline; }
+      .header {
+        background: #1a1a1a;
+        padding: 28px 32px 24px;
+        border-bottom: 3px solid #c01010;
+      }
+      .logo {
+        font-family: "Syne", sans-serif;
+        font-size: 22px;
+        font-weight: 800;
+        margin-bottom: 6px;
+      }
+      .logo .mar {
+        color: #c01010;
+      }
+      .logo .tech {
+        color: #ffffff;
+      }
+      .logo .res {
+        color: #aaaaaa;
+        font-weight: 700;
+      }
+      .header-sub {
+        font-size: 13px;
+        color: #888;
+        letter-spacing: 0.03em;
+      }
+      .body {
+        padding: 28px 32px 32px;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+      }
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+      }
+      label.field-label {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: #666;
+      }
 
-  .body { padding:28px 32px 32px; display:flex; flex-direction:column; gap:18px; }
-  .field { display:flex; flex-direction:column; gap:7px; }
-  label.field-label { font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:#666; }
+      select,
+      input[type="text"],
+      input[type="tel"],
+      input[type="email"] {
+        font-family: "Inter", sans-serif;
+        font-size: 15px;
+        font-weight: 500;
+        padding: 11px 14px;
+        border: 1.5px solid #d0d0d0;
+        border-radius: 8px;
+        background: #f8f8f8;
+        color: #1a1a1a;
+        outline: none;
+        transition: border-color 0.15s;
+        width: 100%;
+      }
+      select {
+        appearance: none;
+        -webkit-appearance: none;
+        cursor: pointer;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23666' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 14px center;
+        padding-right: 38px;
+      }
+      select:focus,
+      input:focus {
+        border-color: #c01010;
+        background: #fff;
+      }
 
-  select, input[type=text], input[type=tel], input[type=email] {
-    font-family:'Inter',sans-serif; font-size:15px; font-weight:500;
-    padding:11px 14px; border:1.5px solid #d0d0d0; border-radius:8px;
-    background:#f8f8f8; color:#1a1a1a; outline:none;
-    transition:border-color .15s; width:100%;
-  }
-  select { appearance:none; -webkit-appearance:none; cursor:pointer;
-    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23666' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-    background-repeat:no-repeat; background-position:right 14px center; padding-right:38px; }
-  select:focus, input:focus { border-color:#c01010; background:#fff; }
+      .row-2 {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 12px;
+      }
 
-  .row-2 { display:grid; grid-template-columns:2fr 1fr; gap:12px; }
+      .select-all-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 14px;
+        background: #f5f5f5;
+        border-radius: 8px;
+        border: 1.5px solid #d8d8d8;
+        cursor: pointer;
+        user-select: none;
+        transition: all 0.15s;
+      }
+      .select-all-row:hover {
+        border-color: #c01010;
+        background: #fff5f5;
+      }
+      .select-all-row input {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+        accent-color: #c01010;
+      }
+      .select-all-row span {
+        font-size: 14px;
+        font-weight: 600;
+        color: #333;
+      }
 
-  .select-all-row {
-    display:flex; align-items:center; gap:10px; padding:10px 14px;
-    background:#f5f5f5; border-radius:8px; border:1.5px solid #d8d8d8;
-    cursor:pointer; user-select:none; transition:all .15s;
-  }
-  .select-all-row:hover { border-color:#c01010; background:#fff5f5; }
-  .select-all-row input { width:18px; height:18px; cursor:pointer; accent-color:#c01010; }
-  .select-all-row span { font-size:14px; font-weight:600; color:#333; }
+      .day-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 6px;
+        margin-top: 2px;
+      }
+      .day-btn {
+        aspect-ratio: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        font-weight: 600;
+        border-radius: 8px;
+        border: 1.5px solid #d8d8d8;
+        background: #f8f8f8;
+        color: #555;
+        cursor: pointer;
+        transition: all 0.15s;
+        user-select: none;
+      }
+      .day-btn:hover {
+        border-color: #c01010;
+        color: #c01010;
+        background: #fff5f5;
+      }
+      .day-btn.selected {
+        background: #c01010;
+        border-color: #c01010;
+        color: #fff;
+      }
+      .day-btn.hidden {
+        visibility: hidden;
+      }
+      .day-header {
+        text-align: center;
+        font-size: 12px;
+        font-weight: 700;
+        color: #999;
+        padding: 2px 0;
+      }
+      .day-blank {
+        aspect-ratio: 1;
+      }
 
-  .day-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:6px; margin-top:2px; }
-  .day-btn {
-    aspect-ratio:1; display:flex; align-items:center; justify-content:center;
-    font-size:14px; font-weight:600; border-radius:8px;
-    border:1.5px solid #d8d8d8; background:#f8f8f8; color:#555;
-    cursor:pointer; transition:all .15s; user-select:none;
-  }
-  .day-btn:hover { border-color:#c01010; color:#c01010; background:#fff5f5; }
-  .day-btn.selected { background:#c01010; border-color:#c01010; color:#fff; }
-  .day-btn.hidden { visibility:hidden; }
+      .submit-btn {
+        width: 100%;
+        padding: 14px;
+        background: #c01010;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-family: "Inter", sans-serif;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background 0.15s;
+      }
+      .submit-btn:hover {
+        background: #a00c0c;
+      }
+      .submit-btn:disabled {
+        background: #ccc;
+        cursor: default;
+      }
 
-  .submit-btn {
-    width:100%; padding:14px; background:#c01010; color:#fff;
-    border:none; border-radius:8px; font-family:'Inter',sans-serif;
-    font-size:16px; font-weight:700; cursor:pointer; transition:background .15s;
-  }
-  .submit-btn:hover { background:#a00c0c; }
-  .submit-btn:disabled { background:#ccc; cursor:default; }
+      .toast {
+        position: fixed;
+        bottom: 24px;
+        left: 50%;
+        transform: translateX(-50%) translateY(80px);
+        background: #1a1a1a;
+        color: #fff;
+        padding: 14px 24px;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 500;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+        transition: transform 0.3s ease;
+        z-index: 999;
+        max-width: 90vw;
+        text-align: center;
+        border-left: 4px solid #c01010;
+      }
+      .toast.show {
+        transform: translateX(-50%) translateY(0);
+      }
+      .toast.error {
+        border-left-color: #c01010;
+      }
+      .toast.success {
+        border-left-color: #2a7a4e;
+      }
 
-  .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(80px);
-    background:#1a1a1a; color:#fff; padding:14px 24px; border-radius:10px;
-    font-size:14px; font-weight:500; box-shadow:0 4px 20px rgba(0,0,0,0.25);
-    transition:transform .3s ease; z-index:999; max-width:90vw; text-align:center;
-    border-left:4px solid #c01010; }
-  .toast.show { transform:translateX(-50%) translateY(0); }
-  .toast.error { border-left-color:#c01010; }
-  .toast.success { border-left-color:#2a7a4e; }
+      .lookup-msg {
+        padding: 10px 14px;
+        border-radius: 6px;
+        font-size: 13px;
+        background: #fff8e6;
+        border: 1px solid #f0d090;
+        color: #8a5010;
+      }
+      .lookup-msg.has-existing {
+        background: #e8f5ee;
+        border-color: #9acdaf;
+        color: #1a5a33;
+      }
+      .myschedule-empty { padding: 14px; color: #777; font-size: 14px; text-align: center; }
+      .ms-month { margin-top: 16px; }
+      .ms-title { font-weight: 700; font-size: 15px; margin-bottom: 6px; color: #1a1a1a; }
+      .ms-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+      .ms-head { text-align: center; font-size: 11px; font-weight: 700; color: #999; padding: 2px 0; }
+      .ms-blank { min-height: 48px; }
+      .ms-day { min-height: 48px; border: 1.5px solid #e3e3e3; border-radius: 8px; background: #fafafa; color: #aaa; display: flex; flex-direction: column; align-items: center; padding: 3px 2px; overflow: hidden; }
+      .ms-day .ms-num { font-size: 12px; font-weight: 600; }
+      .ms-day.on { background: #1a4a2e; border-color: #1a4a2e; color: #fff; }
+      .ms-day.on .ms-job { font-size: 9px; font-weight: 700; line-height: 1.1; text-align: center; margin-top: 1px; }
+      .ms-day.on .ms-time { font-size: 8px; opacity: 0.85; }
 
-  .lookup-msg {
-    padding:10px 14px; border-radius:6px; font-size:13px;
-    background:#fff8e6; border:1px solid #f0d090; color:#8a5010;
-  }
-  .lookup-msg.has-existing { background:#e8f5ee; border-color:#9acdaf; color:#1a5a33; }
-</style>
-</head>
-<body>
-
-<div class="card">
-  <div class="header">
-    <div class="logo"><span class="mar">Mar</span><span class="tech">Tech</span> <span class="res">Rescue</span></div>
-    <div class="header-sub">Monthly availability</div>
-  </div>
-
-  <div class="body" id="formBody">
-
-    <div class="field">
-      <label class="field-label">Your name</label>
-      <select id="nameSelect">
-        <option value="">— Select your name —</option>
-      </select>
-    </div>
-
-    <div class="field">
-      <label class="field-label">Your phone number</label>
-      <input type="tel" id="phoneInput" placeholder="(209) 555-1234" autocomplete="tel" required/>
-      <div id="phoneHint" style="font-size:11px;color:#777;margin-top:4px;">Used to confirm it's you. Format doesn't matter.</div>
-    </div>
-
-    <button class="submit-btn" id="unlockBtn" onclick="unlockForm()">Continue</button>
-
-    <!-- Everything below is hidden until phone matches -->
-    <div id="lockedSection" style="display:none;">
-
-      <div class="row-2" style="margin-top:18px;">
-        <div class="field">
-          <label class="field-label">Month</label>
-          <select id="monthSelect"></select>
+      @media (max-width: 560px) {
+        body { padding: 18px 8px 44px; }
+        .header { padding: 22px 20px 18px; }
+        .body { padding: 22px 16px 26px; }
+        .row-2 { grid-template-columns: 1fr 1fr; }
+        .day-grid { gap: 5px; }
+        .day-btn { font-size: 15px; border-radius: 7px; }
+        .submit-btn { font-size: 16px; padding: 15px; }
+        select,
+        input[type="text"],
+        input[type="tel"],
+        input[type="email"] { font-size: 16px; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="header">
+        <div class="logo">
+          <span class="mar">Mar</span><span class="tech">Tech</span>
+          <span class="res">Rescue</span>
         </div>
+        <div class="header-sub">Monthly availability</div>
+      </div>
+
+      <div class="body" id="formBody">
         <div class="field">
-          <label class="field-label">Year</label>
-          <select id="yearSelect"></select>
+          <label class="field-label">Your name</label>
+          <select id="nameSelect">
+            <option value="">— Select your name —</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label class="field-label">Your phone number</label>
+          <input
+            type="tel"
+            id="phoneInput"
+            autocomplete="tel"
+            required
+          />
+          <div
+            id="phoneHint"
+            style="font-size: 11px; color: #777; margin-top: 4px"
+          >
+            Used to confirm it's you. Format doesn't matter.
+          </div>
+        </div>
+
+        <button class="submit-btn" id="unlockBtn" onclick="unlockForm()">
+          Continue
+        </button>
+
+        <!-- Everything below is hidden until phone matches -->
+        <div id="lockedSection" style="display: none">
+          <button class="submit-btn" id="seeMyScheduleBtn" type="button" onclick="showMySchedule()" style="margin-top: 18px; background: #1a4a2e; border-color: #1a4a2e;">
+            See my schedule
+          </button>
+          <div id="myScheduleWrap"></div>
+          <div class="row-2" style="margin-top: 18px">
+            <div class="field">
+              <label class="field-label">Month</label>
+              <select id="monthSelect"></select>
+            </div>
+            <div class="field">
+              <label class="field-label">Year</label>
+              <select id="yearSelect"></select>
+            </div>
+          </div>
+
+          <div id="lookupMsg" style="display: none; margin-top: 14px"></div>
+
+          <div class="field" style="margin-top: 14px">
+            <label class="field-label">Email</label>
+            <input
+              type="email"
+              id="emailInput"
+              placeholder="you@example.com"
+              required
+            />
+          </div>
+
+          <div class="field" style="margin-top: 14px">
+            <label class="field-label">Days available</label>
+            <label class="select-all-row" for="selectAllChk">
+              <input type="checkbox" id="selectAllChk" />
+              <span>Available all month</span>
+            </label>
+            <div class="day-grid" id="dayGrid"></div>
+          </div>
+
+          <button
+            class="submit-btn"
+            id="submitBtn"
+            onclick="submitForm()"
+            style="margin-top: 18px"
+          >
+            Submit availability
+          </button>
         </div>
       </div>
-
-      <div id="lookupMsg" style="display:none;margin-top:14px;"></div>
-
-      <div class="field" style="margin-top:14px;">
-        <label class="field-label">Email</label>
-        <input type="email" id="emailInput" placeholder="you@example.com" required/>
-      </div>
-
-      <div class="field" style="margin-top:14px;">
-        <label class="field-label">Days available</label>
-        <label class="select-all-row" for="selectAllChk">
-          <input type="checkbox" id="selectAllChk"/>
-          <span>Available all month</span>
-        </label>
-        <div class="day-grid" id="dayGrid"></div>
-      </div>
-
-      <button class="submit-btn" id="submitBtn" onclick="submitForm()" style="margin-top:18px;">Submit availability</button>
     </div>
 
-  </div>
-</div>
+    <div class="toast" id="toast"></div>
 
-<div class="toast" id="toast"></div>
+    <script>
+      const MONTHS = [
+        "",
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+      ];
+      const now = new Date();
 
-<script>
-const MONTHS = ['','January','February','March','April','May','June','July','August','September','October','November','December'];
-const now = new Date();
+      // Populate month/year dropdowns
+      const monthSel = document.getElementById("monthSelect");
+      const yearSel = document.getElementById("yearSelect");
+      for (let i = 1; i <= 12; i++) {
+        const o = document.createElement("option");
+        o.value = i;
+        o.textContent = MONTHS[i];
+        monthSel.appendChild(o);
+      }
+      for (let y = now.getFullYear(); y <= now.getFullYear() + 2; y++) {
+        const o = document.createElement("option");
+        o.value = y;
+        o.textContent = y;
+        yearSel.appendChild(o);
+      }
+      monthSel.value = now.getMonth() + 1;
+      yearSel.value = now.getFullYear();
 
-// Populate month/year dropdowns
-const monthSel = document.getElementById('monthSelect');
-const yearSel = document.getElementById('yearSelect');
-for (let i = 1; i <= 12; i++) {
-  const o = document.createElement('option');
-  o.value = i; o.textContent = MONTHS[i];
-  monthSel.appendChild(o);
-}
-for (let y = now.getFullYear(); y <= now.getFullYear() + 2; y++) {
-  const o = document.createElement('option');
-  o.value = y; o.textContent = y;
-  yearSel.appendChild(o);
-}
-monthSel.value = now.getMonth() + 1;
-yearSel.value = now.getFullYear();
+      // Build the day grid as a month calendar (Su-Sa header + weekday offset)
+      function renderDayGrid() {
+        const grid = document.getElementById("dayGrid");
+        grid.innerHTML = "";
+        const m = parseInt(monthSel.value);
+        const y = parseInt(yearSel.value);
+        const daysInMonth = m && y ? new Date(y, m, 0).getDate() : 31;
+        const firstDay = m && y ? new Date(y, m - 1, 1).getDay() : 0;
+        ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].forEach((h) => {
+          const hd = document.createElement("div");
+          hd.className = "day-header";
+          hd.textContent = h;
+          grid.appendChild(hd);
+        });
+        for (let i = 0; i < firstDay; i++) {
+          const blank = document.createElement("div");
+          blank.className = "day-blank";
+          grid.appendChild(blank);
+        }
+        for (let d = 1; d <= daysInMonth; d++) {
+          const btn = document.createElement("div");
+          btn.className = "day-btn";
+          btn.textContent = d;
+          btn.dataset.day = d;
+          btn.addEventListener("click", () => {
+            btn.classList.toggle("selected");
+            syncSelectAll();
+          });
+          grid.appendChild(btn);
+        }
+      }
 
-// Build day grid 1..31
-const grid = document.getElementById('dayGrid');
-for (let d = 1; d <= 31; d++) {
-  const btn = document.createElement('div');
-  btn.className = 'day-btn';
-  btn.textContent = d;
-  btn.dataset.day = d;
-  btn.addEventListener('click', () => {
-    if (btn.classList.contains('hidden')) return;
-    btn.classList.toggle('selected');
-    syncSelectAll();
-  });
-  grid.appendChild(btn);
-}
+      // Load roster from server
+      async function loadRoster() {
+        try {
+          const resp = await fetch("/api/roster");
+          if (!resp.ok) throw new Error("Roster fetch failed");
+          const list = await resp.json();
+          const sel = document.getElementById("nameSelect");
+          list.forEach((emp) => {
+            const o = document.createElement("option");
+            o.value = emp.name;
+            o.textContent = emp.name;
+            sel.appendChild(o);
+          });
+        } catch (e) {
+          toast("Could not load roster — check your connection", true);
+        }
+      }
+      loadRoster();
 
-// Load roster from server
-async function loadRoster() {
-  try {
-    const resp = await fetch('/api/roster');
-    if (!resp.ok) throw new Error('Roster fetch failed');
-    const list = await resp.json();
-    const sel = document.getElementById('nameSelect');
-    list.forEach(emp => {
-      const o = document.createElement('option');
-      o.value = emp.name;
-      o.textContent = emp.name;
-      sel.appendChild(o);
-    });
-  } catch (e) {
-    toast('Could not load roster — check your connection', true);
-  }
-}
-loadRoster();
+      // Auth state — once unlocked, we keep the verified phone in memory
+      let unlockedFor = null; // employee name once unlocked
+      let unlockedPhone = null; // the phone digits we'll send with subsequent calls
 
-// Auth state — once unlocked, we keep the verified phone in memory
-let unlockedFor = null;  // employee name once unlocked
-let unlockedPhone = null; // the phone digits we'll send with subsequent calls
-
-document.getElementById('monthSelect').addEventListener('change', () => { updateDays(); checkExisting(); });
-document.getElementById('yearSelect').addEventListener('change', () => { updateDays(); checkExisting(); });
-document.getElementById('nameSelect').addEventListener('change', resetUnlock);
-document.getElementById('phoneInput').addEventListener('input', resetUnlock);
-
-function resetUnlock() {
-  // Whenever the user changes name or phone, lock the form again
-  if (unlockedFor) {
-    unlockedFor = null;
-    unlockedPhone = null;
-    document.getElementById('lockedSection').style.display = 'none';
-    document.getElementById('unlockBtn').style.display = 'block';
-    document.getElementById('lookupMsg').style.display = 'none';
-    document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('selected'));
-    document.getElementById('emailInput').value = '';
-  }
-}
-
-async function unlockForm() {
-  const name = document.getElementById('nameSelect').value;
-  const phone = document.getElementById('phoneInput').value.trim();
-  if (!name) return toast('Please select your name');
-  if (!phone) return toast('Enter your phone number');
-
-  const btn = document.getElementById('unlockBtn');
-  btn.disabled = true;
-  btn.textContent = 'Checking…';
-  try {
-    const resp = await fetch('/api/availability/pin-check', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ name, phone })
-    });
-    const data = await resp.json();
-    if (!resp.ok) throw new Error(data.error || 'Could not verify');
-
-    // Unlocked — show the rest of the form
-    unlockedFor = name;
-    unlockedPhone = phone;
-    document.getElementById('lockedSection').style.display = 'block';
-    btn.style.display = 'none';
-    document.getElementById('phoneHint').style.display = 'none';
-    await checkExisting();
-  } catch (e) {
-    toast(e.message, true);
-  } finally {
-    btn.disabled = false;
-    btn.textContent = 'Continue';
-  }
-}
-
-function updateDays() {
-  const m = parseInt(monthSel.value);
-  const y = parseInt(yearSel.value);
-  if (!m || !y) return;
-  const daysInMonth = new Date(y, m, 0).getDate();
-  document.querySelectorAll('.day-btn').forEach(btn => {
-    const d = parseInt(btn.dataset.day);
-    if (d > daysInMonth) {
-      btn.classList.add('hidden');
-      btn.classList.remove('selected');
-    } else {
-      btn.classList.remove('hidden');
-    }
-  });
-  const cb = document.getElementById('selectAllChk');
-  if (cb) cb.checked = false;
-}
-updateDays();
-
-document.getElementById('selectAllChk').addEventListener('change', function() {
-  const checked = this.checked;
-  const m = parseInt(monthSel.value);
-  const y = parseInt(yearSel.value);
-  const daysInMonth = (m && y) ? new Date(y, m, 0).getDate() : 31;
-  document.querySelectorAll('.day-btn').forEach(btn => {
-    if (parseInt(btn.dataset.day) <= daysInMonth) {
-      if (checked) btn.classList.add('selected'); else btn.classList.remove('selected');
-    }
-  });
-});
-
-function syncSelectAll() {
-  const m = parseInt(monthSel.value);
-  const y = parseInt(yearSel.value);
-  const daysInMonth = (m && y) ? new Date(y, m, 0).getDate() : 31;
-  const visible  = Array.from(document.querySelectorAll('.day-btn')).filter(b => parseInt(b.dataset.day) <= daysInMonth);
-  const selected = visible.filter(b => b.classList.contains('selected'));
-  document.getElementById('selectAllChk').checked = visible.length > 0 && selected.length === visible.length;
-}
-
-function getSelectedDays() {
-  return Array.from(document.querySelectorAll('.day-btn.selected'))
-    .map(b => parseInt(b.dataset.day))
-    .sort((a,b) => a-b);
-}
-
-// Check if this person already submitted for this month — prefill their previous answers
-async function checkExisting() {
-  if (!unlockedFor || !unlockedPhone) return;  // form is still locked
-  const name = unlockedFor;
-  const month = monthSel.value;
-  const year = yearSel.value;
-  const msgEl = document.getElementById('lookupMsg');
-  msgEl.style.display = 'none';
-  if (!name || !month || !year) return;
-
-  try {
-    const resp = await fetch('/api/availability/lookup', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ name, phone: unlockedPhone, month: +month, year: +year })
-    });
-    if (!resp.ok) return;
-    const data = await resp.json();
-    if (data.found) {
-      document.querySelectorAll('.day-btn').forEach(btn => btn.classList.remove('selected'));
-      data.days.forEach(d => {
-        const btn = document.querySelector(`.day-btn[data-day="${d}"]`);
-        if (btn) btn.classList.add('selected');
+      document.getElementById("monthSelect").addEventListener("change", () => {
+        updateDays();
+        checkExisting();
       });
-      document.getElementById('emailInput').value = data.email || '';
-      syncSelectAll();
-      const submittedAgo = data.submittedAt ? new Date(data.submittedAt).toLocaleDateString() : '';
-      msgEl.className = 'lookup-msg has-existing';
-      msgEl.textContent = `You previously submitted ${data.days.length} day${data.days.length!==1?'s':''} for ${MONTHS[+month]} ${year}${submittedAgo ? ' on ' + submittedAgo : ''}. You can update and resubmit below.`;
-      msgEl.style.display = 'block';
-      document.getElementById('submitBtn').textContent = 'Update availability';
-    } else {
-      document.querySelectorAll('.day-btn').forEach(btn => btn.classList.remove('selected'));
-      syncSelectAll();
-      document.getElementById('submitBtn').textContent = 'Submit availability';
-    }
-  } catch(e) {
-    // silent — they can still submit
-  }
-}
+      document.getElementById("yearSelect").addEventListener("change", () => {
+        updateDays();
+        checkExisting();
+      });
+      document
+        .getElementById("nameSelect")
+        .addEventListener("change", resetUnlock);
+      document
+        .getElementById("phoneInput")
+        .addEventListener("input", resetUnlock);
 
-async function submitForm() {
-  if (!unlockedFor || !unlockedPhone) return toast('Please verify your phone first');
-  const name  = unlockedFor;
-  const month = +monthSel.value;
-  const year  = +yearSel.value;
-  const days  = getSelectedDays();
-  const email = document.getElementById('emailInput').value.trim();
+      function resetUnlock() {
+        // Whenever the user changes name or phone, lock the form again
+        if (unlockedFor) {
+          unlockedFor = null;
+          unlockedPhone = null;
+          document.getElementById("lockedSection").style.display = "none";
+          document.getElementById("unlockBtn").style.display = "block";
+          document.getElementById("lookupMsg").style.display = "none";
+          document
+            .querySelectorAll(".day-btn")
+            .forEach((b) => b.classList.remove("selected"));
+          document.getElementById("emailInput").value = "";
+        }
+      }
 
-  if (!month || !year) return toast('Pick month and year');
-  if (!email) return toast('Email is required');
-  if (!email.includes('@')) return toast('Enter a valid email');
-  if (!days.length) return toast('Select at least one day');
+      async function unlockForm() {
+        const name = document.getElementById("nameSelect").value;
+        const phone = document.getElementById("phoneInput").value.trim();
+        if (!name) return toast("Please select your name");
+        if (!phone) return toast("Enter your phone number");
 
-  const btn = document.getElementById('submitBtn');
-  btn.disabled = true;
-  btn.textContent = 'Submitting…';
+        const btn = document.getElementById("unlockBtn");
+        btn.disabled = true;
+        btn.textContent = "Checking…";
+        try {
+          const resp = await fetch("/api/availability/pin-check", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name, phone }),
+          });
+          const data = await resp.json();
+          if (!resp.ok) throw new Error(data.error || "Could not verify");
 
-  try {
-    const resp = await fetch('/api/availability/submit', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ name, phone: unlockedPhone, month, year, days, email })
-    });
-    const data = await resp.json();
-    if (!resp.ok) throw new Error(data.error || 'Submit failed');
-    toast(`Thanks ${name} — ${days.length} day${days.length!==1?'s':''} saved for ${MONTHS[month]} ${year}`, false, true);
-    btn.textContent = 'Update availability';
-  } catch(e) {
-    toast('Submit failed: ' + e.message, true);
-  } finally {
-    btn.disabled = false;
-  }
-}
+          // Unlocked — show the rest of the form
+          unlockedFor = name;
+          unlockedPhone = phone;
+          document.getElementById("lockedSection").style.display = "block";
+          btn.style.display = "none";
+          document.getElementById("phoneHint").style.display = "none";
+          await checkExisting();
+        } catch (e) {
+          toast(e.message, true);
+        } finally {
+          btn.disabled = false;
+          btn.textContent = "Continue";
+        }
+      }
 
-function toast(msg, isError = false, isSuccess = false) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.className = 'toast' + (isError ? ' error' : '') + (isSuccess ? ' success' : '');
-  el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 3500);
-}
-</script>
-</body>
+      function updateDays() {
+        renderDayGrid();
+        const cb = document.getElementById("selectAllChk");
+        if (cb) cb.checked = false;
+      }
+      updateDays();
+
+      document
+        .getElementById("selectAllChk")
+        .addEventListener("change", function () {
+          const checked = this.checked;
+          const m = parseInt(monthSel.value);
+          const y = parseInt(yearSel.value);
+          const daysInMonth = m && y ? new Date(y, m, 0).getDate() : 31;
+          document.querySelectorAll(".day-btn").forEach((btn) => {
+            if (parseInt(btn.dataset.day) <= daysInMonth) {
+              if (checked) btn.classList.add("selected");
+              else btn.classList.remove("selected");
+            }
+          });
+        });
+
+      function syncSelectAll() {
+        const m = parseInt(monthSel.value);
+        const y = parseInt(yearSel.value);
+        const daysInMonth = m && y ? new Date(y, m, 0).getDate() : 31;
+        const visible = Array.from(
+          document.querySelectorAll(".day-btn"),
+        ).filter((b) => parseInt(b.dataset.day) <= daysInMonth);
+        const selected = visible.filter((b) =>
+          b.classList.contains("selected"),
+        );
+        document.getElementById("selectAllChk").checked =
+          visible.length > 0 && selected.length === visible.length;
+      }
+
+      function getSelectedDays() {
+        return Array.from(document.querySelectorAll(".day-btn.selected"))
+          .map((b) => parseInt(b.dataset.day))
+          .sort((a, b) => a - b);
+      }
+
+      // Check if this person already submitted for this month — prefill their previous answers
+      async function checkExisting() {
+        if (!unlockedFor || !unlockedPhone) return; // form is still locked
+        const name = unlockedFor;
+        const month = monthSel.value;
+        const year = yearSel.value;
+        const msgEl = document.getElementById("lookupMsg");
+        msgEl.style.display = "none";
+        if (!name || !month || !year) return;
+
+        try {
+          const resp = await fetch("/api/availability/lookup", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              name,
+              phone: unlockedPhone,
+              month: +month,
+              year: +year,
+            }),
+          });
+          if (!resp.ok) return;
+          const data = await resp.json();
+          if (data.found) {
+            document
+              .querySelectorAll(".day-btn")
+              .forEach((btn) => btn.classList.remove("selected"));
+            data.days.forEach((d) => {
+              const btn = document.querySelector(`.day-btn[data-day="${d}"]`);
+              if (btn) btn.classList.add("selected");
+            });
+            document.getElementById("emailInput").value = data.email || "";
+            syncSelectAll();
+            const submittedAgo = data.submittedAt
+              ? new Date(data.submittedAt).toLocaleDateString()
+              : "";
+            msgEl.className = "lookup-msg has-existing";
+            msgEl.textContent = `You previously submitted ${data.days.length} day${data.days.length !== 1 ? "s" : ""} for ${MONTHS[+month]} ${year}${submittedAgo ? " on " + submittedAgo : ""}. You can update and resubmit below.`;
+            msgEl.style.display = "block";
+            document.getElementById("submitBtn").textContent =
+              "Update availability";
+          } else {
+            document
+              .querySelectorAll(".day-btn")
+              .forEach((btn) => btn.classList.remove("selected"));
+            syncSelectAll();
+            document.getElementById("submitBtn").textContent =
+              "Submit availability";
+          }
+        } catch (e) {
+          // silent — they can still submit
+        }
+      }
+
+      // ---- See my schedule (opens in a new window; gated by phone verification) ----
+      const MS_PALETTE = ["#a0c4ff","#baffc9","#ffb3ba","#ffffba","#cbaacb","#ffdfba","#a7d3e0","#e2b2e8","#ffd3b6","#a3d5d3","#f6e8b1","#bae1ff","#ff6f61","#d3d3d3"];
+      function msEsc(x) {
+        return String(x == null ? "" : x).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+      }
+      const MY_SCHED_CSS =
+        "body{font-family:system-ui,-apple-system,'Inter',sans-serif;margin:0;background:#f4f4f4;color:#1a1a1a;padding:18px;}" +
+        ".ms-hd{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;}" +
+        "h1{font-size:22px;margin:0;}" +
+        ".ms-ics{background:#c01010;color:#fff;border:none;border-radius:8px;padding:11px 18px;font-size:15px;font-weight:700;cursor:pointer;}" +
+        ".ms-note{font-size:12px;color:#777;margin:4px 0 0;}" +
+        ".ms-month{margin-top:16px;background:#fff;border-radius:10px;padding:14px;box-shadow:0 1px 4px rgba(0,0,0,.06);}" +
+        ".ms-title{font-weight:800;font-size:32px;margin-bottom:10px;}" +
+        ".ms-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;}" +
+        ".ms-head{text-align:center;font-size:22px;font-weight:700;color:#999;}" +
+        ".ms-blank{min-height:170px;}" +
+        ".ms-day{min-height:170px;border:1.5px solid #e3e3e3;border-radius:8px;background:#fafafa;color:#999;display:flex;flex-direction:column;align-items:center;padding:4px 3px;overflow:hidden;}" +
+        ".ms-day .n{font-size:30px;font-weight:700;}" +
+        ".ms-day.on{color:#202124;font-weight:600;}" +
+        ".ms-day .dow{display:none;}" +
+        ".ms-day.on .j{font-size:28px;font-weight:700;line-height:1.05;text-align:center;margin-top:1px;width:100%;overflow-wrap:anywhere;word-break:break-word;}" +
+        ".ms-day.on{cursor:pointer;}" +
+        ".ms-day.on .t{font-size:26px;opacity:.9;}" +
+        ".dd-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000;display:none;align-items:center;justify-content:center;padding:16px;}" +
+        ".dd-overlay.on{display:flex;}" +
+        ".dd-card{background:#fff;border-radius:14px;padding:22px 22px 18px;max-width:480px;width:100%;box-shadow:0 10px 30px rgba(0,0,0,.25);position:relative;font-family:system-ui,-apple-system,sans-serif;}" +
+        ".dd-close{position:absolute;top:8px;right:14px;font-size:28px;color:#999;cursor:pointer;line-height:1;background:none;border:none;padding:0;}" +
+        ".dd-close:hover{color:#333;}" +
+        ".dd-date{font-size:13px;color:#777;font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;}" +
+        ".dd-job{font-size:22px;font-weight:800;color:#1a4a2e;margin-bottom:6px;line-height:1.2;}" +
+        ".dd-hours{font-size:15px;color:#555;margin-bottom:14px;}" +
+        ".dd-sec{margin-bottom:12px;}" +
+        ".dd-lbl{font-size:11px;color:#777;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;}" +
+        ".dd-val{font-size:15px;color:#333;line-height:1.5;white-space:pre-wrap;}" +
+        ".ms-btns{display:flex;flex-direction:column;gap:8px;align-items:stretch;}" +
+        ".ms-sub{background:#1a4a2e;color:#fff;border:none;border-radius:8px;padding:11px 18px;font-size:15px;font-weight:700;cursor:pointer;}" +
+        ".ms-sub:hover{background:#0f3a22;}" +
+        ".sub-card{background:#fff;border-radius:10px;padding:14px;box-shadow:0 1px 4px rgba(0,0,0,.06);margin:14px 0;}" +
+        ".sub-title{font-weight:800;font-size:18px;margin-bottom:10px;color:#1a4a2e;}" +
+        ".sub-row{margin-bottom:14px;}" +
+        ".sub-label{font-size:12px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;}" +
+        ".sub-link{display:inline-block;padding:12px 16px;background:#1a4a2e;color:#fff !important;text-decoration:none;border-radius:8px;font-size:14px;font-weight:600;word-break:break-all;}" +
+        ".sub-link:hover{background:#0f3a22;}" +
+        ".sub-url{font-family:monospace;font-size:13px;background:#f4f4f4;padding:10px;border-radius:6px;word-break:break-all;color:#333;margin-bottom:8px;}" +
+        ".sub-copy{background:#1a4a2e;color:#fff;border:none;border-radius:6px;padding:8px 16px;font-size:14px;font-weight:600;cursor:pointer;}" +
+        ".sub-copy:hover{background:#0f3a22;}" +
+        ".sub-instructions{font-size:13px;color:#444;line-height:1.7;border-top:1px solid #eee;padding-top:10px;margin-top:4px;}" +
+        ".sub-instructions strong{color:#1a4a2e;}" +
+        "@media (max-width:600px){" +
+          "body{padding:12px;}" +
+          ".ms-hd{align-items:stretch;}" +
+          "h1{font-size:19px;}" +
+          ".ms-ics{width:100%;padding:14px;font-size:16px;}" +
+          ".ms-month{padding:10px;margin-top:12px;}" +
+          ".ms-title{font-size:19px;margin-bottom:8px;}" +
+          ".ms-grid{display:block;}" +
+          ".ms-head{display:none;}" +
+          ".ms-blank{display:none;}" +
+          ".ms-day{display:none;}" +
+          ".ms-day.on{display:flex;flex-direction:row;align-items:center;text-align:left;min-height:0;gap:12px;padding:12px 14px;margin-bottom:8px;border-radius:10px;}" +
+          ".ms-day.on .n{font-size:22px;min-width:30px;text-align:center;flex:0 0 auto;}" +
+          ".ms-day.on .dow{display:block;font-size:13px;font-weight:700;opacity:.75;min-width:34px;flex:0 0 auto;}" +
+          ".ms-day.on .j{font-size:16px;font-weight:700;flex:1 1 auto;text-align:left;margin-top:0;width:auto;line-height:1.2;}" +
+          ".ms-day.on .t{font-size:14px;font-weight:600;opacity:.9;white-space:nowrap;flex:0 0 auto;}" +
+        "}";
+      function buildScheduleHTML(shifts) {
+        const MN = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+        const DOW = ["Su","Mo","Tu","We","Th","Fr","Sa"];
+        const months = {};
+        shifts.forEach((s) => { const k = s.y + "_" + s.m; (months[k] = months[k] || {})[s.day] = s; });
+        const keys = Object.keys(months).sort((a, b) => { const p = a.split("_").map(Number), q = b.split("_").map(Number); return p[0] - q[0] || p[1] - q[1]; });
+        let html = "";
+        keys.forEach((k) => {
+          const parts = k.split("_").map(Number), y = parts[0], m = parts[1];
+          const dim = new Date(y, m + 1, 0).getDate(), first = new Date(y, m, 1).getDay();
+          html += '<div class="ms-month"><div class="ms-title">' + MN[m] + " " + y + '</div><div class="ms-grid">';
+          DOW.forEach((d) => { html += '<div class="ms-head">' + d + "</div>"; });
+          for (let i = 0; i < first; i++) html += '<div class="ms-blank"></div>';
+          for (let d = 1; d <= dim; d++) {
+            const s = months[k][d];
+            if (s) {
+              const t = s.start && s.end ? s.start + "-" + s.end : "";
+              const col = s.color || "#a0c4ff";
+              const dowName = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][new Date(y, m, d).getDay()];
+              const idx = shifts.indexOf(s);
+              html += '<div class="ms-day on" data-i="' + idx + '" style="background:' + col + ';border-color:' + col + ';"><span class="n">' + d + '</span><span class="dow">' + dowName + '</span><span class="j">' + msEsc(s.job) + '</span><span class="t">' + msEsc(t) + "</span></div>";
+            } else {
+              html += '<div class="ms-day"><span class="n">' + d + "</span></div>";
+            }
+          }
+          html += "</div></div>";
+        });
+        return html;
+      }
+      function downloadICS(shifts, name) {
+        const p = (n) => String(n).padStart(2, "0");
+        const esc = (v) => String(v == null ? "" : v).replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\r?\n/g, "\\n");
+        const stamp = new Date().toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+        const lines = ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//MarTech Rescue//Schedule//EN","CALSCALE:GREGORIAN"];
+        shifts.forEach((s, i) => {
+          const dt = "" + s.y + p(s.m + 1) + p(s.day);
+          const st = (s.start || "00:00").replace(":", "") + "00";
+          const en = (s.end || "23:59").replace(":", "") + "00";
+          lines.push("BEGIN:VEVENT","UID:martech-" + dt + "-" + i + "@rescue","DTSTAMP:" + stamp,"DTSTART:" + dt + "T" + st,"DTEND:" + dt + "T" + en,"SUMMARY:" + esc((s.job || "Shift") + " - " + name),"END:VEVENT");
+        });
+        lines.push("END:VCALENDAR");
+        const blob = new Blob([lines.join("\r\n")], { type: "text/calendar;charset=utf-8" });
+        const url = URL.createObjectURL(blob), a = document.createElement("a");
+        a.href = url; a.download = "my-schedule.ics"; document.body.appendChild(a); a.click();
+        setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+      }
+      async function showMySchedule() {
+        if (!unlockedFor) return;
+        // Open the window synchronously, inside the click gesture, so mobile browsers
+        // don't block it (they would if we only opened it after the await below).
+        const win = window.open("", "_blank");
+        if (!win) { alert("Please allow pop-ups to open your schedule in a new window."); return; }
+        try { win.document.write('<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><body style="font-family:system-ui,-apple-system,sans-serif;padding:24px;color:#666;">Loading your schedule…</body>'); } catch (e) {}
+        const fail = (msg) => { try { win.document.body.innerHTML = '<div style="font-family:system-ui,-apple-system,sans-serif;padding:24px;color:#666;">' + msEsc(msg) + '</div>'; } catch (e) { alert(msg); } };
+        let snap, subUrls = null;
+        try {
+          // Fetch published schedule AND the per-crew subscribe URLs in parallel.
+          const [pubResp, subResp] = await Promise.all([
+            fetch("/api/published"),
+            fetch("/api/availability/subscribe-url", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ name: unlockedFor, phone: unlockedPhone }),
+            }),
+          ]);
+          if (pubResp.status === 404) { fail("No schedule has been published yet."); return; }
+          if (!pubResp.ok) throw new Error("load");
+          snap = await pubResp.json();
+          if (subResp.ok) { try { subUrls = await subResp.json(); } catch (_) {} }
+        } catch (e) { fail("Could not load your schedule. Please try again."); return; }
+        const me = (snap.employees || []).find((e) => e.name === unlockedFor);
+        if (!me) { fail("You are not on the published schedule yet."); return; }
+        const jobsById = {}, jobColorById = {};
+        (snap.jobs || []).forEach((j, idx) => { jobsById[j.id] = j; jobColorById[j.id] = MS_PALETTE[idx % MS_PALETTE.length]; });
+        const shifts = [];
+        for (const key in (snap.assignments || {})) {
+          const parts = key.split("_").map(Number), y = parts[0], m = parts[1];
+          for (const slot in snap.assignments[key]) {
+            const sp = slot.split("_");
+            if (parseInt(sp[0]) === me.id) {
+              const jid = snap.assignments[key][slot];
+              const job = jobsById[jid] || {};
+              const day = parseInt(sp[1]);
+              const sh = sp[2] || 'day';
+              const monthAsgns = snap.assignments[key];
+              const partners = [];
+              for (const oslot in monthAsgns) {
+                if (oslot === slot) continue;
+                const osp = oslot.split("_");
+                if (parseInt(osp[1]) !== day) continue;
+                if ((osp[2] || 'day') !== sh) continue;
+                if (monthAsgns[oslot] !== jid) continue;
+                const pe = (snap.employees || []).find(e => e.id === parseInt(osp[0]));
+                if (pe) partners.push(pe.name);
+              }
+              partners.sort();
+              shifts.push({ y, m, day, job: job.clientName || "Job", start: job.startTime || "", end: job.endTime || "", color: jobColorById[jid] || "#a0c4ff", notes: job.notes || "", partners });
+            }
+          }
+        }
+        if (!shifts.length) { fail("You have no scheduled days in the published schedule yet."); return; }
+        shifts.sort((a, b) => a.y - b.y || a.m - b.m || a.day - b.day);
+        // Self-contained popup: the .ics generator and the subscribe panel both
+        // run INSIDE the popup document (so `document` refers to the popup, which
+        // is what makes the download and the clipboard copy work).
+        const popupScript = (
+          "var SHIFTS=" + JSON.stringify(shifts) + ";" +
+          "var NAME=" + JSON.stringify(unlockedFor) + ";" +
+          "var SUB=" + JSON.stringify(subUrls || {}) + ";" +
+          "var downloadICS=" + downloadICS.toString() + ";" +
+          "document.getElementById('icsBtn').addEventListener('click',function(){downloadICS(SHIFTS,NAME);});" +
+          "var subBtn=document.getElementById('subBtn');" +
+          "if(subBtn&&SUB&&SUB.https){subBtn.addEventListener('click',function(){var p=document.getElementById('subPanel');var open=p.style.display==='none';p.style.display=open?'block':'none';if(open){var w=document.getElementById('subWebcalLink');var h=document.getElementById('subHttpsUrl');if(w){w.href=SUB.webcal||SUB.https;w.textContent=SUB.webcal||SUB.https;}if(h){h.textContent=SUB.https;}}});}" +
+          "else if(subBtn){subBtn.disabled=true;subBtn.textContent='Subscribe unavailable';}" +
+          "var subCopy=document.getElementById('subCopy');" +
+          "if(subCopy){subCopy.addEventListener('click',function(){if(!SUB||!SUB.https)return;navigator.clipboard.writeText(SUB.https).then(function(){var old=subCopy.textContent;subCopy.textContent='Copied \\u2713';setTimeout(function(){subCopy.textContent=old;},1500);}).catch(function(){alert('Could not auto-copy. Long-press the link above to copy it manually.');});});}" +
+          "var DOW=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];" +
+          "var MNN=['January','February','March','April','May','June','July','August','September','October','November','December'];" +
+          "function showDayDetail(i){var s=SHIFTS[i];if(!s)return;var dt=new Date(s.y,s.m,s.day);document.getElementById('ddDate').textContent=DOW[dt.getDay()]+', '+MNN[s.m]+' '+s.day+', '+s.y;document.getElementById('ddJob').textContent=s.job;document.getElementById('ddHours').textContent=(s.start&&s.end)?(s.start+' \\u2013 '+s.end):'Time TBD';var crew=NAME+((s.partners&&s.partners.length)?(', '+s.partners.join(', ')):' (solo)');document.getElementById('ddCrew').textContent=crew;var ns=document.getElementById('ddNotesSec'),nv=document.getElementById('ddNotes');if(s.notes){ns.style.display='';nv.textContent=s.notes;}else{ns.style.display='none';}document.getElementById('dayDetailOverlay').classList.add('on');}" +
+          "function hideDayDetail(){document.getElementById('dayDetailOverlay').classList.remove('on');}" +
+          "document.getElementById('cal').addEventListener('click',function(ev){var el=ev.target;while(el&&el!==this){if(el.classList&&el.classList.contains('on')&&el.dataset&&el.dataset.i!==undefined){showDayDetail(+el.dataset.i);return;}el=el.parentNode;}});" +
+          "document.getElementById('dayDetailOverlay').addEventListener('click',function(ev){if(ev.target===this)hideDayDetail();});" +
+          "document.getElementById('ddClose').addEventListener('click',hideDayDetail);"
+        ).replace(/</g, "\\u003c");
+        const html =
+          '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>My Schedule</title><style>' + MY_SCHED_CSS + '</style></head>' +
+          '<body><div class="ms-hd"><div><h1>My Schedule - ' + msEsc(unlockedFor) + '</h1><div class="ms-note">Subscribe to keep this calendar live in sync, or download a one-time copy.</div></div>' +
+          '<div class="ms-btns">' +
+            '<button id="subBtn" class="ms-sub" type="button">Subscribe to live calendar</button>' +
+            '<button id="icsBtn" class="ms-ics" type="button">Add to calendar (.ics)</button>' +
+          '</div></div>' +
+          '<div id="subPanel" style="display:none">' +
+            '<div class="sub-card">' +
+              '<div class="sub-title">Your private calendar feed</div>' +
+              '<div class="sub-row">' +
+                '<div class="sub-label">iPhone / iPad &mdash; tap to add:</div>' +
+                '<a id="subWebcalLink" class="sub-link" href="#"></a>' +
+              '</div>' +
+              '<div class="sub-row">' +
+                '<div class="sub-label">Google Calendar / Outlook &mdash; copy &amp; paste:</div>' +
+                '<div id="subHttpsUrl" class="sub-url"></div>' +
+                '<button id="subCopy" class="sub-copy" type="button">Copy link</button>' +
+              '</div>' +
+              '<div class="sub-instructions">' +
+                '<strong>Google Calendar:</strong> calendar.google.com &rarr; &ldquo;+&rdquo; next to Other calendars &rarr; From URL &rarr; paste &rarr; Add calendar.<br>' +
+                '<strong>Outlook (web):</strong> Calendar &rarr; Add calendar &rarr; Subscribe from web &rarr; paste.<br>' +
+                'Your phone refreshes the feed automatically &mdash; usually within an hour of any schedule change.' +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+          '<div id="cal">' + buildScheduleHTML(shifts) + '</div>' +
+          '<div id="dayDetailOverlay" class="dd-overlay"><div class="dd-card">' +
+            '<button id="ddClose" class="dd-close" type="button" aria-label="Close">&times;</button>' +
+            '<div class="dd-date" id="ddDate"></div>' +
+            '<div class="dd-job" id="ddJob"></div>' +
+            '<div class="dd-hours" id="ddHours"></div>' +
+            '<div class="dd-sec"><div class="dd-lbl">Crew today</div><div class="dd-val" id="ddCrew"></div></div>' +
+            '<div class="dd-sec" id="ddNotesSec"><div class="dd-lbl">Notes</div><div class="dd-val" id="ddNotes"></div></div>' +
+          '</div></div>' +
+          '<scr' + 'ipt>' + popupScript + '</scr' + 'ipt></body></html>';
+        const d = win.document;
+        d.open();
+        d.write(html);
+        d.close();
+      }
+
+      async function submitForm() {
+        if (!unlockedFor || !unlockedPhone)
+          return toast("Please verify your phone first");
+        const name = unlockedFor;
+        const month = +monthSel.value;
+        const year = +yearSel.value;
+        const days = getSelectedDays();
+        const email = document.getElementById("emailInput").value.trim();
+
+        if (!month || !year) return toast("Pick month and year");
+        if (!email) return toast("Email is required");
+        if (!email.includes("@")) return toast("Enter a valid email");
+        if (!days.length) return toast("Select at least one day");
+
+        const btn = document.getElementById("submitBtn");
+        btn.disabled = true;
+        btn.textContent = "Submitting…";
+
+        try {
+          const resp = await fetch("/api/availability/submit", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              name,
+              phone: unlockedPhone,
+              month,
+              year,
+              days,
+              email,
+            }),
+          });
+          const data = await resp.json();
+          if (!resp.ok) throw new Error(data.error || "Submit failed");
+          toast(
+            `Thanks ${name} — ${days.length} day${days.length !== 1 ? "s" : ""} saved for ${MONTHS[month]} ${year}`,
+            false,
+            true,
+          );
+          btn.textContent = "Update availability";
+        } catch (e) {
+          toast("Submit failed: " + e.message, true);
+        } finally {
+          btn.disabled = false;
+        }
+      }
+
+      function toast(msg, isError = false, isSuccess = false) {
+        const el = document.getElementById("toast");
+        el.textContent = msg;
+        el.className =
+          "toast" + (isError ? " error" : "") + (isSuccess ? " success" : "");
+        el.classList.add("show");
+        setTimeout(() => el.classList.remove("show"), 3500);
+      }
+    </script>
+  </body>
 </html>
