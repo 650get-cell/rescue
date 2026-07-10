@@ -1130,4 +1130,50 @@
         }
 
         await refresh();
-        // Refetch when window regains
+        // Refetch when window regains focus
+        // (catches edits from other tabs and new crew submissions)
+        window.addEventListener("focus", () => { refresh(); });
+        document.addEventListener("visibilitychange", () => {
+          if (!document.hidden) refresh();
+        });
+      }
+
+      // ============================================================
+      // REFRESH — pull latest state from server and re-render
+      // ============================================================
+      async function refresh() {
+        try {
+          const state = await apiGetState();
+          _cachedState = state;
+          render();
+        } catch (e) {
+          if (e.message === "AUTH") {
+            sessionStorage.removeItem("martech_admin_pw");
+            ADMIN_PW = "";
+            location.reload();
+            return;
+          }
+          const wrap = document.getElementById("wrap");
+          if (wrap) {
+            wrap.innerHTML = '<div class="no-data-block"><strong>Could not load availability data.</strong><br>' + (e && e.message ? e.message : "Unknown error") + '</div>';
+          }
+        }
+      }
+
+      // ============================================================
+      // CLEAR ALL — wipe every submission across every month
+      // ============================================================
+      async function clearAllAvailability() {
+        if (!confirm("Wipe ALL submitted availability for ALL employees across ALL months?\n\nThis cannot be undone from the UI. (The server keeps automatic backups in data/backups/ on disk.)")) return;
+        const state = loadState();
+        if (!state) return;
+        state.availability = {};
+        saveStateLocal(state);
+        render();
+      }
+
+      // Kick everything off
+      boot();
+    </script>
+  </body>
+</html>
