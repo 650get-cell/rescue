@@ -1175,5 +1175,20 @@
       // Kick everything off
       boot();
     </script>
-  </body>
+  <script>
+// Version footer — shows what's live so we can verify deploys landed.
+(async () => {
+  try {
+    const r = await fetch('/api/version');
+    if (!r.ok) return;
+    const v = await r.json();
+    const el = document.createElement('div');
+    el.style.cssText = 'position:fixed;bottom:6px;right:10px;font:11px/1.4 system-ui,sans-serif;color:#999;background:rgba(255,255,255,0.8);padding:3px 8px;border-radius:4px;pointer-events:none;user-select:none;z-index:10;';
+    el.textContent = 'v' + v.version + ' \u00b7 ' + v.commit;
+    el.title = 'Started: ' + v.startedAt;
+    document.body.appendChild(el);
+  } catch (_) {}
+})();
+</script>
+</body>
 </html>

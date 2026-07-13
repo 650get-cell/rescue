@@ -5,6 +5,7 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const { execSync } = require('child_process');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -20,6 +21,34 @@ if (!fs.existsSync(BACKUP_DIR)) fs.mkdirSync(BACKUP_DIR, { recursive: true });
 
 app.use(express.json({ limit: '5mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
+
+// ============================================================
+// VERSION INFO (read once at startup)
+// ============================================================
+// Version comes from package.json — bump it there before each deploy.
+// Git short SHA is captured at startup so you can verify which code is live.
+const APP_VERSION = (() => {
+  try {
+    return JSON.parse(fs.readFileSync(path.join(__dirname, 'package.json'), 'utf8')).version || 'unknown';
+  } catch (_) { return 'unknown'; }
+})();
+const APP_COMMIT = (() => {
+  try {
+    return execSync('git rev-parse --short HEAD', { cwd: __dirname, stdio: ['ignore', 'pipe', 'ignore'] })
+      .toString().trim() || 'nogit';
+  } catch (_) {
+    try {
+      const head = fs.readFileSync(path.join(__dirname, '.git', 'HEAD'), 'utf8').trim();
+      if (head.startsWith('ref: ')) {
+        const refPath = path.join(__dirname, '.git', head.slice(5));
+        return fs.readFileSync(refPath, 'utf8').trim().slice(0, 7);
+      }
+      return head.slice(0, 7);
+    } catch (_) { return 'nogit'; }
+  }
+})();
+const APP_STARTED_AT = new Date().toISOString();
+
 
 // ============================================================
 // STORAGE HELPERS
@@ -242,6 +271,12 @@ app.post('/api/admin/check', (req, res) => {
     recordFail(req);
     res.status(401).json({ ok: false, error: 'Wrong password' });
   }
+});
+
+// Version info — public, no auth. Used by the admin footer to display
+// version + commit hash so you can verify at a glance which code is live.
+app.get('/api/version', (req, res) => {
+  res.json({ version: APP_VERSION, commit: APP_COMMIT, startedAt: APP_STARTED_AT });
 });
 
 // Roster of active employees (for the submission form dropdown)
