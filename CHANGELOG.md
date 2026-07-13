@@ -12,6 +12,11 @@ here describing what changed.
 
 ---
 
+## 1.1.0 — 2026-07-13
+
+- **New:** admin landing page at `/admin.html`. Big button cards linking to Scheduler, Availability View, and the Crew Availability Form. Password-gated. Bookmark it as your admin homepage.
+- Same version + commit-hash footer as the other admin pages.
+
 ## 1.0.0 — 2026-07-10
 
 Baseline version. Includes everything currently in production:

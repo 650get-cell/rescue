@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MarTech Rescue — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:"Inter",sans-serif; background:#e8e8e8; min-height:100vh; color:#1a1a1a; padding:24px 16px 60px; }
+
+  .header {
+    max-width:1000px; margin:0 auto 28px; background:#1a1a1a; border-bottom:3px solid #c01010;
+    padding:22px 28px; border-radius:14px 14px 0 0;
+    display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;
+  }
+  .logo { font-family:"Syne",sans-serif; font-weight:800; font-size:24px; letter-spacing:-0.02em; }
+  .logo .mar { color:#c01010; }
+  .logo .tech { color:#fff; }
+  .logo .res { color:#aaa; font-weight:700; }
+  .logo-sub { color:#888; font-size:12px; letter-spacing:.15em; text-transform:uppercase; font-weight:500; margin-top:4px; }
+  .logout-btn { background:transparent; border:1px solid rgba(255,255,255,.25); color:#aaa; padding:8px 14px; border-radius:6px; font-size:13px; cursor:pointer; font-family:"Inter",sans-serif; }
+  .logout-btn:hover { border-color:rgba(255,255,255,.5); color:#fff; }
+
+  .container { max-width:1000px; margin:0 auto; background:#fff; border-radius:0 0 14px 14px; padding:36px 32px 40px; box-shadow:0 4px 24px rgba(0,0,0,.10); }
+
+  h1 { font-family:"Syne",sans-serif; font-size:26px; font-weight:800; color:#1a1a1a; margin-bottom:6px; }
+  .subtitle { color:#666; font-size:14px; margin-bottom:28px; }
+
+  .cards { display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:16px; }
+
+  .card {
+    background:#fafafa; border:2px solid #e0e0e0; border-radius:12px; padding:24px 22px;
+    text-decoration:none; color:inherit; display:flex; flex-direction:column; gap:10px;
+    transition:all .18s; cursor:pointer;
+  }
+  .card:hover { border-color:#c01010; background:#fff; transform:translateY(-2px); box-shadow:0 6px 18px rgba(192,16,16,.10); }
+  .card-icon { font-size:32px; line-height:1; }
+  .card-title { font-family:"Syne",sans-serif; font-weight:800; font-size:18px; color:#1a1a1a; }
+  .card-desc { font-size:13px; color:#666; line-height:1.5; }
+  .card-tag { display:inline-block; font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; padding:3px 8px; border-radius:4px; align-self:flex-start; margin-top:4px; }
+  .card-tag.admin { background:#fee; color:#c01010; }
+  .card-tag.crew { background:#eaf5ee; color:#1a5a33; }
+
+  .footer-note { margin-top:32px; padding-top:20px; border-top:1px solid #eee; font-size:12px; color:#888; text-align:center; }
+
+  .version-chip { position:fixed; bottom:8px; left:10px; font:12px/1.4 system-ui,sans-serif; color:#555; background:rgba(255,255,255,0.95); padding:4px 10px; border:1px solid #ccc; border-radius:4px; pointer-events:none; user-select:none; z-index:99999; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="logo"><span class="mar">Mar</span><span class="tech">Tech</span> <span class="res">Rescue</span></div>
+    <div class="logo-sub">Admin Dashboard</div>
+  </div>
+  <button class="logout-btn" onclick="logout()">Log out</button>
+</div>
+
+<div class="container">
+  <h1>What do you want to do?</h1>
+  <div class="subtitle">Pick a section below to jump in.</div>
+
+  <div class="cards">
+    <a href="/scheduler.html" class="card">
+      <div class="card-icon">📅</div>
+      <div class="card-title">Scheduler</div>
+      <div class="card-desc">Create jobs, assign crew, publish the schedule, export Excel, manage the roster.</div>
+      <span class="card-tag admin">Admin</span>
+    </a>
+
+    <a href="/availability_view.html" class="card">
+      <div class="card-icon">👥</div>
+      <div class="card-title">Availability View</div>
+      <div class="card-desc">Calendar showing who's available each day. Edit any crew member's submission.</div>
+      <span class="card-tag admin">Admin</span>
+    </a>
+
+    <a href="/availability.html" class="card">
+      <div class="card-icon">📝</div>
+      <div class="card-title">Availability Form</div>
+      <div class="card-desc">The form crew fill out to submit their monthly availability. Open it to see what they see.</div>
+      <span class="card-tag crew">Crew view</span>
+    </a>
+  </div>
+
+  <div class="footer-note">
+    Bookmark this page — <code>/admin.html</code> — for one-click access to everything.
+  </div>
+</div>
+
+<script>
+// ============================================================
+// AUTH GATE — same X-Admin-Password mechanism as other admin pages
+// ============================================================
+let ADMIN_PW = sessionStorage.getItem('martech_admin_pw') || '';
+
+async function apiCheckPw(pw) {
+  try {
+    const r = await fetch('/api/admin/check', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ password: pw }),
+    });
+    return r.ok;
+  } catch { return false; }
+}
+
+function logout() {
+  sessionStorage.removeItem('martech_admin_pw');
+  location.reload();
+}
+
+async function boot() {
+  if (ADMIN_PW) {
+    const ok = await apiCheckPw(ADMIN_PW);
+    if (!ok) { sessionStorage.removeItem('martech_admin_pw'); ADMIN_PW = ''; }
+  }
+  while (!ADMIN_PW) {
+    const pw = prompt('Admin password:');
+    if (pw === null) {
+      document.body.innerHTML = '<div style="padding:60px;text-align:center;color:#666;font-family:sans-serif;">Login cancelled. Refresh to try again.</div>';
+      return;
+    }
+    const ok = await apiCheckPw(pw);
+    if (ok) {
+      ADMIN_PW = pw;
+      sessionStorage.setItem('martech_admin_pw', pw);
+      break;
+    }
+    alert('Wrong password.');
+  }
+}
+boot();
+
+// ============================================================
+// VERSION FOOTER
+// ============================================================
+(async () => {
+  try {
+    const r = await fetch('/api/version');
+    if (!r.ok) return;
+    const v = await r.json();
+    const el = document.createElement('div');
+    el.className = 'version-chip';
+    el.textContent = 'v' + v.version + ' · ' + v.commit;
+    el.title = 'Started: ' + v.startedAt;
+    document.body.appendChild(el);
+  } catch (_) {}
+})();
+</script>
+
+</body>
+</html>
