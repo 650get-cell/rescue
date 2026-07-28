@@ -226,8 +226,10 @@ function recordFail(req) {
 function recordSuccess(req) { authAttempts.delete(clientIp(req)); }
 
 function passwordOk(pw) {
-  const a = Buffer.from(String(pw || ''));
-  const b = Buffer.from(String(ADMIN_PASSWORD));
+  // Trim to defend against accidental leading/trailing whitespace when the
+  // password gets pasted or auto-filled with extra spaces.
+  const a = Buffer.from(String(pw || '').trim());
+  const b = Buffer.from(String(ADMIN_PASSWORD).trim());
   if (a.length !== b.length) return false;
   try { return crypto.timingSafeEqual(a, b); } catch (_) { return false; }
 }

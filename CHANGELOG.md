@@ -16,6 +16,7 @@ here describing what changed.
 
 - **New:** admin landing page at `/admin.html`. Big button cards linking to Scheduler, Availability View, and the Crew Availability Form. Password-gated. Bookmark it as your admin homepage.
 - Same version + commit-hash footer as the other admin pages.
+- **Fix:** admin password comparison now trims leading/trailing whitespace so accidental spaces from paste or autofill don't cause "Wrong password."
 
 ## 1.0.0 — 2026-07-10
 
