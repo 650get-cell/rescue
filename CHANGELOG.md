@@ -12,6 +12,10 @@ here describing what changed.
 
 ---
 
+## 1.1.1 — 2026-08-06
+
+- **Fix:** "See my schedule" popup now has a **← Back to form** button in the header. Previously crew had no way to close the popup other than closing the browser tab.
+
 ## 1.1.0 — 2026-07-13
 
 - **New:** admin landing page at `/admin.html`. Big button cards linking to Scheduler, Availability View, and the Crew Availability Form. Password-gated. Bookmark it as your admin homepage.

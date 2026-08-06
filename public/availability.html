@@ -801,7 +801,9 @@
           "function hideDayDetail(){document.getElementById('dayDetailOverlay').classList.remove('on');}" +
           "document.getElementById('cal').addEventListener('click',function(ev){var el=ev.target;while(el&&el!==this){if(el.classList&&el.classList.contains('on')&&el.dataset&&el.dataset.i!==undefined){showDayDetail(+el.dataset.i);return;}el=el.parentNode;}});" +
           "document.getElementById('dayDetailOverlay').addEventListener('click',function(ev){if(ev.target===this)hideDayDetail();});" +
-          "document.getElementById('ddClose').addEventListener('click',hideDayDetail);"
+          "document.getElementById('ddClose').addEventListener('click',hideDayDetail);" +
+          "var msCloseBtn=document.getElementById('msCloseBtn');" +
+          "if(msCloseBtn){msCloseBtn.addEventListener('click',function(){try{window.close();}catch(e){}setTimeout(function(){if(!window.closed){window.location.href='/availability.html';}},100);});}"
         ).replace(/</g, "\\u003c");
         const html =
           '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>My Schedule</title><style>' + MY_SCHED_CSS + '</style></head>' +
@@ -809,6 +811,7 @@
           '<div class="ms-btns">' +
             '<button id="subBtn" class="ms-sub" type="button">Subscribe to live calendar</button>' +
             '<button id="icsBtn" class="ms-ics" type="button">Add to calendar (.ics)</button>' +
+            '<button id="msCloseBtn" type="button" style="background:transparent;color:#c01010;border:1.5px solid #c01010;padding:9px 16px;border-radius:8px;font-weight:600;font-size:14px;cursor:pointer;font-family:inherit;">&larr; Back to form</button>' +
           '</div></div>' +
           '<div id="subPanel" style="display:none">' +
             '<div class="sub-card">' +
