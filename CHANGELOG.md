@@ -12,6 +12,10 @@ here describing what changed.
 
 ---
 
+## 1.1.2 — 2026-08-06
+
+- **Style:** version chip on admin pages now uses black background with white text (matches the app header). Easier to read against the light page background.
+
 ## 1.1.1 — 2026-08-06
 
 - **Fix:** "See my schedule" popup now has a **← Back to form** button in the header. Previously crew had no way to close the popup other than closing the browser tab.

@@ -2598,7 +2598,7 @@ boot();
     if (!r.ok) return;
     const v = await r.json();
     const el = document.createElement('div');
-    el.style.cssText = 'position:fixed;bottom:8px;left:10px;font:12px/1.4 system-ui,sans-serif;color:#555;background:rgba(255,255,255,0.95);padding:4px 10px;border:1px solid #ccc;border-radius:4px;pointer-events:none;user-select:none;z-index:99999;';
+    el.style.cssText = 'position:fixed;bottom:8px;left:10px;font:12px/1.4 system-ui,sans-serif;color:#fff;background:#1a1a1a;padding:4px 10px;border-radius:4px;pointer-events:none;user-select:none;z-index:99999;';
     el.textContent = 'v' + v.version + ' \u00b7 ' + v.commit;
     el.title = 'Started: ' + v.startedAt;
     document.body.appendChild(el);
