@@ -1,0 +1,1 @@
+- [State storage (Postgres kv_store)](state-storage.md) — whole state is one JSONB blob; all mutations MUST go through withStateTxn (advisory-lock txn), never bare writeKV('state').

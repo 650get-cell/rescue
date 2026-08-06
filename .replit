@@ -1,5 +1,5 @@
 run = "npm start"
-modules = ["nodejs-20", "python-3.11"]
+modules = ["nodejs-20", "python-3.11", "postgresql-16"]
 
 [nix]
 channel = "stable-23_11"
@@ -16,6 +16,7 @@ integrations = ["github:1.0.0"]
 [userenv]
 
 [userenv.shared]
+ADMIN_PASSWORD = "Fire7187"
 
 [[ports]]
 localPort = 3000

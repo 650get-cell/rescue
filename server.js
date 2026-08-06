@@ -1,113 +1,67 @@
 // MarTech Rescue Scheduler — Express server
-// Storage: JSON files on disk (Replit persists files between runs)
+// Storage: PostgreSQL (durable across restarts / deploys). Two logical blobs
+// live in the `kv_store` table: 'state' (the full admin state) and 'published'
+// (the crew-facing snapshot). Point-in-time snapshots of state go into
+// `state_backups`. Legacy data/*.json files are used only to seed an empty
+// database on first boot.
 
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
-const { execSync } = require('child_process');
+const { Pool } = require('pg');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const DATA_DIR = path.join(__dirname, 'data');
-const BACKUP_DIR = path.join(DATA_DIR, 'backups');
 const STATE_FILE = path.join(DATA_DIR, 'state.json');
 const PUBLISHED_FILE = path.join(DATA_DIR, 'published.json');
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'change-me';
 const MAX_BACKUPS = 20;
 
-if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
-if (!fs.existsSync(BACKUP_DIR)) fs.mkdirSync(BACKUP_DIR, { recursive: true });
+const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+pool.on('error', (err) => console.error('Unexpected PG pool error', err));
 
 app.use(express.json({ limit: '5mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ============================================================
-// VERSION INFO (read once at startup)
-// ============================================================
-// Version comes from package.json — bump it there before each deploy.
-// Git short SHA is captured at startup so you can verify which code is live.
-const APP_VERSION = (() => {
-  try {
-    return JSON.parse(fs.readFileSync(path.join(__dirname, 'package.json'), 'utf8')).version || 'unknown';
-  } catch (_) { return 'unknown'; }
-})();
-const APP_COMMIT = (() => {
-  try {
-    return execSync('git rev-parse --short HEAD', { cwd: __dirname, stdio: ['ignore', 'pipe', 'ignore'] })
-      .toString().trim() || 'nogit';
-  } catch (_) {
-    try {
-      const head = fs.readFileSync(path.join(__dirname, '.git', 'HEAD'), 'utf8').trim();
-      if (head.startsWith('ref: ')) {
-        const refPath = path.join(__dirname, '.git', head.slice(5));
-        return fs.readFileSync(refPath, 'utf8').trim().slice(0, 7);
-      }
-      return head.slice(0, 7);
-    } catch (_) { return 'nogit'; }
-  }
-})();
-const APP_STARTED_AT = new Date().toISOString();
-
+// wrap: adapt async route handlers so a rejected promise is forwarded to the
+// Express error middleware instead of hanging the request (Express 4 quirk).
+const wrap = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
 // ============================================================
-// STORAGE HELPERS
+// STORAGE HELPERS (PostgreSQL-backed)
 // ============================================================
 
-// Atomic write: write to a temp file in the same directory, then rename().
-// rename() is atomic on the same filesystem, so a crash mid-write can never
-// leave a half-written / truncated JSON file behind.
-function writeJSONAtomic(file, obj) {
-  const tmp = `${file}.tmp-${process.pid}-${Date.now()}`;
-  fs.writeFileSync(tmp, JSON.stringify(obj, null, 2));
-  fs.renameSync(tmp, file);
-}
-
-// Parse a JSON file or throw. Callers decide what to do on failure.
+// Parse a JSON file or throw. Used only when seeding from legacy files.
 function readJSON(file) {
   return JSON.parse(fs.readFileSync(file, 'utf8'));
 }
 
-// loadJSON: forgiving read used for derived/optional files (published.json).
-function loadJSON(file, fallback) {
-  try {
-    if (!fs.existsSync(file)) return fallback;
-    return readJSON(file);
-  } catch (e) {
-    console.error('loadJSON error', file, e);
-    return fallback;
-  }
+// Read a JSON blob from kv_store. Returns the parsed object, or null if absent.
+// pg automatically parses jsonb columns into JS values.
+async function readKV(key) {
+  const { rows } = await pool.query('SELECT value FROM kv_store WHERE key = $1', [key]);
+  return rows.length ? rows[0].value : null;
 }
 
-// Snapshot the current state file into backups/, then prune to MAX_BACKUPS.
-function backupStateFile() {
-  try {
-    if (!fs.existsSync(STATE_FILE)) return;
-    const stamp = new Date().toISOString().replace(/[:.]/g, '-');
-    fs.copyFileSync(STATE_FILE, path.join(BACKUP_DIR, `state-${stamp}.json`));
-    const files = fs.readdirSync(BACKUP_DIR)
-      .filter(f => f.startsWith('state-') && f.endsWith('.json'))
-      .sort();
-    while (files.length > MAX_BACKUPS) {
-      const old = files.shift();
-      try { fs.unlinkSync(path.join(BACKUP_DIR, old)); } catch (_) {}
-    }
-  } catch (e) {
-    console.error('backupStateFile error', e);
-  }
+// Upsert a JSON blob into kv_store.
+async function writeKV(key, value) {
+  await pool.query(
+    `INSERT INTO kv_store (key, value, updated_at) VALUES ($1, $2::jsonb, now())
+     ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = now()`,
+    [key, JSON.stringify(value)]
+  );
 }
 
-// Most recent backup that still parses, or null.
-function latestGoodBackup() {
+// Most recent backup, or null.
+async function latestGoodBackup() {
   try {
-    const files = fs.readdirSync(BACKUP_DIR)
-      .filter(f => f.startsWith('state-') && f.endsWith('.json'))
-      .sort();
-    for (let i = files.length - 1; i >= 0; i--) {
-      try { return readJSON(path.join(BACKUP_DIR, files[i])); } catch (_) {}
-    }
-  } catch (_) {}
-  return null;
+    const { rows } = await pool.query('SELECT data FROM state_backups ORDER BY id DESC LIMIT 1');
+    return rows.length ? rows[0].data : null;
+  } catch (_) {
+    return null;
+  }
 }
 
 function defaultState() {
@@ -170,35 +124,102 @@ function normalizeState(state) {
   return state;
 }
 
-// Load state. On a corrupt state.json, NEVER silently reset to defaults
-// (that path is what destroys real data). Instead: preserve the corrupt file,
-// recover from the most recent good backup, and only fall back to defaults as
-// a true last resort — logging loudly throughout.
-function loadState() {
-  if (!fs.existsSync(STATE_FILE)) return normalizeState(defaultState());
+// Load state from the database. Falls back to the most recent backup, then to
+// defaults, if the primary row is somehow missing.
+async function loadState() {
+  const raw = await readKV('state');
+  if (raw != null) return normalizeState(raw);
+  const backup = await latestGoodBackup();
+  if (backup) {
+    console.error('!!! state row missing — recovered from the latest backup');
+    return normalizeState(backup);
+  }
+  return normalizeState(defaultState());
+}
+
+// Atomic read-modify-write for the 'state' blob. Serializes all state
+// mutations via a transaction-scoped advisory lock so concurrent writers can
+// never clobber each other (last-writer-wins) or bypass the optimistic
+// version check. `fn(state)` receives the current normalized state and returns
+// the object to persist; return null/undefined to make no change (no write,
+// no backup). The previous committed value is snapshotted into state_backups
+// in the same transaction, so backups always correspond to committed versions.
+async function withStateTxn(fn) {
+  const client = await pool.connect();
   try {
-    return normalizeState(readJSON(STATE_FILE));
-  } catch (e) {
-    console.error('!!! state.json failed to parse:', e.message);
-    try {
-      const corrupt = path.join(DATA_DIR, `state.corrupt-${Date.now()}.json`);
-      fs.copyFileSync(STATE_FILE, corrupt);
-      console.error('!!! preserved corrupt file at', corrupt);
-    } catch (_) {}
-    const backup = latestGoodBackup();
-    if (backup) {
-      console.error('!!! recovered state from the latest good backup');
-      return normalizeState(backup);
+    await client.query('BEGIN');
+    await client.query("SELECT pg_advisory_xact_lock(hashtext('kv_store:state'))");
+    const { rows } = await client.query("SELECT value FROM kv_store WHERE key = 'state'");
+    const stateRow = rows.length ? rows[0].value : null;
+
+    // Baseline to mutate from. If the state row is missing, recover from the
+    // latest backup (same semantics as loadState) rather than starting from
+    // defaults, which would silently discard recoverable data on first write.
+    let baseline = stateRow;
+    if (baseline == null) {
+      const bk = await client.query('SELECT data FROM state_backups ORDER BY id DESC LIMIT 1');
+      if (bk.rows.length) {
+        console.error('!!! state row missing in withStateTxn — recovering from latest backup');
+        baseline = bk.rows[0].data;
+      }
     }
-    console.error('!!! no usable backup — starting from defaults (existing file preserved, not overwritten until next save)');
-    return normalizeState(defaultState());
+    const stored = normalizeState(baseline != null ? baseline : defaultState());
+
+    const toWrite = await fn(stored);
+
+    if (toWrite != null) {
+      normalizeState(toWrite);
+      // Only snapshot an actual committed state row; when we recovered from a
+      // backup there is nothing new to back up (that value is already a backup).
+      if (stateRow != null) {
+        await client.query('INSERT INTO state_backups (data) VALUES ($1::jsonb)', [JSON.stringify(stateRow)]);
+        await client.query(
+          `DELETE FROM state_backups
+             WHERE id NOT IN (SELECT id FROM state_backups ORDER BY id DESC LIMIT $1)`,
+          [MAX_BACKUPS]
+        );
+      }
+      await client.query(
+        `INSERT INTO kv_store (key, value, updated_at) VALUES ('state', $1::jsonb, now())
+         ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = now()`,
+        [JSON.stringify(toWrite)]
+      );
+    }
+
+    await client.query('COMMIT');
+    return toWrite;
+  } catch (e) {
+    try { await client.query('ROLLBACK'); } catch (_) {}
+    throw e;
+  } finally {
+    client.release();
   }
 }
 
-function saveState(state) {
-  normalizeState(state);
-  backupStateFile();              // snapshot previous good version first
-  writeJSONAtomic(STATE_FILE, state);
+// Seed the two blobs from legacy JSON files when the database is empty (first
+// boot in a fresh environment such as production). The schema itself (the
+// kv_store and state_backups tables) is owned by the environment: it is created
+// in development via Replit's managed database tooling and applied to production
+// automatically by the Publish flow's schema diff — the app must not run DDL.
+async function initDb() {
+  await seedIfEmpty('state', STATE_FILE, () => defaultState());
+  await seedIfEmpty('published', PUBLISHED_FILE, () => null);
+}
+
+async function seedIfEmpty(key, file, fallbackFn) {
+  const existing = await readKV(key);
+  if (existing != null) return;
+  let value = null;
+  let fromFile = false;
+  try {
+    if (fs.existsSync(file)) { value = readJSON(file); fromFile = true; }
+  } catch (e) {
+    console.error('seed read error', file, e);
+  }
+  if (value == null) value = fallbackFn();
+  if (value == null) return;   // nothing to seed (e.g. no published file yet)
+  await writeKV(key, value);
+  console.log(`Seeded '${key}' from ${fromFile ? 'legacy file' : 'defaults'}`);
 }
 
 // ============================================================
@@ -275,20 +296,14 @@ app.post('/api/admin/check', (req, res) => {
   }
 });
 
-// Version info — public, no auth. Used by the admin footer to display
-// version + commit hash so you can verify at a glance which code is live.
-app.get('/api/version', (req, res) => {
-  res.json({ version: APP_VERSION, commit: APP_COMMIT, startedAt: APP_STARTED_AT });
-});
-
 // Roster of active employees (for the submission form dropdown)
-app.get('/api/roster', (req, res) => {
-  const state = loadState();
+app.get('/api/roster', wrap(async (req, res) => {
+  const state = await loadState();
   const list = state.employees
     .filter(e => e.active !== false)
     .map(e => ({ id: e.id, name: e.name }));
   res.json(list);
-});
+}));
 
 // Extract just the digits from a phone string.
 // US-friendly: if the result is 11 digits and begins with a "1", drop the
@@ -303,11 +318,11 @@ function phoneDigits(s) {
 // Verify the phone matches the named employee (active only). Compares digits
 // only, so formatting doesn't matter. Returns { state, emp } on success, or
 // sends an HTTP error and returns null on failure.
-function verifyEmpAuth(req, res) {
+async function verifyEmpAuth(req, res) {
   const { name, phone } = req.body || {};
   if (!name) { res.status(400).json({ error: 'name required' }); return null; }
   if (!phone) { res.status(400).json({ error: 'phone required' }); return null; }
-  const state = loadState();
+  const state = await loadState();
   const emp = state.employees.find(e => e.name === name && e.active !== false);
   if (!emp) { res.status(404).json({ error: 'Name not found in roster' }); return null; }
   const onFile = phoneDigits(emp.phone);
@@ -323,17 +338,17 @@ function verifyEmpAuth(req, res) {
 }
 
 // Phone check — used by the form before showing the day picker
-app.post('/api/availability/pin-check', (req, res) => {
-  const result = verifyEmpAuth(req, res);
+app.post('/api/availability/pin-check', wrap(async (req, res) => {
+  const result = await verifyEmpAuth(req, res);
   if (!result) return;
   res.json({ ok: true });
-});
+}));
 
 // Get a specific employee's availability for a month. Requires phone match.
-app.post('/api/availability/lookup', (req, res) => {
+app.post('/api/availability/lookup', wrap(async (req, res) => {
   const { month, year } = req.body || {};
   if (!month || !year) return res.status(400).json({ error: 'month and year required' });
-  const result = verifyEmpAuth(req, res);
+  const result = await verifyEmpAuth(req, res);
   if (!result) return;
   const { state, emp } = result;
   const key = `${year}_${month - 1}`;
@@ -348,10 +363,10 @@ app.post('/api/availability/lookup', (req, res) => {
     email: record.email || '',
     submittedAt: record.submittedAt || null,
   });
-});
+}));
 
 // Submit / update availability — requires phone match.
-app.post('/api/availability/submit', (req, res) => {
+app.post('/api/availability/submit', wrap(async (req, res) => {
   const { month, year, days, email } = req.body || {};
   if (!month || !year || !Array.isArray(days)) {
     return res.status(400).json({ error: 'month, year, days required' });
@@ -363,77 +378,98 @@ app.post('/api/availability/submit', (req, res) => {
   const cleanDays = [...new Set(days.map(Number).filter(d => Number.isInteger(d) && d >= 1 && d <= 31))]
     .sort((a, b) => a - b);
 
-  const result = verifyEmpAuth(req, res);
+  const result = await verifyEmpAuth(req, res);
   if (!result) return;
-  const { state, emp } = result;
+  const empId = result.emp.id;
+  const empName = result.emp.name;
+  const submittedDigits = phoneDigits(req.body.phone);
 
-  const key = `${year}_${month - 1}`;
-  if (!state.availability[key]) state.availability[key] = {};
+  await withStateTxn((state) => {
+    const emp = state.employees.find(e => e.id === empId && e.active !== false);
+    // Re-check auth inside the transaction: the roster phone could have changed
+    // between the pre-txn auth check and now (TOCTOU). Reject if it no longer matches.
+    if (!emp || phoneDigits(emp.phone) !== submittedDigits) {
+      throw Object.assign(new Error('Authorization no longer valid — the roster changed. Please re-verify.'), { httpStatus: 409 });
+    }
 
-  state.availability[key][emp.id] = {
-    days: cleanDays,
-    phone: emp.phone,            // store canonical roster value, not what they typed
-    email: email.trim(),
-    submittedAt: new Date().toISOString(),
-  };
-  emp.email = email.trim();
-
-  state.version = (state.version || 0) + 1;   // invalidate stale admin caches
-  saveState(state);
-  res.json({ ok: true, employee: { id: emp.id, name: emp.name }, days: cleanDays });
-});
+    const key = `${year}_${month - 1}`;
+    if (!state.availability[key]) state.availability[key] = {};
+    state.availability[key][emp.id] = {
+      days: cleanDays,
+      phone: emp.phone,            // store canonical roster value, not what they typed
+      email: email.trim(),
+      submittedAt: new Date().toISOString(),
+    };
+    emp.email = email.trim();
+    state.version = (state.version || 0) + 1;   // invalidate stale admin caches
+    return state;
+  });
+  res.json({ ok: true, employee: { id: empId, name: empName }, days: cleanDays });
+}));
 
 // Get the published schedule (read-only for crew)
-app.get('/api/published', (req, res) => {
-  const pub = loadJSON(PUBLISHED_FILE, null);
+app.get('/api/published', wrap(async (req, res) => {
+  const pub = await readKV('published');
   if (!pub) return res.status(404).json({ error: 'No schedule published yet' });
   res.json(pub);
-});
+}));
 
 // ============================================================
 // CALENDAR FEED (per-crew live ICS subscription)
 // ============================================================
 
-// Generate or fetch the opaque token that identifies a crew member to their
+// Generate (once) the opaque token that identifies a crew member to their
 // personal calendar feed URL. 32 chars of url-safe random, stored on the
-// employee record. Admin can revoke by clearing the field in state.json.
-function getOrCreateCalendarToken(emp, state) {
-  if (typeof emp.calendarToken === 'string' && emp.calendarToken.length >= 24) {
-    return emp.calendarToken;
-  }
-  emp.calendarToken = crypto.randomBytes(24).toString('base64')
-    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-  state.version = (state.version || 0) + 1;
-  saveState(state);
-  return emp.calendarToken;
+// employee record. Admin can revoke by clearing the field in state. The
+// read-modify-write runs inside withStateTxn so it can't race other writers.
+async function getOrCreateCalendarToken(empId, submittedDigits) {
+  let token;
+  await withStateTxn((state) => {
+    const emp = state.employees.find(e => e.id === empId && e.active !== false);
+    // Re-check auth inside the transaction (TOCTOU): reject if the roster phone
+    // no longer matches the phone this request authenticated with.
+    if (!emp || phoneDigits(emp.phone) !== submittedDigits) {
+      throw Object.assign(new Error('Authorization no longer valid — the roster changed. Please re-verify.'), { httpStatus: 409 });
+    }
+    if (typeof emp.calendarToken === 'string' && emp.calendarToken.length >= 24) {
+      token = emp.calendarToken;
+      return null;   // already has a token — no write needed
+    }
+    token = crypto.randomBytes(24).toString('base64')
+      .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    emp.calendarToken = token;
+    state.version = (state.version || 0) + 1;
+    return state;
+  });
+  return token;
 }
 
 // Return both the https:// and webcal:// subscription URLs for a verified
 // crew member. Phone-verified, same gate as the other availability endpoints.
-app.post('/api/availability/subscribe-url', (req, res) => {
-  const result = verifyEmpAuth(req, res);
+app.post('/api/availability/subscribe-url', wrap(async (req, res) => {
+  const result = await verifyEmpAuth(req, res);
   if (!result) return;
-  const { state, emp } = result;
-  const token = getOrCreateCalendarToken(emp, state);
+  const { emp } = result;
+  const token = await getOrCreateCalendarToken(emp.id, phoneDigits(req.body.phone));
   const proto = (req.get('x-forwarded-proto') || req.protocol || 'https').split(',')[0].trim();
   const host  = (req.get('x-forwarded-host')  || req.get('host')   || '').split(',')[0].trim();
   res.json({
     https:  `${proto}://${host}/api/myschedule.ics?token=${token}`,
     webcal: `webcal://${host}/api/myschedule.ics?token=${token}`,
   });
-});
+}));
 
 // Live ICS feed. Calendar apps poll this URL automatically with no UI, so
 // the token in the query string IS the credential — there's no phone challenge
 // here. Token is bound to a single employee record and is regenerable.
-app.get('/api/myschedule.ics', (req, res) => {
+app.get('/api/myschedule.ics', wrap(async (req, res) => {
   const token = String(req.query.token || '');
   if (token.length < 16) return res.status(400).type('text/plain').send('token required');
-  const state = loadState();
+  const state = await loadState();
   const emp = state.employees.find(e => e.calendarToken === token && e.active !== false);
   if (!emp) return res.status(404).type('text/plain').send('not found');
 
-  const pub = loadJSON(PUBLISHED_FILE, null);
+  const pub = await readKV('published');
   const shifts = [];
   if (pub && pub.assignments) {
     const jobsById = {};
@@ -529,42 +565,52 @@ app.get('/api/myschedule.ics', (req, res) => {
   res.set('Cache-Control', 'public, max-age=300');
   res.type('text/calendar; charset=utf-8');
   res.send(lines.join('\r\n'));
-});
+}));
 
 // ============================================================
 // ADMIN ENDPOINTS
 // ============================================================
 
 // Get full state (includes version, used for optimistic concurrency)
-app.get('/api/state', requireAdmin, (req, res) => {
-  res.json(loadState());
-});
+app.get('/api/state', requireAdmin, wrap(async (req, res) => {
+  res.json(await loadState());
+}));
 
 // Save full state. Validates shape and enforces an optimistic-concurrency
 // version check so a stale window cannot silently overwrite newer changes.
-app.put('/api/state', requireAdmin, (req, res) => {
+app.put('/api/state', requireAdmin, wrap(async (req, res) => {
   const incoming = req.body;
   if (!validState(incoming)) {
     return res.status(400).json({ error: 'Invalid or incomplete state — refused to save (must include employees, jobs, availability, assignments).' });
   }
-  const stored = loadState();
-  const storedV = stored.version || 0;
-  const incomingV = (typeof incoming.version === 'number') ? incoming.version : storedV;
-  if (storedV !== 0 && incomingV !== storedV) {
-    return res.status(409).json({
-      error: 'stale',
-      message: 'The schedule changed in another window or via a crew submission since this page loaded.',
-      currentVersion: storedV,
+  let newVersion;
+  try {
+    await withStateTxn((stored) => {
+      const storedV = stored.version || 0;
+      const incomingV = (typeof incoming.version === 'number') ? incoming.version : storedV;
+      if (storedV !== 0 && incomingV !== storedV) {
+        throw Object.assign(new Error('stale'), { stale: true, currentVersion: storedV });
+      }
+      incoming.version = storedV + 1;
+      newVersion = incoming.version;
+      return incoming;   // persist the client's full state as the new value
     });
+  } catch (e) {
+    if (e && e.stale) {
+      return res.status(409).json({
+        error: 'stale',
+        message: 'The schedule changed in another window or via a crew submission since this page loaded.',
+        currentVersion: e.currentVersion,
+      });
+    }
+    throw e;
   }
-  incoming.version = storedV + 1;
-  saveState(incoming);
-  res.json({ ok: true, version: incoming.version });
-});
+  res.json({ ok: true, version: newVersion });
+}));
 
 // Publish — write a snapshot for crew to read
-app.post('/api/publish', requireAdmin, (req, res) => {
-  const state = loadState();
+app.post('/api/publish', requireAdmin, wrap(async (req, res) => {
+  const state = await loadState();
   const snapshot = {
     publishedAt: new Date().toISOString(),
     employees: state.employees.filter(e => e.active !== false).map(e => ({ id: e.id, name: e.name })),
@@ -575,16 +621,34 @@ app.post('/api/publish', requireAdmin, (req, res) => {
     })),
     assignments: state.assignments,
   };
-  writeJSONAtomic(PUBLISHED_FILE, snapshot);
+  await writeKV('published', snapshot);
   res.json({ ok: true, publishedAt: snapshot.publishedAt });
-});
+}));
 
 // ============================================================
 // ROUTES (serve HTML)
 // ============================================================
 app.get('/', (req, res) => res.redirect('/availability.html'));
 
-app.listen(PORT, () => {
-  console.log(`MarTech scheduler running on port ${PORT}`);
-  console.log(`Admin password: ${ADMIN_PASSWORD === 'change-me' ? 'CHANGE-ME (set ADMIN_PASSWORD env var!)' : '[set]'}`);
+// Error handler — anything a wrapped async route rejects with lands here.
+app.use((err, req, res, next) => {
+  console.error('Unhandled request error:', err);
+  if (res.headersSent) return next(err);
+  if (err && Number.isInteger(err.httpStatus)) {
+    return res.status(err.httpStatus).json({ error: err.message || 'Request failed' });
+  }
+  res.status(500).json({ error: 'Internal server error' });
 });
+
+initDb()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`MarTech scheduler running on port ${PORT}`);
+      console.log(`Admin password: ${ADMIN_PASSWORD === 'change-me' ? 'CHANGE-ME (set ADMIN_PASSWORD env var!)' : '[set]'}`);
+      console.log('Storage: PostgreSQL');
+    });
+  })
+  .catch((err) => {
+    console.error('Failed to initialize database — not starting server:', err);
+    process.exit(1);
+  });
