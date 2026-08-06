@@ -12,6 +12,10 @@ here describing what changed.
 
 ---
 
+## 1.1.3 — 2026-08-06
+
+- **Style:** version chip font bumped from 12px to 14px. Back-to-form pill on See my schedule popup bumped from 14px to 16px. Both easier to read.
+
 ## 1.1.2 — 2026-08-06
 
 - **Style:** version chip on admin pages now uses black background with white text (matches the app header). Easier to read against the light page background.
