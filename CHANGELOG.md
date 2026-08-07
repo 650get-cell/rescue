@@ -12,6 +12,10 @@ here describing what changed.
 
 ---
 
+## 1.8.9 — 2026-08-07
+
+- **Style (scheduler):** month-nav arrow buttons (← →) now match the other header buttons — solid grey with white text instead of transparent.
+
 ## 1.8.8 — 2026-08-07
 
 - **Style (scheduler):** all secondary buttons in the header bar (Consolidate, Inactive Jobs, Manage Crew, Availability view, Subscribe, Export Excel) are now solid grey with white text — no longer transparent/faint. Red accent stays on Auto-Assign and Publish for the two main actions.
