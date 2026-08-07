@@ -83,6 +83,21 @@ input:focus, select:focus, textarea:focus { border-color:#c01010; background:#ff
 .day-bar { height:4px; border-radius:2px; }
 .day-more { font-size:8px; font-weight:700; color:#666; }
 
+/* Inline day-detail panel */
+.day-detail-inline { grid-column:1 / -1; background:#fafafa; border:1px solid #e3e3e3; border-radius:8px; padding:12px 14px; margin:2px 0 4px; }
+.day-detail-inline .dd-hdr { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; padding-bottom:8px; border-bottom:1px solid #e5e5e5; }
+.day-detail-inline .dd-title { font-family:"Syne",sans-serif; font-weight:800; font-size:14px; color:#1a1a1a; }
+.day-detail-inline .dd-close { background:transparent; border:none; color:#888; font-size:20px; line-height:1; cursor:pointer; padding:0 4px; }
+.day-detail-inline .dd-jobs { display:flex; flex-direction:column; gap:8px; }
+.day-detail-inline .dd-job { background:#fff; border:1px solid #eee; border-left:4px solid var(--jcolor, #c01010); border-radius:6px; padding:10px 12px; cursor:pointer; }
+.day-detail-inline .dd-job-name { font-family:"Syne",sans-serif; font-weight:800; font-size:14px; color:#1a1a1a; margin-bottom:2px; }
+.day-detail-inline .dd-job-meta { font-size:12px; color:#666; margin-bottom:6px; display:flex; gap:10px; }
+.day-detail-inline .dd-crew-pills { display:flex; flex-wrap:wrap; gap:4px; }
+.day-detail-inline .dd-crew-pill { background:#1a4a2e; color:#fff; padding:3px 8px; border-radius:999px; font-size:11px; font-weight:600; }
+.day-detail-inline .dd-crew-empty { background:transparent; color:#c01010; padding:3px 8px; border-radius:999px; font-size:11px; font-weight:600; border:1.5px dashed #c01010; }
+.day-detail-inline .dd-empty-msg { padding:8px 0; color:#888; font-size:12px; text-align:center; font-style:italic; }
+
+
 .section-title { font-family:"Syne",sans-serif; font-weight:800; font-size:12px; text-transform:uppercase; letter-spacing:0.08em; color:#c01010; margin:20px 4px 8px; }
 
 .jobs-here { display:flex; flex-direction:column; gap:8px; }
@@ -445,9 +460,17 @@ function renderCalendar() {
   const firstDow = first.getDay();
   const today = new Date();
   const colors = jobColorMap();
+  const empsById = {}; (STATE.employees || []).forEach(e => empsById[e.id] = e);
+  const selectedWeek = selectedDay ? Math.floor((firstDow + selectedDay - 1) / 7) : -1;
   let html = '';
   ['Su','Mo','Tu','We','Th','Fr','Sa'].forEach(d => html += '<div class="dow">' + d + '</div>');
-  for (let i = 0; i < firstDow; i++) html += '<div class="day-cell empty"></div>';
+  let cellsRendered = 0;
+  let weekIdx = 0;
+  function maybeInsertDetail() {
+    if (weekIdx === selectedWeek) html += renderInlineDetail(selectedDay, colors, empsById);
+    weekIdx++;
+  }
+  for (let i = 0; i < firstDow; i++) { html += '<div class="day-cell empty"></div>'; cellsRendered++; if (cellsRendered % 7 === 0) maybeInsertDetail(); }
   for (let day = 1; day <= dim; day++) {
     const isToday = today.getDate() === day && today.getMonth() === viewMonth && today.getFullYear() === viewYear;
     const isSel = selectedDay === day;
@@ -456,8 +479,50 @@ function renderCalendar() {
     const more = jobs.length > 3 ? '<div class="day-more">+' + (jobs.length - 3) + '</div>' : '';
     const cls = 'day-cell' + (isToday ? ' today' : '') + (isSel ? ' selected' : '');
     html += '<div class="' + cls + '" onclick="pickDay(' + day + ')"><div class="day-num">' + day + '</div><div class="day-bars">' + bars + more + '</div></div>';
+    cellsRendered++;
+    if (cellsRendered % 7 === 0) maybeInsertDetail();
   }
+  while (cellsRendered % 7 !== 0) { html += '<div class="day-cell empty"></div>'; cellsRendered++; if (cellsRendered % 7 === 0) maybeInsertDetail(); }
   grid.innerHTML = html;
+}
+
+function renderInlineDetail(day, colors, empsById) {
+  if (!day) return '';
+  const jobs = jobsOnDay(viewYear, viewMonth, day);
+  const dt = new Date(viewYear, viewMonth, day);
+  const dateLabel = DOW[dt.getDay()] + ', ' + MONTH_NAMES[viewMonth] + ' ' + day;
+  let html = '<div class="day-detail-inline">';
+  html += '<div class="dd-hdr"><div class="dd-title">' + dateLabel + '</div><button class="dd-close" onclick="pickDay(' + day + ')" aria-label="Close">&times;</button></div>';
+  if (!jobs.length) {
+    html += '<div class="dd-empty-msg">No jobs on this day.</div>';
+  } else {
+    html += '<div class="dd-jobs">';
+    const k = viewYear + '_' + viewMonth;
+    const asgnMap = (STATE.assignments && STATE.assignments[k]) || {};
+    jobs.forEach(j => {
+      const teamSize = j.teamSize || 1;
+      const crewNames = [];
+      for (const slot in asgnMap) {
+        const sp = slot.split('_');
+        if (parseInt(sp[1]) === day && asgnMap[slot] === j.id) {
+          crewNames.push((empsById[parseInt(sp[0])] || {}).name || 'Unknown');
+        }
+      }
+      crewNames.sort();
+      const empty = Math.max(0, teamSize - crewNames.length);
+      let pills = crewNames.map(n => '<span class="dd-crew-pill">' + esc(n) + '</span>').join('');
+      for (let i = 0; i < empty; i++) pills += '<span class="dd-crew-empty">Unassigned</span>';
+      html += '<div class="dd-job" style="--jcolor:' + colors[j.id] + ';" onclick="event.stopPropagation(); openAssignModal(' + j.id + ')">' +
+        '<div class="dd-job-name">' + esc(j.clientName || 'Job') + '</div>' +
+        '<div class="dd-job-meta"><span>' + esc(j.startTime || '') + '&ndash;' + esc(j.endTime || '') + '</span>' +
+          '<span>' + crewNames.length + ' / ' + teamSize + ' filled</span>' +
+        '</div>' +
+        '<div class="dd-crew-pills">' + pills + '</div></div>';
+    });
+    html += '</div>';
+  }
+  html += '</div>';
+  return html;
 }
 function pickDay(day) {
   selectedDay = (selectedDay === day) ? null : day;
@@ -472,14 +537,10 @@ function renderJobsHere() {
   const title = document.getElementById('jobsHereTitle');
   const wrap = document.getElementById('jobsHere');
   const colors = jobColorMap();
-  let jobs;
-  if (selectedDay) {
-    jobs = jobsOnDay(viewYear, viewMonth, selectedDay);
-    title.textContent = jobs.length + (jobs.length === 1 ? ' job on ' : ' jobs on ') + MONTH_NAMES[viewMonth].slice(0,3) + ' ' + selectedDay;
-  } else {
-    jobs = jobsInMonth();
-    title.textContent = jobs.length + (jobs.length === 1 ? ' job' : ' jobs') + ' in ' + MONTH_NAMES[viewMonth];
-  }
+  if (selectedDay) { title.style.display='none'; wrap.style.display='none'; return; }
+  title.style.display=''; wrap.style.display='';
+  const jobs = jobsInMonth();
+  title.textContent = jobs.length + (jobs.length === 1 ? ' job' : ' jobs') + ' in ' + MONTH_NAMES[viewMonth];
   if (!jobs.length) { wrap.innerHTML = '<div class="no-jobs">' + (selectedDay ? 'No jobs on this day.' : 'No jobs this month yet. Tap + Add Job above.') + '</div>'; return; }
   const empsById = {}; (STATE.employees || []).forEach(e => empsById[e.id] = e);
   wrap.innerHTML = jobs.map(j => {
