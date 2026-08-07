@@ -12,6 +12,14 @@ here describing what changed.
 
 ---
 
+## 1.8.6 — 2026-08-07
+
+- **Style (scheduler):** open-shifts chip made bigger and easier to read — number bumped from 18px to 28px, label bumped to 14px stacked on two lines ("OPEN / SHIFTS"), lighter grey for label contrast, more padding.
+
+## 1.8.5 — 2026-08-07
+
+- **Style (scheduler):** open-shifts counter number switched from Syne (display font) to Inter (body font). Cleaner numerals, easier to read.
+
 ## 1.8.4 — 2026-08-07
 
 - **Style (scheduler):** open-shifts counter number is now white on the black chip (dropped the semantic red/amber/green color-cycling).
