@@ -12,6 +12,10 @@ here describing what changed.
 
 ---
 
+## 1.6.1 — 2026-08-07
+
+- **Fix (mobile):** timezone bug where job dates shifted back one day (e.g. an Aug 3 job showed as Aug 2 in the pill, and calendar day-taps found "no jobs" on days that actually had jobs). Root cause: `new Date('YYYY-MM-DD')` parses as UTC midnight, which becomes the previous day in western timezones. Fixed by parsing all date-only strings as local dates.
+
 ## 1.6.0 — 2026-08-07
 
 - **New (mobile):** tapping a day on the calendar now opens the day's job detail INLINE between the week rows (Google-Calendar style), instead of scrolling down to a list below. Shows each job on that day with times, filled/needed count, and green pills for assigned crew (dashed red "Unassigned" pills for empty slots). Tap the ✕ or the day again to close. Tap any job in the detail to open the assign modal.

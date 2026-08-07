@@ -284,11 +284,19 @@ function toast(msg, kind) {
   setTimeout(()=>t.className = 'toast ' + (kind || ''), 2400);
 }
 function todayISO() { return new Date().toISOString().slice(0,10); }
+function parseLocalDate(iso) {
+  // Parse a YYYY-MM-DD string as a LOCAL date (midnight local time), not UTC.
+  // Without this helper, new Date('2026-08-03') becomes UTC midnight which shifts
+  // to the previous day in western timezones.
+  if (!iso) return new Date(NaN);
+  const parts = String(iso).slice(0, 10).split('-').map(Number);
+  return new Date(parts[0], parts[1] - 1, parts[2]);
+}
 
 function daysForJob(j) {
   const out = [];
   if (!j.startDate) return out;
-  const start = new Date(j.startDate), end = new Date(j.endDate || j.startDate);
+  const start = parseLocalDate(j.startDate), end = parseLocalDate(j.endDate || j.startDate);
   const wd = j.workDays || [1,2,3,4,5];
   for (let d = new Date(start); d <= end; d.setDate(d.getDate()+1)) {
     if (wd.indexOf(d.getDay()) !== -1) out.push(new Date(d));
@@ -310,9 +318,9 @@ function jobsInMonth() {
   const first = new Date(viewYear, viewMonth, 1);
   const last = new Date(viewYear, viewMonth + 1, 0);
   return (STATE.jobs || []).filter(j => j.active !== false).filter(j => {
-    const s = new Date(j.startDate), e = new Date(j.endDate || j.startDate);
+    const s = parseLocalDate(j.startDate), e = parseLocalDate(j.endDate || j.startDate);
     return s <= last && e >= first;
-  }).sort((a,b) => new Date(a.startDate) - new Date(b.startDate));
+  }).sort((a,b) => parseLocalDate(a.startDate) - parseLocalDate(b.startDate));
 }
 function crewCountForJobTotal(jobId) {
   if (!STATE.assignments) return 0;
@@ -330,7 +338,7 @@ function crewCountForJobOnDay(jobId, y, m, day) {
   }
   return ct;
 }
-function fmtShortDate(iso) { const d = new Date(iso); return (d.getMonth()+1) + '/' + d.getDate(); }
+function fmtShortDate(iso) { const d = parseLocalDate(iso); return (d.getMonth()+1) + '/' + d.getDate(); }
 
 // ============================================================
 // FORM (expandable)
