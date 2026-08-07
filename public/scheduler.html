@@ -270,6 +270,7 @@
     <button class="btn btn-ghost" onclick="openManageCrewModal()">Manage Crew</button>
     <a class="btn btn-ghost" href="availability_view.html" target="_blank" rel="noopener">Availability view ↗</a>
     <button class="btn btn-accent" onclick="publishSchedule()" style="background:#2a7a4e;border-color:#2a7a4e;">Publish</button>
+    <button class="btn btn-ghost" onclick="openAdminSubscribeModal()">Subscribe (calendar)</button>
     <button class="btn btn-ghost" onclick="exportXlsx()">Export Excel</button>
   </div>
 </div>
@@ -2604,6 +2605,88 @@ boot();
     document.body.appendChild(el);
   } catch (_) {}
 })();
+</script>
+
+<!-- Admin subscribe modal -->
+<div id="adminSubOverlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:2000; align-items:center; justify-content:center; padding:16px;">
+  <div style="background:#fff; border-radius:14px; max-width:560px; width:100%; padding:24px 24px 20px; box-shadow:0 12px 32px rgba(0,0,0,0.3); font-family:'Inter',sans-serif;">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+      <div style="font-family:'Syne','Inter',sans-serif; font-size:20px; font-weight:800; color:#1a1a1a;">Subscribe to the full schedule</div>
+      <button onclick="closeAdminSubscribeModal()" style="background:none; border:none; font-size:28px; line-height:1; color:#999; cursor:pointer; padding:0;">&times;</button>
+    </div>
+    <div style="font-size:13px; color:#666; margin-bottom:16px; line-height:1.5;">Every job across the whole crew, live-syncing to your phone or desktop calendar. Updates automatically as you publish changes.</div>
+
+    <div style="margin-bottom:16px;">
+      <div style="font-size:11px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:#666; margin-bottom:6px;">iPhone / iPad &mdash; tap to add:</div>
+      <a id="adminSubWebcal" href="#" style="display:inline-block; padding:12px 16px; background:#1a4a2e; color:#fff; text-decoration:none; border-radius:8px; font-size:14px; font-weight:600; word-break:break-all;">Loading&hellip;</a>
+    </div>
+
+    <div style="margin-bottom:16px;">
+      <div style="font-size:11px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:#666; margin-bottom:6px;">Google Calendar / Outlook &mdash; copy &amp; paste:</div>
+      <div id="adminSubHttps" style="font-family:monospace; font-size:13px; background:#f4f4f4; padding:10px; border-radius:6px; word-break:break-all; color:#333; margin-bottom:8px;">Loading&hellip;</div>
+      <button id="adminSubCopy" onclick="adminSubCopyLink()" style="background:#1a4a2e; color:#fff; border:none; border-radius:6px; padding:8px 16px; font-size:14px; font-weight:600; cursor:pointer;">Copy link</button>
+    </div>
+
+    <div style="font-size:12px; color:#555; line-height:1.7; border-top:1px solid #eee; padding-top:12px;">
+      <strong style="color:#1a4a2e;">Google Calendar:</strong> calendar.google.com &rarr; &ldquo;+&rdquo; next to Other calendars &rarr; From URL &rarr; paste &rarr; Add calendar.<br>
+      <strong style="color:#1a4a2e;">Outlook (web):</strong> Calendar &rarr; Add calendar &rarr; Subscribe from web &rarr; paste.<br>
+      <strong style="color:#1a4a2e;">iPhone:</strong> tap the green link above.<br>
+      Feed refreshes automatically every hour after any schedule change.
+    </div>
+
+    <div style="margin-top:14px; padding-top:12px; border-top:1px solid #eee;">
+      <button onclick="rotateAdminSubToken()" style="background:transparent; color:#c01010; border:1px solid #c01010; border-radius:6px; padding:6px 12px; font-size:12px; cursor:pointer;">Reset link (revokes old ones)</button>
+    </div>
+  </div>
+</div>
+
+<script>
+async function openAdminSubscribeModal() {
+  const ov = document.getElementById('adminSubOverlay');
+  const webcalEl = document.getElementById('adminSubWebcal');
+  const httpsEl = document.getElementById('adminSubHttps');
+  webcalEl.textContent = 'Loading\u2026'; webcalEl.href = '#';
+  httpsEl.textContent = 'Loading\u2026';
+  ov.style.display = 'flex';
+  try {
+    const pw = sessionStorage.getItem('martech_admin_pw') || '';
+    const r = await fetch('/api/admin/subscribe-url', {
+      method: 'POST',
+      headers: { 'X-Admin-Password': pw, 'Content-Type': 'application/json' },
+    });
+    if (!r.ok) throw new Error('http ' + r.status);
+    const d = await r.json();
+    webcalEl.href = d.webcal; webcalEl.textContent = d.webcal;
+    httpsEl.textContent = d.https;
+    window._adminSubHttps = d.https;
+  } catch (e) {
+    webcalEl.textContent = 'Error loading link. Close and try again.';
+    httpsEl.textContent = '';
+  }
+}
+function closeAdminSubscribeModal() {
+  document.getElementById('adminSubOverlay').style.display = 'none';
+}
+document.getElementById('adminSubOverlay').addEventListener('click', function(ev) {
+  if (ev.target === this) closeAdminSubscribeModal();
+});
+function adminSubCopyLink() {
+  if (!window._adminSubHttps) return;
+  navigator.clipboard.writeText(window._adminSubHttps).then(() => {
+    const btn = document.getElementById('adminSubCopy');
+    const old = btn.textContent;
+    btn.textContent = 'Copied \u2713';
+    setTimeout(() => { btn.textContent = old; }, 1500);
+  }).catch(() => alert('Could not copy. Long-press the URL above to copy manually.'));
+}
+async function rotateAdminSubToken() {
+  if (!confirm('Reset the subscription link? Anyone currently subscribed will need the new link.')) return;
+  const pw = sessionStorage.getItem('martech_admin_pw') || '';
+  try {
+    await fetch('/api/admin/subscribe-rotate', { method: 'POST', headers: { 'X-Admin-Password': pw } });
+    openAdminSubscribeModal();
+  } catch (e) { alert('Reset failed: ' + e.message); }
+}
 </script>
 </body>
 </html>

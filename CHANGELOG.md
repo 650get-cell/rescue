@@ -12,6 +12,11 @@ here describing what changed.
 
 ---
 
+## 1.2.0 — 2026-08-06
+
+- **New:** admin can subscribe to the full schedule (every job, every crew) via a live calendar feed. Click "Subscribe (calendar)" in the scheduler header → modal shows webcal:// and https:// URLs. Works with iOS, Google Calendar, Outlook. Feed auto-refreshes hourly.
+- Rotate button revokes the current link and issues a fresh one.
+
 ## 1.1.4 — 2026-08-06
 
 - **Style:** "My Schedule" heading larger (22px → 30px). All three top buttons (Subscribe, Add to calendar, Back to form) now the same pill shape and size, in larger 17px font.

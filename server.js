@@ -568,6 +568,136 @@ app.get('/api/myschedule.ics', wrap(async (req, res) => {
 }));
 
 // ============================================================
+// ADMIN FULL-SCHEDULE SUBSCRIPTION (all jobs, all crew)
+// ============================================================
+// Admin-only calendar feed showing every job across the roster.
+// Password-gated to mint the URL; token-only after that so calendar
+// apps can poll without needing a header.
+
+function ensureAdminToken(state) {
+  if (typeof state.adminCalendarToken === 'string' && state.adminCalendarToken.length >= 24) {
+    return state.adminCalendarToken;
+  }
+  const token = crypto.randomBytes(24).toString('base64')
+    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  state.adminCalendarToken = token;
+  return token;
+}
+
+app.post('/api/admin/subscribe-url', requireAdmin, wrap(async (req, res) => {
+  const state = await loadState();
+  const token = ensureAdminToken(state);
+  await saveState(state);
+  const host = req.get('host');
+  const proto = (req.get('x-forwarded-proto') || 'https').split(',')[0].trim();
+  res.json({
+    https:  `${proto}://${host}/api/admin/schedule.ics?token=${token}`,
+    webcal: `webcal://${host}/api/admin/schedule.ics?token=${token}`,
+  });
+}));
+
+// Rotate the admin token (revokes all existing subscriptions).
+app.post('/api/admin/subscribe-rotate', requireAdmin, wrap(async (req, res) => {
+  const state = await loadState();
+  delete state.adminCalendarToken;
+  const token = ensureAdminToken(state);
+  await saveState(state);
+  res.json({ ok: true, token });
+}));
+
+app.get('/api/admin/schedule.ics', wrap(async (req, res) => {
+  const token = String(req.query.token || '');
+  if (token.length < 16) return res.status(400).type('text/plain').send('token required');
+  const state = await loadState();
+  if (state.adminCalendarToken !== token) return res.status(404).type('text/plain').send('not found');
+
+  const pub = await readKV('published');
+  // One event per (job, day, shift) with full crew list in DESCRIPTION.
+  const events = [];
+  if (pub && pub.assignments) {
+    const jobsById = {};
+    (pub.jobs || []).forEach(j => { jobsById[j.id] = j; });
+    const empsById = {};
+    (pub.employees || []).forEach(e => { empsById[e.id] = e; });
+    // Group by (jobId, year, month, day, shift) so duplicate crew slots collapse.
+    const groups = {};
+    for (const key in pub.assignments) {
+      const parts = key.split('_').map(Number);
+      const y = parts[0], m = parts[1];
+      const monthAsgns = pub.assignments[key];
+      for (const slot in monthAsgns) {
+        const sp = slot.split('_');
+        const day = parseInt(sp[1]);
+        const shift = sp[2] || 'day';
+        const jid = monthAsgns[slot];
+        const empId = parseInt(sp[0]);
+        const gk = jid + '_' + y + '_' + m + '_' + day + '_' + shift;
+        if (!groups[gk]) groups[gk] = { jid, y, m, day, shift, crewIds: [] };
+        groups[gk].crewIds.push(empId);
+      }
+    }
+    for (const gk in groups) {
+      const g = groups[gk];
+      const job = jobsById[g.jid] || {};
+      const crewNames = g.crewIds
+        .map(id => (empsById[id] || {}).name)
+        .filter(Boolean)
+        .sort();
+      events.push({
+        y: g.y, m: g.m, day: g.day, shift: g.shift, jid: g.jid,
+        job: job.clientName || 'Job',
+        start: job.startTime || '07:00',
+        end:   job.endTime   || '17:00',
+        notes: job.notes || '',
+        crew: crewNames,
+      });
+    }
+    events.sort((a, b) => a.y - b.y || a.m - b.m || a.day - b.day || a.jid - b.jid);
+  }
+
+  const pad = n => String(n).padStart(2, '0');
+  const esc = v => String(v == null ? '' : v).replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n');
+  const stamp = new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+  const lines = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//MarTech Rescue//Full Schedule//EN',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+    'X-WR-CALNAME:MarTech Rescue - Full Schedule',
+    'X-WR-CALDESC:Every job across the roster - auto-syncs from MarTech Rescue',
+    'X-PUBLISHED-TTL:PT1H',
+    'REFRESH-INTERVAL;VALUE=DURATION:PT1H',
+  ];
+  events.forEach(ev => {
+    const dt = '' + ev.y + pad(ev.m + 1) + pad(ev.day);
+    const st = (ev.start || '07:00').replace(':', '') + '00';
+    const en = (ev.end   || '17:00').replace(':', '') + '00';
+    const uid = 'martech-admin-' + ev.jid + '-' + dt + '-' + ev.shift + '@martech-rescue.local';
+    const crewCount = ev.crew.length;
+    const summary = ev.job + (crewCount ? ' (' + crewCount + ')' : ' (no crew)');
+    const crewLine = crewCount ? 'Crew: ' + ev.crew.join(', ') : 'No crew assigned yet';
+    const notesLine = ev.notes ? '\\nNotes: ' + ev.notes.replace(/\r?\n/g, ' ') : '';
+    const description = crewLine + '\\nHours: ' + ev.start + ' - ' + ev.end + notesLine;
+    lines.push(
+      'BEGIN:VEVENT',
+      'UID:' + uid,
+      'DTSTAMP:' + stamp,
+      'DTSTART:' + dt + 'T' + st,
+      'DTEND:'   + dt + 'T' + en,
+      'SUMMARY:' + esc(summary),
+      'DESCRIPTION:' + esc(description),
+      'END:VEVENT'
+    );
+  });
+  lines.push('END:VCALENDAR');
+
+  res.set('Cache-Control', 'public, max-age=300');
+  res.type('text/calendar; charset=utf-8');
+  res.send(lines.join('\r\n'));
+}));
+
+// ============================================================
 // ADMIN ENDPOINTS
 // ============================================================
 
