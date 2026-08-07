@@ -12,6 +12,10 @@ here describing what changed.
 
 ---
 
+## 1.7.1 — 2026-08-07
+
+- **Style (scheduler):** Notes pill button now spans the full width of the job config pane, with larger padding and font for easier clicking. Still highlights when notes are attached.
+
 ## 1.7.0 — 2026-08-07
 
 - **Style (all pages):** removed all green from the UI. Buttons, pills, badges, and highlights that used to be green are now black or dark grey. The only non-red/black/grey colors left in the app are the pastel job palette on the scheduler and calendar. Affects Subscribe / Copy / See my schedule / crew pills / scheduled-day highlights / success toasts / etc.
