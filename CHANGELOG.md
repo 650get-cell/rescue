@@ -12,6 +12,10 @@ here describing what changed.
 
 ---
 
+## 1.8.3 — 2026-08-07
+
+- **Style (scheduler):** open-shifts counter red now uses brand red `#c01010` (same as "Mar" in the header logo).
+
 ## 1.8.2 — 2026-08-07
 
 - **Style (scheduler):** open-shifts counter red is now pure/saturated (#ff2020) instead of coral/pink. Amber deeper, green cleaner.
