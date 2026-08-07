@@ -12,6 +12,10 @@ here describing what changed.
 
 ---
 
+## 1.8.8 — 2026-08-07
+
+- **Style (scheduler):** all secondary buttons in the header bar (Consolidate, Inactive Jobs, Manage Crew, Availability view, Subscribe, Export Excel) are now solid grey with white text — no longer transparent/faint. Red accent stays on Auto-Assign and Publish for the two main actions.
+
 ## 1.8.7 — 2026-08-07
 
 - **Style (scheduler):** Publish button restored to the red brand accent (same style as Auto-Assign). Was previously overridden to black and disappeared into the header background.
