@@ -655,7 +655,7 @@ boot();
     const target = document.getElementById('logoSub');
     if (!target) return;
     const span = document.createElement('span');
-    span.style.cssText = 'display:inline-block; margin-left:8px; padding:2px 7px; background:#c01010; color:#fff; border-radius:4px; font-family:system-ui,sans-serif; font-size:10px; font-weight:700; letter-spacing:0.02em; text-transform:none; vertical-align:middle;';
+    span.style.cssText = 'margin-left:8px; color:#888; font-family:"Inter",sans-serif; font-size:9px; font-weight:600; letter-spacing:0.14em; text-transform:uppercase; vertical-align:middle;';
     span.textContent = 'v' + v.version + ' \u00b7 ' + v.commit;
     target.appendChild(span);
   } catch (_) {}

@@ -12,6 +12,10 @@ here describing what changed.
 
 ---
 
+## 1.5.4 — 2026-08-06
+
+- **Style (mobile):** version indicator changed from red pill to plain grey uppercase text matching the "MOBILE SCHEDULER" subtitle. Sits inline right after it in the header.
+
 ## 1.5.3 — 2026-08-06
 
 - **Style (mobile):** version chip moved to the top header, inline next to "MOBILE SCHEDULER" text — red pill with white text, always visible in the sticky header while scrolling.
