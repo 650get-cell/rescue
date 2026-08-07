@@ -139,7 +139,7 @@ input:focus, select:focus, textarea:focus { border-color:#c01010; background:#ff
   <div class="sticky-header">
     <div>
       <div class="logo"><span class="mar">Mar</span><span class="tech">Tech</span> <span class="res">Rescue</span></div>
-      <div class="logo-sub">Mobile Scheduler</div>
+      <div class="logo-sub" id="logoSub">Mobile Scheduler</div>
     </div>
     <div class="month-nav-top">
       <button class="nav-btn-top" onclick="shiftMonth(-1)">&larr;</button>
@@ -648,14 +648,14 @@ async function boot() {
 }
 boot();
 
-// Version indicator — inline with "Last published" text so it's always visible above the sticky publish bar
+// Version indicator — inline in header next to "Mobile Scheduler" text
 (async () => {
   try { const r = await fetch('/api/version'); if (!r.ok) return;
     const v = await r.json();
-    const target = document.getElementById('publishInfo');
+    const target = document.getElementById('logoSub');
     if (!target) return;
     const span = document.createElement('span');
-    span.style.cssText = 'display:inline-block; margin-left:8px; padding:2px 8px; background:#1a1a1a; color:#fff; border-radius:4px; font-family:system-ui,sans-serif; font-size:11px; font-weight:600; vertical-align:middle;';
+    span.style.cssText = 'display:inline-block; margin-left:8px; padding:2px 7px; background:#c01010; color:#fff; border-radius:4px; font-family:system-ui,sans-serif; font-size:10px; font-weight:700; letter-spacing:0.02em; text-transform:none; vertical-align:middle;';
     span.textContent = 'v' + v.version + ' \u00b7 ' + v.commit;
     target.appendChild(span);
   } catch (_) {}

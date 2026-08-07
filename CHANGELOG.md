@@ -12,6 +12,10 @@ here describing what changed.
 
 ---
 
+## 1.5.3 — 2026-08-06
+
+- **Style (mobile):** version chip moved to the top header, inline next to "MOBILE SCHEDULER" text — red pill with white text, always visible in the sticky header while scrolling.
+
 ## 1.5.2 — 2026-08-06
 
 - **Fix (mobile):** version chip was hidden behind the sticky Publish bar. Moved it inline with the "Last published" text at the bottom so it's always visible. Now you can verify at a glance which version is running on your phone.
