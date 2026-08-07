@@ -1,6 +1,6 @@
 {
   "name": "martech-rescue-scheduler",
-  "version": "1.9.1",
+  "version": "1.9.2",
   "description": "MarTech Rescue crew scheduler with availability submissions and published schedule view",
   "main": "server.js",
   "scripts": {

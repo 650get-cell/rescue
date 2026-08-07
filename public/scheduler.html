@@ -255,7 +255,10 @@
 <body>
 
 <div class="header">
-  <div class="logo"><span class="mar">Mar</span><span class="tech">Tech</span> <span class="rescue">Rescue</span></div>
+  <div>
+    <div class="logo"><span class="mar">Mar</span><span class="tech">Tech</span> <span class="rescue">Rescue</span></div>
+    <div id="logoVersion" style="color:#888; font-size:11px; font-weight:600; letter-spacing:0.06em; margin-top:2px;"></div>
+  </div>
 
   <div class="scroll-controls">
     <button class="nav-btn" onclick="shiftView(-1)" title="Earlier">&#8592;</button>
@@ -2632,17 +2635,17 @@ async function boot() {
 boot();
 </script>
 <script>
-// Version footer — shows what's live so we can verify deploys landed.
+// Version indicator — under the logo in the header. Version only, no hash.
 (async () => {
   try {
     const r = await fetch('/api/version');
     if (!r.ok) return;
     const v = await r.json();
-    const el = document.createElement('div');
-    el.style.cssText = 'position:fixed;bottom:8px;left:10px;font:14px/1.4 system-ui,sans-serif;color:#fff;background:#1a1a1a;padding:4px 10px;border-radius:4px;pointer-events:none;user-select:none;z-index:99999;';
-    el.textContent = 'v' + v.version + ' \u00b7 ' + v.commit;
-    el.title = 'Started: ' + v.startedAt;
-    document.body.appendChild(el);
+    const target = document.getElementById('logoVersion');
+    if (target) {
+      target.textContent = 'v' + v.version;
+      target.title = 'Commit ' + v.commit + ' \u00b7 started ' + v.startedAt;
+    }
   } catch (_) {}
 })();
 </script>

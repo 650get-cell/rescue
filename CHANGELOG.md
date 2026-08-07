@@ -12,6 +12,10 @@ here describing what changed.
 
 ---
 
+## 1.9.2 — 2026-08-07
+
+- **Style (scheduler):** version indicator moved from a floating chip in the bottom-left to a small grey line under the "MarTech Rescue" logo in the header. Shows just the version number (e.g. `v1.9.2`). The commit hash is available on hover if anyone needs it.
+
 ## 1.9.1 — 2026-08-07
 
 - **Style (scheduler):** squared off the "+ Add job" button, job pills, and legend items on the desktop scheduler (were border-radius 18-20px, now 6px). Consistent with the header buttons and the rest of the app.
