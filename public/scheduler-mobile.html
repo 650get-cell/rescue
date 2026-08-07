@@ -24,7 +24,7 @@ body { font-family:"Inter",sans-serif; background:#e8e8e8; min-height:100vh; pad
 /* JOB PILLS STRIP - horizontal scroll */
 .pills-strip { padding:6px 12px 10px; overflow-x:auto; overflow-y:hidden; white-space:nowrap; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
 .pills-strip::-webkit-scrollbar { display:none; }
-.job-pill { display:inline-flex; align-items:center; gap:6px; background:#2a2a2a; color:#fff; padding:6px 12px; border-radius:999px; font-size:12px; font-weight:600; margin-right:6px; cursor:pointer; border:1.5px solid transparent; }
+.job-pill { display:inline-flex; align-items:center; gap:6px; background:#2a2a2a; color:#fff; padding:6px 12px; border-radius:6px; font-size:12px; font-weight:600; margin-right:6px; cursor:pointer; border:1.5px solid transparent; }
 .job-pill:active, .job-pill.active { background:#fff; color:#1a1a1a; }
 .job-pill .dot { width:8px; height:8px; border-radius:50%; background:#c01010; flex-shrink:0; }
 .job-pill .pill-date { font-size:10px; opacity:0.7; margin-left:4px; }
@@ -32,7 +32,7 @@ body { font-family:"Inter",sans-serif; background:#e8e8e8; min-height:100vh; pad
 
 /* EXPANDABLE ADD JOB */
 .add-trigger { padding:0 12px 12px; }
-.add-btn { width:100%; background:#c01010; color:#fff; border:none; border-radius:999px; padding:11px 16px; font-size:15px; font-weight:700; cursor:pointer; font-family:inherit; display:flex; align-items:center; justify-content:center; gap:8px; }
+.add-btn { width:100%; background:#c01010; color:#fff; border:none; border-radius:6px; padding:11px 16px; font-size:15px; font-weight:700; cursor:pointer; font-family:inherit; display:flex; align-items:center; justify-content:center; gap:8px; }
 .add-btn:active { background:#a00c0c; }
 .add-btn .chev { transition:transform 0.2s; display:inline-block; }
 .add-btn.open .chev { transform:rotate(180deg); }
@@ -93,8 +93,8 @@ input:focus, select:focus, textarea:focus { border-color:#c01010; background:#ff
 .day-detail-inline .dd-job-name { font-family:"Syne",sans-serif; font-weight:800; font-size:14px; color:#1a1a1a; margin-bottom:2px; }
 .day-detail-inline .dd-job-meta { font-size:12px; color:#666; margin-bottom:6px; display:flex; gap:10px; }
 .day-detail-inline .dd-crew-pills { display:flex; flex-wrap:wrap; gap:4px; }
-.day-detail-inline .dd-crew-pill { background:#1a1a1a; color:#fff; padding:3px 8px; border-radius:999px; font-size:11px; font-weight:600; }
-.day-detail-inline .dd-crew-empty { background:transparent; color:#c01010; padding:3px 8px; border-radius:999px; font-size:11px; font-weight:600; border:1.5px dashed #c01010; }
+.day-detail-inline .dd-crew-pill { background:#1a1a1a; color:#fff; padding:3px 8px; border-radius:6px; font-size:11px; font-weight:600; }
+.day-detail-inline .dd-crew-empty { background:transparent; color:#c01010; padding:3px 8px; border-radius:6px; font-size:11px; font-weight:600; border:1.5px dashed #c01010; }
 .day-detail-inline .dd-empty-msg { padding:8px 0; color:#888; font-size:12px; text-align:center; font-style:italic; }
 
 
@@ -104,12 +104,12 @@ input:focus, select:focus, textarea:focus { border-color:#c01010; background:#ff
 .job-item { background:#fff; border:1px solid #e3e3e3; border-radius:10px; padding:12px 14px; cursor:pointer; border-left:4px solid var(--jcolor,#c01010); box-shadow:0 1px 3px rgba(0,0,0,0.04); }
 .job-item-name { font-family:"Syne",sans-serif; font-weight:800; font-size:15px; color:#1a1a1a; margin-bottom:3px; }
 .job-item-meta { font-size:12px; color:#666; display:flex; gap:10px; flex-wrap:wrap; }
-.job-item-meta .crew-chip { background:#f2f2f2; color:#333333; padding:1px 8px; border-radius:999px; font-weight:600; }
+.job-item-meta .crew-chip { background:#f2f2f2; color:#333333; padding:1px 8px; border-radius:6px; font-weight:600; }
 .no-jobs { padding:20px; color:#888; text-align:center; font-size:13px; }
 
 /* PUBLISH BAR */
 .publish-bar { position:fixed; bottom:0; left:0; right:0; background:#fff; border-top:1px solid #ddd; padding:10px 14px 14px; z-index:90; box-shadow:0 -4px 12px rgba(0,0,0,0.08); }
-.publish-btn { width:100%; padding:14px; background:#c01010; color:#fff; border:none; border-radius:999px; font-size:16px; font-weight:700; cursor:pointer; font-family:inherit; }
+.publish-btn { width:100%; padding:14px; background:#c01010; color:#fff; border:none; border-radius:6px; font-size:16px; font-weight:700; cursor:pointer; font-family:inherit; }
 .publish-btn:active { background:#a00c0c; }
 .publish-info { text-align:center; font-size:11px; color:#666; margin-top:6px; }
 
@@ -129,9 +129,9 @@ input:focus, select:focus, textarea:focus { border-color:#c01010; background:#ff
 .day-row-hd { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
 .day-row-date { font-family:"Syne",sans-serif; font-weight:800; font-size:14px; color:#1a1a1a; }
 .day-row-count { font-size:11px; color:#666; }
-.crew-pill { background:#1a1a1a; color:#fff; padding:5px 10px; border-radius:999px; font-size:12px; font-weight:600; display:inline-flex; align-items:center; gap:5px; margin:0 4px 4px 0; }
+.crew-pill { background:#1a1a1a; color:#fff; padding:5px 10px; border-radius:6px; font-size:12px; font-weight:600; display:inline-flex; align-items:center; gap:5px; margin:0 4px 4px 0; }
 .crew-pill .remove { background:rgba(255,255,255,0.25); border-radius:50%; width:16px; height:16px; display:inline-flex; align-items:center; justify-content:center; font-size:10px; cursor:pointer; }
-.add-crew-btn { background:transparent; border:1.5px dashed #c01010; color:#c01010; padding:6px 12px; border-radius:999px; font-size:12px; font-weight:600; cursor:pointer; font-family:inherit; margin:0 4px 4px 0; }
+.add-crew-btn { background:transparent; border:1.5px dashed #c01010; color:#c01010; padding:6px 12px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer; font-family:inherit; margin:0 4px 4px 0; }
 
 .picker-list { display:flex; flex-direction:column; }
 .picker-row { display:flex; justify-content:space-between; align-items:center; padding:12px 14px; border-bottom:1px solid #eee; cursor:pointer; }

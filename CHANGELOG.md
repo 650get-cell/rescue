@@ -12,6 +12,14 @@ here describing what changed.
 
 ---
 
+## 1.9.1 — 2026-08-07
+
+- **Style (scheduler):** squared off the "+ Add job" button, job pills, and legend items on the desktop scheduler (were border-radius 18-20px, now 6px). Consistent with the header buttons and the rest of the app.
+
+## 1.9.0 — 2026-08-07
+
+- **Style (all pages):** removed the round-pill shape from all buttons and chips. Corners are now 6px rounded (same as the header buttons on the scheduler), giving the whole app a squared, uniform look. Applies to Subscribe, Add-to-calendar, Back-to-form, crew pills, mobile Add Job, Publish, add-crew, and all "unassigned" pills.
+
 ## 1.8.9 — 2026-08-07
 
 - **Style (scheduler):** month-nav arrow buttons (← →) now match the other header buttons — solid grey with white text instead of transparent.
