@@ -12,6 +12,10 @@ here describing what changed.
 
 ---
 
+## 1.8.7 — 2026-08-07
+
+- **Style (scheduler):** Publish button restored to the red brand accent (same style as Auto-Assign). Was previously overridden to black and disappeared into the header background.
+
 ## 1.8.6 — 2026-08-07
 
 - **Style (scheduler):** open-shifts chip made bigger and easier to read — number bumped from 18px to 28px, label bumped to 14px stacked on two lines ("OPEN / SHIFTS"), lighter grey for label contrast, more padding.
