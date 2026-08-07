@@ -12,6 +12,10 @@ here describing what changed.
 
 ---
 
+## 1.5.5 — 2026-08-07
+
+- **Style (mobile):** simplified version chip to show only the version number (e.g. `v1.5.5`). Dropped the commit hash from the visible text — the hash is still returned by `/api/version` for anyone who needs it, just not shown in the header.
+
 ## 1.5.4 — 2026-08-06
 
 - **Style (mobile):** version indicator changed from red pill to plain grey uppercase text matching the "MOBILE SCHEDULER" subtitle. Sits inline right after it in the header.

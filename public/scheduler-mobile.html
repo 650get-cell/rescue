@@ -656,7 +656,7 @@ boot();
     if (!target) return;
     const span = document.createElement('span');
     span.style.cssText = 'margin-left:8px; color:#888; font-family:"Inter",sans-serif; font-size:9px; font-weight:600; letter-spacing:0.14em; text-transform:uppercase; vertical-align:middle;';
-    span.textContent = 'v' + v.version + ' \u00b7 ' + v.commit;
+    span.textContent = ' v' + v.version;
     target.appendChild(span);
   } catch (_) {}
 })();
