@@ -12,6 +12,10 @@ here describing what changed.
 
 ---
 
+## 1.8.4 — 2026-08-07
+
+- **Style (scheduler):** open-shifts counter number is now white on the black chip (dropped the semantic red/amber/green color-cycling).
+
 ## 1.8.3 — 2026-08-07
 
 - **Style (scheduler):** open-shifts counter red now uses brand red `#c01010` (same as "Mar" in the header logo).
