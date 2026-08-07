@@ -12,6 +12,10 @@ here describing what changed.
 
 ---
 
+## 1.6.0 — 2026-08-07
+
+- **New (mobile):** tapping a day on the calendar now opens the day's job detail INLINE between the week rows (Google-Calendar style), instead of scrolling down to a list below. Shows each job on that day with times, filled/needed count, and green pills for assigned crew (dashed red "Unassigned" pills for empty slots). Tap the ✕ or the day again to close. Tap any job in the detail to open the assign modal.
+
 ## 1.5.5 — 2026-08-07
 
 - **Style (mobile):** simplified version chip to show only the version number (e.g. `v1.5.5`). Dropped the commit hash from the visible text — the hash is still returned by `/api/version` for anyone who needs it, just not shown in the header.
