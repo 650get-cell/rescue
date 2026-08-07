@@ -63,8 +63,8 @@ input:focus, select:focus, textarea:focus { border-color:#c01010; background:#ff
 
 .form-actions { display:flex; gap:8px; margin-top:4px; }
 .form-actions button { flex:1; padding:12px; border-radius:8px; font-family:inherit; font-size:15px; font-weight:700; cursor:pointer; border:none; }
-.btn-save { background:#1a4a2e; color:#fff; }
-.btn-save:active { background:#0f3a22; }
+.btn-save { background:#1a1a1a; color:#fff; }
+.btn-save:active { background:#333333; }
 .btn-cancel { background:#f2f2f2; color:#333; border:1.5px solid #d0d0d0 !important; }
 .btn-delete { background:transparent; color:#c01010; border:1.5px solid #c01010 !important; font-weight:700; }
 
@@ -93,7 +93,7 @@ input:focus, select:focus, textarea:focus { border-color:#c01010; background:#ff
 .day-detail-inline .dd-job-name { font-family:"Syne",sans-serif; font-weight:800; font-size:14px; color:#1a1a1a; margin-bottom:2px; }
 .day-detail-inline .dd-job-meta { font-size:12px; color:#666; margin-bottom:6px; display:flex; gap:10px; }
 .day-detail-inline .dd-crew-pills { display:flex; flex-wrap:wrap; gap:4px; }
-.day-detail-inline .dd-crew-pill { background:#1a4a2e; color:#fff; padding:3px 8px; border-radius:999px; font-size:11px; font-weight:600; }
+.day-detail-inline .dd-crew-pill { background:#1a1a1a; color:#fff; padding:3px 8px; border-radius:999px; font-size:11px; font-weight:600; }
 .day-detail-inline .dd-crew-empty { background:transparent; color:#c01010; padding:3px 8px; border-radius:999px; font-size:11px; font-weight:600; border:1.5px dashed #c01010; }
 .day-detail-inline .dd-empty-msg { padding:8px 0; color:#888; font-size:12px; text-align:center; font-style:italic; }
 
@@ -104,7 +104,7 @@ input:focus, select:focus, textarea:focus { border-color:#c01010; background:#ff
 .job-item { background:#fff; border:1px solid #e3e3e3; border-radius:10px; padding:12px 14px; cursor:pointer; border-left:4px solid var(--jcolor,#c01010); box-shadow:0 1px 3px rgba(0,0,0,0.04); }
 .job-item-name { font-family:"Syne",sans-serif; font-weight:800; font-size:15px; color:#1a1a1a; margin-bottom:3px; }
 .job-item-meta { font-size:12px; color:#666; display:flex; gap:10px; flex-wrap:wrap; }
-.job-item-meta .crew-chip { background:#eaf5ee; color:#1a5a33; padding:1px 8px; border-radius:999px; font-weight:600; }
+.job-item-meta .crew-chip { background:#f2f2f2; color:#333333; padding:1px 8px; border-radius:999px; font-weight:600; }
 .no-jobs { padding:20px; color:#888; text-align:center; font-size:13px; }
 
 /* PUBLISH BAR */
@@ -129,7 +129,7 @@ input:focus, select:focus, textarea:focus { border-color:#c01010; background:#ff
 .day-row-hd { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
 .day-row-date { font-family:"Syne",sans-serif; font-weight:800; font-size:14px; color:#1a1a1a; }
 .day-row-count { font-size:11px; color:#666; }
-.crew-pill { background:#1a4a2e; color:#fff; padding:5px 10px; border-radius:999px; font-size:12px; font-weight:600; display:inline-flex; align-items:center; gap:5px; margin:0 4px 4px 0; }
+.crew-pill { background:#1a1a1a; color:#fff; padding:5px 10px; border-radius:999px; font-size:12px; font-weight:600; display:inline-flex; align-items:center; gap:5px; margin:0 4px 4px 0; }
 .crew-pill .remove { background:rgba(255,255,255,0.25); border-radius:50%; width:16px; height:16px; display:inline-flex; align-items:center; justify-content:center; font-size:10px; cursor:pointer; }
 .add-crew-btn { background:transparent; border:1.5px dashed #c01010; color:#c01010; padding:6px 12px; border-radius:999px; font-size:12px; font-weight:600; cursor:pointer; font-family:inherit; margin:0 4px 4px 0; }
 
@@ -138,13 +138,13 @@ input:focus, select:focus, textarea:focus { border-color:#c01010; background:#ff
 .picker-row:active { background:#f5f5f5; }
 .picker-name { font-size:15px; font-weight:600; color:#1a1a1a; }
 .picker-tag { font-size:11px; text-transform:uppercase; letter-spacing:0.05em; }
-.picker-tag.avail { color:#1a5a33; font-weight:700; }
+.picker-tag.avail { color:#333333; font-weight:700; }
 .picker-tag.busy { color:#c01010; font-weight:700; }
 .picker-tag.none { color:#888; }
 
 .toast { position:fixed; bottom:100px; left:50%; transform:translateX(-50%) translateY(80px); background:#1a1a1a; color:#fff; padding:12px 20px; border-radius:10px; font-size:13px; font-weight:500; box-shadow:0 4px 20px rgba(0,0,0,0.25); transition:transform 0.25s ease; z-index:2000; max-width:90vw; text-align:center; border-left:4px solid #c01010; }
 .toast.show { transform:translateX(-50%) translateY(0); }
-.toast.success { border-left-color:#2a7a4e; }
+.toast.success { border-left-color:#1a1a1a; }
 
 </style>
 </head>
@@ -586,7 +586,7 @@ function renderJobsHere() {
         }
       }
       crewNames.sort();
-      let pills = crewNames.map(n => '<span class="crew-pill" style="background:#1a4a2e;">' + esc(n) + '</span>').join('');
+      let pills = crewNames.map(n => '<span class="crew-pill" style="background:#1a1a1a;">' + esc(n) + '</span>').join('');
       const empty = teamSize - crewNames.length;
       for (let i = 0; i < empty; i++) {
         pills += '<span class="crew-pill" style="background:#f2f2f2;color:#c01010;border:1.5px dashed #c01010;">Unassigned</span>';

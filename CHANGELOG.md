@@ -12,6 +12,10 @@ here describing what changed.
 
 ---
 
+## 1.7.0 — 2026-08-07
+
+- **Style (all pages):** removed all green from the UI. Buttons, pills, badges, and highlights that used to be green are now black or dark grey. The only non-red/black/grey colors left in the app are the pastel job palette on the scheduler and calendar. Affects Subscribe / Copy / See my schedule / crew pills / scheduled-day highlights / success toasts / etc.
+
 ## 1.6.2 — 2026-08-07
 
 - **Style (mobile):** job color palette now matches the desktop scheduler exactly — same pastel colors in the same order (Pastel Blue, Mint, Pink, Yellow, Lavender, Peach, Sky, Lilac, Sand, Seafoam, Lemon, LtBlue, Coral, Grey). A given job shows the same color on both mobile and desktop.

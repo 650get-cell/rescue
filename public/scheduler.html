@@ -79,8 +79,8 @@
   .job-config { background:var(--bg); border-radius:8px; padding:12px; border:1px solid var(--border); }
   .notes-pill { display:inline-flex; align-items:center; gap:6px; background:#f1f1f1; color:#333; border:1px solid #c8c8c8; border-radius:14px; padding:5px 13px; font-size:12px; font-weight:600; cursor:pointer; font-family:inherit; margin:4px 0 10px; transition:background .12s,border-color .12s; }
   .notes-pill:hover { background:#e6e6e6; border-color:#888; }
-  .notes-pill.has-notes { background:#e8f5ee; border-color:#9acdaf; color:#1a5a33; }
-  .notes-pill .dot { width:7px; height:7px; border-radius:50%; background:#2a7a4e; display:inline-block; }
+  .notes-pill.has-notes { background:#f2f2f2; border-color:#cccccc; color:#333333; }
+  .notes-pill .dot { width:7px; height:7px; border-radius:50%; background:#1a1a1a; display:inline-block; }
   .notes-textarea { width:100%; min-height:180px; padding:10px 12px; border:1px solid var(--border); border-radius:6px; font-family:inherit; font-size:14px; line-height:1.5; resize:vertical; box-sizing:border-box; }
 
   .cfg-row { display:flex; align-items:center; gap:6px; margin-bottom:8px; }
@@ -269,7 +269,7 @@
     <button class="btn btn-ghost" onclick="openInactiveModal()" id="inactiveBtn">Inactive Jobs</button>
     <button class="btn btn-ghost" onclick="openManageCrewModal()">Manage Crew</button>
     <a class="btn btn-ghost" href="availability_view.html" target="_blank" rel="noopener">Availability view ↗</a>
-    <button class="btn btn-accent" onclick="publishSchedule()" style="background:#2a7a4e;border-color:#2a7a4e;">Publish</button>
+    <button class="btn btn-accent" onclick="publishSchedule()" style="background:#1a1a1a;border-color:#1a1a1a;">Publish</button>
     <button class="btn btn-ghost" onclick="openAdminSubscribeModal()">Subscribe (calendar)</button>
     <button class="btn btn-ghost" onclick="exportXlsx()">Export Excel</button>
   </div>
@@ -971,7 +971,7 @@ function renderJobConfig(){
       <span style="font-size:12px;color:var(--muted);margin-left:6px;">${sz}-person team</span>
     </div>
     ${(startDate&&endDate)?`<button class="panel-btn panel-clear" onclick="clearJobAssignments()">Clear all assignments</button>`:''}
-    <button class="panel-btn" onclick="saveJobAndMinimize()" style="background:#2a7a4e;color:#fff;border:2px solid #2a7a4e;font-weight:700;border-radius:18px;margin-bottom:8px;">Save job</button>
+    <button class="panel-btn" onclick="saveJobAndMinimize()" style="background:#1a1a1a;color:#fff;border:2px solid #1a1a1a;font-weight:700;border-radius:18px;margin-bottom:8px;">Save job</button>
     <button class="panel-btn panel-clear" onclick="setJobInactive()" style="margin-top:10px;">Set inactive (archive)</button>
     <button class="panel-btn panel-clear" onclick="deleteJob()" style="color:#c04040;border-color:#c04040;">Delete job (permanent)</button>
   `;
@@ -1923,7 +1923,7 @@ function openDayModal(y,m,day){
           const al=document.createElement('div'); al.style.cssText='font-size:11px;color:var(--muted);margin:8px 0 4px;'; al.textContent='Available to add:'; sec.appendChild(al);
           unassigned.forEach(emp=>{
             const noAvail = !availSet.has(emp.id);
-            const bc = noAvail ? '#b8a040' : '#4aaa70';
+            const bc = noAvail ? '#b8a040' : '#888888';
             const badge = noAvail
               ? '<span style="font-size:10px;font-weight:600;color:#8a6010;background:#fff3c4;border:1px solid #e0c060;border-radius:3px;padding:1px 6px;margin-right:6px;">no avail</span>'
               : '';
@@ -2618,19 +2618,19 @@ boot();
 
     <div style="margin-bottom:16px;">
       <div style="font-size:11px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:#666; margin-bottom:6px;">iPhone / iPad &mdash; tap to add:</div>
-      <a id="adminSubWebcal" href="#" style="display:inline-block; padding:12px 16px; background:#1a4a2e; color:#fff; text-decoration:none; border-radius:8px; font-size:14px; font-weight:600; word-break:break-all;">Loading&hellip;</a>
+      <a id="adminSubWebcal" href="#" style="display:inline-block; padding:12px 16px; background:#1a1a1a; color:#fff; text-decoration:none; border-radius:8px; font-size:14px; font-weight:600; word-break:break-all;">Loading&hellip;</a>
     </div>
 
     <div style="margin-bottom:16px;">
       <div style="font-size:11px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:#666; margin-bottom:6px;">Google Calendar / Outlook &mdash; copy &amp; paste:</div>
       <div id="adminSubHttps" style="font-family:monospace; font-size:13px; background:#f4f4f4; padding:10px; border-radius:6px; word-break:break-all; color:#333; margin-bottom:8px;">Loading&hellip;</div>
-      <button id="adminSubCopy" onclick="adminSubCopyLink()" style="background:#1a4a2e; color:#fff; border:none; border-radius:6px; padding:8px 16px; font-size:14px; font-weight:600; cursor:pointer;">Copy link</button>
+      <button id="adminSubCopy" onclick="adminSubCopyLink()" style="background:#1a1a1a; color:#fff; border:none; border-radius:6px; padding:8px 16px; font-size:14px; font-weight:600; cursor:pointer;">Copy link</button>
     </div>
 
     <div style="font-size:12px; color:#555; line-height:1.7; border-top:1px solid #eee; padding-top:12px;">
-      <strong style="color:#1a4a2e;">Google Calendar:</strong> calendar.google.com &rarr; &ldquo;+&rdquo; next to Other calendars &rarr; From URL &rarr; paste &rarr; Add calendar.<br>
-      <strong style="color:#1a4a2e;">Outlook (web):</strong> Calendar &rarr; Add calendar &rarr; Subscribe from web &rarr; paste.<br>
-      <strong style="color:#1a4a2e;">iPhone:</strong> tap the green link above.<br>
+      <strong style="color:#1a1a1a;">Google Calendar:</strong> calendar.google.com &rarr; &ldquo;+&rdquo; next to Other calendars &rarr; From URL &rarr; paste &rarr; Add calendar.<br>
+      <strong style="color:#1a1a1a;">Outlook (web):</strong> Calendar &rarr; Add calendar &rarr; Subscribe from web &rarr; paste.<br>
+      <strong style="color:#1a1a1a;">iPhone:</strong> tap the green link above.<br>
       Feed refreshes automatically every hour after any schedule change.
     </div>
 
