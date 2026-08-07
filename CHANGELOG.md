@@ -12,6 +12,14 @@ here describing what changed.
 
 ---
 
+## 1.8.2 — 2026-08-07
+
+- **Style (scheduler):** open-shifts counter red is now pure/saturated (#ff2020) instead of coral/pink. Amber deeper, green cleaner.
+
+## 1.8.1 — 2026-08-07
+
+- **Style (scheduler):** open-shifts counter uses higher-contrast colors against the black chip background — brighter red for "many open," warmer amber for "few," clean green for zero.
+
 ## 1.8.0 — 2026-08-07
 
 - **New (scheduler):** open-shifts counter in the header shows how many crew slots across all active jobs still need to be filled. Black chip with big number — red when many open, amber when few, green at zero. Updates automatically.
