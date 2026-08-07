@@ -263,6 +263,11 @@
     <button class="nav-btn" onclick="shiftView(1)" title="Later">&#8594;</button>
   </div>
 
+  <div id="openShiftsChip" title="Open shifts across all active jobs (total needed minus assigned)" style="display:flex; align-items:center; gap:8px; padding:8px 14px; background:#1a1a1a; color:#fff; border-radius:8px; font-size:13px; font-weight:600; white-space:nowrap;">
+    <span id="openShiftsCount" style="font-family:'Syne',sans-serif; font-size:16px; font-weight:800; color:#ff8080;">0</span>
+    <span style="color:#aaa; font-size:11px; text-transform:uppercase; letter-spacing:0.08em;">open shifts</span>
+  </div>
+
   <div class="header-actions">
     <button class="btn btn-accent" onclick="autoAssignPrompt()">Auto-Assign</button>
     <button class="btn btn-ghost" onclick="consolidate()">Consolidate</button>
@@ -420,6 +425,41 @@ const JOB_PALETTE = [
   { bg:'#ff6f61', text:'#471f1b', banner:'#7f3730', pbg:'#ff6f61', ptext:'#471f1b' },  // Pastel Coral
   { bg:'#d3d3d3', text:'#3b3b3b', banner:'#696969', pbg:'#d3d3d3', ptext:'#3b3b3b' },  // Pastel Grey
 ];
+
+// Open-shifts counter — total crew slots across active jobs, minus filled ones.
+// Runs after every state change or render to keep the header chip fresh.
+function updateOpenShiftsCount() {
+  try {
+    const jobs = (state.jobs || []).filter(j => j.active !== false);
+    let needed = 0, filled = 0;
+    jobs.forEach(j => {
+      const teamSize = j.teamSize || 1;
+      // Count workdays in the job's date range
+      if (!j.startDate) return;
+      const start = new Date(j.startDate + 'T00:00:00');
+      const end = new Date((j.endDate || j.startDate) + 'T00:00:00');
+      const wd = j.workDays || [1,2,3,4,5];
+      let dayCount = 0;
+      for (let d = new Date(start); d <= end; d.setDate(d.getDate()+1)) {
+        if (wd.indexOf(d.getDay()) !== -1) dayCount++;
+      }
+      needed += teamSize * dayCount;
+    });
+    // Count assignments to active jobs
+    const activeIds = new Set(jobs.map(j => j.id));
+    for (const k in (state.assignments || {})) {
+      for (const slot in state.assignments[k]) {
+        if (activeIds.has(state.assignments[k][slot])) filled++;
+      }
+    }
+    const open = Math.max(0, needed - filled);
+    const el = document.getElementById('openShiftsCount');
+    if (el) {
+      el.textContent = open;
+      el.style.color = open === 0 ? '#4aaa70' : (open < 5 ? '#ffbb66' : '#ff8080');
+    }
+  } catch (e) { /* silent */ }
+}
 
 // ================================================================
 // DEFAULT EMPLOYEES + SEED AVAILABILITY (from Spring 2026 Excel)
@@ -2687,6 +2727,10 @@ async function rotateAdminSubToken() {
     openAdminSubscribeModal();
   } catch (e) { alert('Reset failed: ' + e.message); }
 }
+
+// Keep the open-shifts counter fresh
+setInterval(updateOpenShiftsCount, 1500);
+window.addEventListener('load', () => setTimeout(updateOpenShiftsCount, 200));
 </script>
 </body>
 </html>

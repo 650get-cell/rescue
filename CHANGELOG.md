@@ -12,6 +12,10 @@ here describing what changed.
 
 ---
 
+## 1.8.0 — 2026-08-07
+
+- **New (scheduler):** open-shifts counter in the header shows how many crew slots across all active jobs still need to be filled. Black chip with big number — red when many open, amber when few, green at zero. Updates automatically.
+
 ## 1.7.1 — 2026-08-07
 
 - **Style (scheduler):** Notes pill button now spans the full width of the job config pane, with larger padding and font for easier clicking. Still highlights when notes are attached.
