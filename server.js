@@ -770,6 +770,15 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Internal server error' });
 });
 
+app.get('/api/version', (req, res) => {
+  let version = 'unknown', commit = 'nogit';
+  try { version = require('./package.json').version || 'unknown'; } catch (_) {}
+  try {
+    commit = require('child_process').execSync('git rev-parse --short HEAD', { cwd: __dirname })
+      .toString().trim();
+  } catch (_) {}
+  res.json({ version, commit, startedAt: new Date().toISOString() });
+});
 initDb()
   .then(() => {
     app.listen(PORT, () => {
