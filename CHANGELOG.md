@@ -12,6 +12,10 @@ here describing what changed.
 
 ---
 
+## 1.5.1 — 2026-08-06
+
+- **Mobile:** tapping a day on the calendar now shows the full assignment for that day inline — each job on that day lists the assigned crew (green pills) plus any unfilled slots (dashed red "Unassigned" pills). No need to open the assign modal just to check who's on what. Tap the job card to open the modal if you want to change anything.
+
 ## 1.5.0 — 2026-08-06
 
 - **Mobile scheduler rebuilt around a sticky header:** (1) horizontal-scroll row of pills for jobs in the current month — tap a pill to open that job's assign-crew modal; (2) collapsible + Add Job button that expands the form when tapped and collapses back on save/cancel. Body area (below the sticky header) shows the month calendar grid and a jobs list, with more scroll room than before.

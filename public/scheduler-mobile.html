@@ -482,18 +482,40 @@ function renderJobsHere() {
     title.textContent = jobs.length + (jobs.length === 1 ? ' job' : ' jobs') + ' in ' + MONTH_NAMES[viewMonth];
   }
   if (!jobs.length) { wrap.innerHTML = '<div class="no-jobs">' + (selectedDay ? 'No jobs on this day.' : 'No jobs this month yet. Tap + Add Job above.') + '</div>'; return; }
+  const empsById = {}; (STATE.employees || []).forEach(e => empsById[e.id] = e);
   wrap.innerHTML = jobs.map(j => {
     const teamSize = j.teamSize || 1;
     const days = daysForJob(j);
     const filled = selectedDay ? crewCountForJobOnDay(j.id, viewYear, viewMonth, selectedDay) : crewCountForJobTotal(j.id);
     const total = selectedDay ? teamSize : (teamSize * days.length);
+    let crewBlock = '';
+    if (selectedDay) {
+      // list assigned crew for this specific day + any empty slots
+      const k = viewYear + '_' + viewMonth;
+      const asgnMap = (STATE.assignments && STATE.assignments[k]) || {};
+      const crewNames = [];
+      for (const slot in asgnMap) {
+        const sp = slot.split('_');
+        if (parseInt(sp[1]) === selectedDay && asgnMap[slot] === j.id) {
+          const nm = (empsById[parseInt(sp[0])] || {}).name || 'Unknown';
+          crewNames.push(nm);
+        }
+      }
+      crewNames.sort();
+      let pills = crewNames.map(n => '<span class="crew-pill" style="background:#1a4a2e;">' + esc(n) + '</span>').join('');
+      const empty = teamSize - crewNames.length;
+      for (let i = 0; i < empty; i++) {
+        pills += '<span class="crew-pill" style="background:#f2f2f2;color:#c01010;border:1.5px dashed #c01010;">Unassigned</span>';
+      }
+      crewBlock = '<div style="margin-top:8px; display:flex; flex-wrap:wrap; gap:4px;">' + pills + '</div>';
+    }
     return '<div class="job-item" style="--jcolor:' + colors[j.id] + ';" onclick="openAssignModal(' + j.id + ')">' +
       '<div class="job-item-name">' + esc(j.clientName || 'Job') + '</div>' +
       '<div class="job-item-meta">' +
         '<span>' + esc(j.startTime || '') + '&ndash;' + esc(j.endTime || '') + '</span>' +
         '<span class="crew-chip">' + filled + ' / ' + total + '</span>' +
         (j.notes ? '<span>&#128221; Notes</span>' : '') +
-      '</div></div>';
+      '</div>' + crewBlock + '</div>';
   }).join('');
 }
 
