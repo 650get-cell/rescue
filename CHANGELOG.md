@@ -12,6 +12,10 @@ here describing what changed.
 
 ---
 
+## 1.3.0 — 2026-08-06
+
+- **New:** mobile-friendly scheduler at `/scheduler-mobile.html`. Purpose-built for field use on a phone: sticky top bar with month navigation + big "+ Add Job" button; vertical scrollable job list; tap a job to assign crew day-by-day; sticky Publish button at the bottom. Uses the same data as the desktop scheduler — any change syncs both ways. Also linked as a new tile on the admin hub.
+
 ## 1.2.0 — 2026-08-06
 
 - **New:** admin can subscribe to the full schedule (every job, every crew) via a live calendar feed. Click "Subscribe (calendar)" in the scheduler header → modal shows webcal:// and https:// URLs. Works with iOS, Google Calendar, Outlook. Feed auto-refreshes hourly.
