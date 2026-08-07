@@ -12,6 +12,10 @@ here describing what changed.
 
 ---
 
+## 1.5.2 — 2026-08-06
+
+- **Fix (mobile):** version chip was hidden behind the sticky Publish bar. Moved it inline with the "Last published" text at the bottom so it's always visible. Now you can verify at a glance which version is running on your phone.
+
 ## 1.5.1 — 2026-08-06
 
 - **Mobile:** tapping a day on the calendar now shows the full assignment for that day inline — each job on that day lists the assigned crew (green pills) plus any unfilled slots (dashed red "Unassigned" pills). No need to open the assign modal just to check who's on what. Tap the job card to open the modal if you want to change anything.

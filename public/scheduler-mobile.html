@@ -131,7 +131,6 @@ input:focus, select:focus, textarea:focus { border-color:#c01010; background:#ff
 .toast.show { transform:translateX(-50%) translateY(0); }
 .toast.success { border-left-color:#2a7a4e; }
 
-.version-chip { position:fixed; bottom:90px; left:10px; font:14px/1.4 system-ui,sans-serif; color:#fff; background:#1a1a1a; padding:3px 8px; border-radius:4px; z-index:80; opacity:0.9; }
 </style>
 </head>
 <body>
@@ -649,13 +648,16 @@ async function boot() {
 }
 boot();
 
-// Version chip
+// Version indicator — inline with "Last published" text so it's always visible above the sticky publish bar
 (async () => {
   try { const r = await fetch('/api/version'); if (!r.ok) return;
     const v = await r.json();
-    const el = document.createElement('div'); el.className = 'version-chip';
-    el.textContent = 'v' + v.version + ' · ' + v.commit;
-    document.body.appendChild(el);
+    const target = document.getElementById('publishInfo');
+    if (!target) return;
+    const span = document.createElement('span');
+    span.style.cssText = 'display:inline-block; margin-left:8px; padding:2px 8px; background:#1a1a1a; color:#fff; border-radius:4px; font-family:system-ui,sans-serif; font-size:11px; font-weight:600; vertical-align:middle;';
+    span.textContent = 'v' + v.version + ' \u00b7 ' + v.commit;
+    target.appendChild(span);
   } catch (_) {}
 })();
 </script>
