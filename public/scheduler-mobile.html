@@ -8,20 +8,43 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
 <style>
 * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
-body { font-family:"Inter",sans-serif; background:#e8e8e8; min-height:100vh; padding:32px 16px 100px; color:#1a1a1a; }
-.card { max-width:520px; margin:0 auto; background:#fff; border-radius:14px; overflow:hidden; box-shadow:0 4px 24px rgba(0,0,0,0.12); }
+body { font-family:"Inter",sans-serif; background:#e8e8e8; min-height:100vh; padding-bottom:100px; color:#1a1a1a; }
 
-.header { background:#1a1a1a; padding:28px 32px 24px; border-bottom:3px solid #c01010; }
-.logo { font-family:"Syne",sans-serif; font-size:22px; font-weight:800; margin-bottom:6px; }
-.logo .mar { color:#c01010; } .logo .tech { color:#ffffff; } .logo .res { color:#aaaaaa; font-weight:700; }
-.header-sub { font-size:13px; color:#888; letter-spacing:0.03em; }
+/* STICKY TOP */
+.sticky-top { position:sticky; top:0; z-index:100; background:#1a1a1a; border-bottom:3px solid #c01010; }
 
-.body { padding:24px 28px 28px; display:flex; flex-direction:column; gap:16px; }
+.sticky-header { padding:12px 14px 8px; display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.logo { font-family:"Syne",sans-serif; font-weight:800; font-size:16px; line-height:1; letter-spacing:-0.02em; }
+.logo .mar { color:#c01010; } .logo .tech { color:#fff; } .logo .res { color:#aaa; font-weight:700; }
+.logo-sub { color:#888; font-size:9px; letter-spacing:0.14em; text-transform:uppercase; margin-top:3px; }
+.month-nav-top { display:flex; align-items:center; gap:6px; }
+.nav-btn-top { background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); color:#fff; width:30px; height:30px; border-radius:6px; font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+.month-lbl-top { color:#fff; font-family:"Syne",sans-serif; font-weight:800; font-size:14px; min-width:90px; text-align:center; }
 
-.section-title { font-family:"Syne",sans-serif; font-weight:800; font-size:13px; text-transform:uppercase; letter-spacing:0.08em; color:#c01010; margin-top:8px; padding-top:14px; border-top:1px solid #eee; }
-.section-title:first-child { border-top:none; padding-top:0; margin-top:0; }
+/* JOB PILLS STRIP - horizontal scroll */
+.pills-strip { padding:6px 12px 10px; overflow-x:auto; overflow-y:hidden; white-space:nowrap; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+.pills-strip::-webkit-scrollbar { display:none; }
+.job-pill { display:inline-flex; align-items:center; gap:6px; background:#2a2a2a; color:#fff; padding:6px 12px; border-radius:999px; font-size:12px; font-weight:600; margin-right:6px; cursor:pointer; border:1.5px solid transparent; }
+.job-pill:active, .job-pill.active { background:#fff; color:#1a1a1a; }
+.job-pill .dot { width:8px; height:8px; border-radius:50%; background:#c01010; flex-shrink:0; }
+.job-pill .pill-date { font-size:10px; opacity:0.7; margin-left:4px; }
+.pills-empty { color:#888; font-size:11px; padding:4px 4px; font-style:italic; }
 
-.field { display:flex; flex-direction:column; gap:7px; }
+/* EXPANDABLE ADD JOB */
+.add-trigger { padding:0 12px 12px; }
+.add-btn { width:100%; background:#c01010; color:#fff; border:none; border-radius:999px; padding:11px 16px; font-size:15px; font-weight:700; cursor:pointer; font-family:inherit; display:flex; align-items:center; justify-content:center; gap:8px; }
+.add-btn:active { background:#a00c0c; }
+.add-btn .chev { transition:transform 0.2s; display:inline-block; }
+.add-btn.open .chev { transform:rotate(180deg); }
+
+.add-form { max-height:0; overflow:hidden; background:#fff; transition:max-height 0.3s ease; }
+.add-form.open { max-height:80vh; overflow-y:auto; -webkit-overflow-scrolling:touch; }
+.add-form-inner { padding:20px 22px 24px; display:flex; flex-direction:column; gap:14px; }
+
+.editing-note { padding:10px 14px; border-radius:6px; background:#fff8e6; border:1px solid #f0d090; color:#8a5010; font-size:13px; display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.editing-note button { background:transparent; border:none; color:#8a5010; font-weight:700; cursor:pointer; text-decoration:underline; font-size:12px; }
+
+.field { display:flex; flex-direction:column; gap:6px; }
 label.field-label { font-size:11px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:#666; }
 input[type="text"], input[type="date"], input[type="time"], input[type="number"], input[type="email"], select, textarea {
   font-family:"Inter",sans-serif; font-size:15px; font-weight:500; padding:11px 14px;
@@ -32,62 +55,60 @@ textarea { min-height:60px; resize:vertical; font-family:inherit; }
 select { appearance:none; -webkit-appearance:none; cursor:pointer; padding-right:38px;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23666' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 14px center; }
 input:focus, select:focus, textarea:focus { border-color:#c01010; background:#fff; }
-
-.row-2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.row-2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
 
 .workdays-row { display:flex; gap:5px; flex-wrap:wrap; }
-.wd-chip { flex:1; min-width:38px; padding:9px 6px; border:1.5px solid #d0d0d0; background:#f8f8f8; border-radius:8px; font-size:13px; font-weight:600; color:#666; cursor:pointer; user-select:none; text-align:center; }
+.wd-chip { flex:1; min-width:34px; padding:8px 4px; border:1.5px solid #d0d0d0; background:#f8f8f8; border-radius:8px; font-size:12px; font-weight:600; color:#666; cursor:pointer; user-select:none; text-align:center; }
 .wd-chip.on { background:#c01010; border-color:#c01010; color:#fff; }
 
-.btn-primary { width:100%; padding:14px; background:#1a4a2e; color:#fff; border:none; border-radius:8px; font-family:"Inter",sans-serif; font-size:16px; font-weight:700; cursor:pointer; transition:background 0.15s; }
-.btn-primary:hover, .btn-primary:active { background:#0f3a22; }
-.btn-primary:disabled { background:#ccc; }
-.btn-danger-outline { width:100%; padding:12px; background:transparent; color:#c01010; border:1.5px solid #c01010; border-radius:8px; font-family:"Inter",sans-serif; font-size:14px; font-weight:700; cursor:pointer; }
-.btn-secondary-outline { width:100%; padding:12px; background:transparent; color:#666; border:1.5px solid #ccc; border-radius:8px; font-family:"Inter",sans-serif; font-size:14px; font-weight:600; cursor:pointer; }
+.form-actions { display:flex; gap:8px; margin-top:4px; }
+.form-actions button { flex:1; padding:12px; border-radius:8px; font-family:inherit; font-size:15px; font-weight:700; cursor:pointer; border:none; }
+.btn-save { background:#1a4a2e; color:#fff; }
+.btn-save:active { background:#0f3a22; }
+.btn-cancel { background:#f2f2f2; color:#333; border:1.5px solid #d0d0d0 !important; }
+.btn-delete { background:transparent; color:#c01010; border:1.5px solid #c01010 !important; font-weight:700; }
 
-.editing-note { padding:10px 14px; border-radius:6px; background:#fff8e6; border:1px solid #f0d090; color:#8a5010; font-size:13px; display:flex; align-items:center; justify-content:space-between; gap:8px; }
-.editing-note button { background:transparent; border:none; color:#8a5010; font-weight:700; cursor:pointer; text-decoration:underline; font-size:12px; }
+/* BODY */
+.body { padding:16px 14px 20px; }
 
-.month-nav { display:flex; align-items:center; justify-content:space-between; gap:10px; }
-.nav-btn { background:#f2f2f2; border:1.5px solid #d0d0d0; color:#333; width:38px; height:38px; border-radius:8px; font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
-.nav-btn:hover { border-color:#c01010; color:#c01010; }
-.month-lbl { font-family:"Syne",sans-serif; font-weight:800; font-size:17px; color:#1a1a1a; flex:1; text-align:center; }
-
-.cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:5px; margin-top:2px; }
+.cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
 .dow { text-align:center; font-size:11px; font-weight:700; color:#999; padding:2px 0; text-transform:uppercase; }
-.day-cell { aspect-ratio:1; background:#f8f8f8; border:1.5px solid #d8d8d8; border-radius:8px; padding:4px 2px; display:flex; flex-direction:column; align-items:center; cursor:pointer; user-select:none; transition:all 0.15s; }
+.day-cell { aspect-ratio:1; background:#fff; border:1.5px solid #d8d8d8; border-radius:8px; padding:4px 2px; display:flex; flex-direction:column; align-items:center; cursor:pointer; user-select:none; }
 .day-cell.empty { visibility:hidden; }
 .day-cell.today { border-color:#c01010; border-width:2px; }
-.day-cell.selected { background:#1a1a1a; border-color:#1a1a1a; color:#fff; }
+.day-cell.selected { background:#1a1a1a; border-color:#1a1a1a; }
 .day-cell.selected .day-num { color:#fff; }
 .day-num { font-size:14px; font-weight:700; color:#333; line-height:1; margin-bottom:3px; }
-.day-bars { display:flex; flex-direction:column; gap:1px; width:100%; align-items:stretch; padding:0 2px; }
+.day-bars { display:flex; flex-direction:column; gap:1px; width:100%; padding:0 2px; }
 .day-bar { height:4px; border-radius:2px; }
 .day-more { font-size:8px; font-weight:700; color:#666; }
 
-.jobs-here { margin-top:6px; display:flex; flex-direction:column; gap:8px; }
-.job-item { background:#fafafa; border:1px solid #e3e3e3; border-radius:8px; padding:12px 14px; cursor:pointer; border-left:4px solid var(--jcolor,#c01010); }
+.section-title { font-family:"Syne",sans-serif; font-weight:800; font-size:12px; text-transform:uppercase; letter-spacing:0.08em; color:#c01010; margin:20px 4px 8px; }
+
+.jobs-here { display:flex; flex-direction:column; gap:8px; }
+.job-item { background:#fff; border:1px solid #e3e3e3; border-radius:10px; padding:12px 14px; cursor:pointer; border-left:4px solid var(--jcolor,#c01010); box-shadow:0 1px 3px rgba(0,0,0,0.04); }
 .job-item-name { font-family:"Syne",sans-serif; font-weight:800; font-size:15px; color:#1a1a1a; margin-bottom:3px; }
 .job-item-meta { font-size:12px; color:#666; display:flex; gap:10px; flex-wrap:wrap; }
 .job-item-meta .crew-chip { background:#eaf5ee; color:#1a5a33; padding:1px 8px; border-radius:999px; font-weight:600; }
 .no-jobs { padding:20px; color:#888; text-align:center; font-size:13px; }
 
+/* PUBLISH BAR */
 .publish-bar { position:fixed; bottom:0; left:0; right:0; background:#fff; border-top:1px solid #ddd; padding:10px 14px 14px; z-index:90; box-shadow:0 -4px 12px rgba(0,0,0,0.08); }
-.publish-btn { width:100%; padding:14px; background:#c01010; color:#fff; border:none; border-radius:8px; font-size:16px; font-weight:700; cursor:pointer; font-family:inherit; }
-.publish-btn:hover, .publish-btn:active { background:#a00c0c; }
+.publish-btn { width:100%; padding:14px; background:#c01010; color:#fff; border:none; border-radius:999px; font-size:16px; font-weight:700; cursor:pointer; font-family:inherit; }
+.publish-btn:active { background:#a00c0c; }
 .publish-info { text-align:center; font-size:11px; color:#666; margin-top:6px; }
 
-/* Assign crew modal */
+/* MODALS */
 .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:1000; display:none; }
 .modal-overlay.on { display:block; }
-.modal { position:absolute; inset:0; background:#e8e8e8; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:24px 16px 100px; }
+.modal { position:absolute; inset:0; background:#e8e8e8; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:24px 14px 100px; }
 .modal-card { max-width:520px; margin:0 auto; background:#fff; border-radius:14px; overflow:hidden; box-shadow:0 4px 24px rgba(0,0,0,0.12); }
-.modal-hd { background:#1a1a1a; padding:22px 28px 20px; border-bottom:3px solid #c01010; display:flex; align-items:center; justify-content:space-between; gap:12px; }
-.modal-title { font-family:"Syne",sans-serif; font-weight:800; font-size:18px; color:#fff; }
-.modal-close { background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.25); color:#fff; width:36px; height:36px; border-radius:8px; font-size:22px; cursor:pointer; display:flex; align-items:center; justify-content:center; line-height:1; }
-.modal-body { padding:22px 24px 24px; display:flex; flex-direction:column; gap:12px; }
-.modal-footer { background:#fff; padding:12px 24px 22px; border-top:1px solid #eee; display:flex; gap:8px; position:sticky; bottom:0; }
-.modal-footer button { flex:1; }
+.modal-hd { background:#1a1a1a; padding:20px 24px 18px; border-bottom:3px solid #c01010; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.modal-title { font-family:"Syne",sans-serif; font-weight:800; font-size:17px; color:#fff; }
+.modal-close { background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.25); color:#fff; width:36px; height:36px; border-radius:8px; font-size:22px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+.modal-body { padding:20px 22px 22px; display:flex; flex-direction:column; gap:12px; }
+.modal-footer { background:#fff; padding:12px 22px 20px; border-top:1px solid #eee; display:flex; gap:8px; position:sticky; bottom:0; }
+.modal-footer button { flex:1; padding:12px; border-radius:8px; font-family:inherit; font-size:14px; font-weight:700; cursor:pointer; border:none; }
 
 .day-row { background:#fafafa; border:1px solid #e3e3e3; border-radius:8px; padding:12px 14px; }
 .day-row-hd { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
@@ -115,61 +136,66 @@ input:focus, select:focus, textarea:focus { border-color:#c01010; background:#ff
 </head>
 <body>
 
-<div class="card">
-  <div class="header">
-    <div class="logo"><span class="mar">Mar</span><span class="tech">Tech</span> <span class="res">Rescue</span></div>
-    <div class="header-sub">Mobile Scheduler</div>
+<div class="sticky-top">
+  <div class="sticky-header">
+    <div>
+      <div class="logo"><span class="mar">Mar</span><span class="tech">Tech</span> <span class="res">Rescue</span></div>
+      <div class="logo-sub">Mobile Scheduler</div>
+    </div>
+    <div class="month-nav-top">
+      <button class="nav-btn-top" onclick="shiftMonth(-1)">&larr;</button>
+      <div class="month-lbl-top" id="monthLbl">&mdash;</div>
+      <button class="nav-btn-top" onclick="shiftMonth(1)">&rarr;</button>
+    </div>
   </div>
-  <div class="body">
 
-    <div id="editingNote" class="editing-note" style="display:none;">
-      <span>Editing existing job. <b id="editingName"></b></span>
-      <button onclick="clearForm()">Clear</button>
-    </div>
+  <div class="pills-strip" id="pillsStrip"></div>
 
-    <div class="section-title" id="formSectionTitle">Add Job</div>
+  <div class="add-trigger">
+    <button class="add-btn" id="addBtn" onclick="toggleForm()">+ Add Job <span class="chev">&#9660;</span></button>
+  </div>
 
-    <div class="field"><label class="field-label">Job / Client name</label>
-      <input type="text" id="jobClientName" placeholder="e.g. Chili Bar Penstock"></div>
-    <div class="row-2">
-      <div class="field"><label class="field-label">Start date</label><input type="date" id="jobStartDate"></div>
-      <div class="field"><label class="field-label">End date</label><input type="date" id="jobEndDate"></div>
-    </div>
-    <div class="row-2">
-      <div class="field"><label class="field-label">Start time</label><input type="time" id="jobStartTime" value="07:00"></div>
-      <div class="field"><label class="field-label">End time</label><input type="time" id="jobEndTime" value="16:30"></div>
-    </div>
-    <div class="field"><label class="field-label">Crew size (per day)</label><input type="number" id="jobTeamSize" min="1" max="20" value="2"></div>
-    <div class="field"><label class="field-label">Work days</label>
-      <div class="workdays-row" id="workDaysRow">
-        <div class="wd-chip" data-d="0">Su</div>
-        <div class="wd-chip on" data-d="1">Mo</div>
-        <div class="wd-chip on" data-d="2">Tu</div>
-        <div class="wd-chip on" data-d="3">We</div>
-        <div class="wd-chip on" data-d="4">Th</div>
-        <div class="wd-chip on" data-d="5">Fr</div>
-        <div class="wd-chip" data-d="6">Sa</div>
+  <div class="add-form" id="addForm">
+    <div class="add-form-inner">
+      <div id="editingNote" class="editing-note" style="display:none;">
+        <span>Editing <b id="editingName"></b></span>
+        <button onclick="clearForm(true)">Clear</button>
+      </div>
+      <div class="field"><label class="field-label">Job / Client name</label><input type="text" id="jobClientName" placeholder="e.g. Chili Bar Penstock"></div>
+      <div class="row-2">
+        <div class="field"><label class="field-label">Start date</label><input type="date" id="jobStartDate"></div>
+        <div class="field"><label class="field-label">End date</label><input type="date" id="jobEndDate"></div>
+      </div>
+      <div class="row-2">
+        <div class="field"><label class="field-label">Start time</label><input type="time" id="jobStartTime" value="07:00"></div>
+        <div class="field"><label class="field-label">End time</label><input type="time" id="jobEndTime" value="16:30"></div>
+      </div>
+      <div class="field"><label class="field-label">Crew size (per day)</label><input type="number" id="jobTeamSize" min="1" max="20" value="2"></div>
+      <div class="field"><label class="field-label">Work days</label>
+        <div class="workdays-row" id="workDaysRow">
+          <div class="wd-chip" data-d="0">Su</div>
+          <div class="wd-chip on" data-d="1">Mo</div>
+          <div class="wd-chip on" data-d="2">Tu</div>
+          <div class="wd-chip on" data-d="3">We</div>
+          <div class="wd-chip on" data-d="4">Th</div>
+          <div class="wd-chip on" data-d="5">Fr</div>
+          <div class="wd-chip" data-d="6">Sa</div>
+        </div>
+      </div>
+      <div class="field"><label class="field-label">Notes (parking, gate codes, etc.)</label><textarea id="jobNotes" placeholder="Optional"></textarea></div>
+      <div class="form-actions">
+        <button class="btn-cancel" onclick="cancelForm()">Cancel</button>
+        <button class="btn-delete" id="deleteBtn" onclick="deleteJob()" style="display:none;">Delete</button>
+        <button class="btn-save" onclick="saveJob()" id="saveBtn">Save Job</button>
       </div>
     </div>
-    <div class="field"><label class="field-label">Notes (parking, gate codes, etc.)</label><textarea id="jobNotes" placeholder="Optional"></textarea></div>
-
-    <button class="btn-primary" onclick="saveJob()" id="saveBtn">Save Job</button>
-    <button class="btn-danger-outline" onclick="deleteJob()" id="deleteBtn" style="display:none;">Delete this job</button>
-
-    <div class="section-title">Calendar</div>
-
-    <div class="month-nav">
-      <button class="nav-btn" onclick="shiftMonth(-1)">&larr;</button>
-      <div class="month-lbl" id="monthLbl">&mdash;</div>
-      <button class="nav-btn" onclick="shiftMonth(1)">&rarr;</button>
-    </div>
-
-    <div class="cal-grid" id="calGrid"></div>
-
-    <div class="section-title" id="jobsHereTitle">Jobs</div>
-    <div class="jobs-here" id="jobsHere"></div>
-
   </div>
+</div>
+
+<div class="body">
+  <div class="cal-grid" id="calGrid"></div>
+  <div class="section-title" id="jobsHereTitle">Jobs</div>
+  <div class="jobs-here" id="jobsHere"></div>
 </div>
 
 <div class="publish-bar">
@@ -187,8 +213,8 @@ input:focus, select:focus, textarea:focus { border-color:#c01010; background:#ff
       </div>
       <div class="modal-body" id="assignModalBody"></div>
       <div class="modal-footer">
-        <button class="btn-secondary-outline" onclick="editJobFromAssign()">Edit job</button>
-        <button class="btn-primary" onclick="closeAssignModal()">Done</button>
+        <button class="btn-cancel" onclick="editJobFromAssign()">Edit job</button>
+        <button class="btn-save" onclick="closeAssignModal()">Done</button>
       </div>
     </div>
   </div>
@@ -224,20 +250,16 @@ const DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const COLORS = ['#c01010','#c07010','#9070c0','#1a4a2e','#2a70b0','#a05070','#e6a020','#4a7c8c'];
 
 async function apiCheckPw(pw) {
-  try {
-    const r = await fetch('/api/admin/check', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({password: pw}) });
-    return r.ok;
-  } catch { return false; }
+  try { const r = await fetch('/api/admin/check', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({password: pw}) }); return r.ok; } catch { return false; }
 }
 async function loadState() {
   const r = await fetch('/api/state', { headers:{'X-Admin-Password': ADMIN_PW} });
-  if (!r.ok) throw new Error('load ' + r.status);
-  return r.json();
+  if (!r.ok) throw new Error('load'); return r.json();
 }
 async function saveState(s) {
   const r = await fetch('/api/state', { method:'PUT', headers:{'Content-Type':'application/json','X-Admin-Password': ADMIN_PW}, body: JSON.stringify(s) });
   if (r.status === 409) { toast('Someone else changed the schedule. Reloading.', 'error'); setTimeout(()=>location.reload(), 1200); throw new Error('STALE'); }
-  if (!r.ok) throw new Error('save failed');
+  if (!r.ok) throw new Error('save');
   const d = await r.json().catch(()=>null);
   if (d && typeof d.version === 'number') s.version = d.version;
 }
@@ -262,15 +284,27 @@ function daysForJob(j) {
 function jobsOnDay(y, m, day) {
   if (!STATE || !STATE.jobs) return [];
   const target = new Date(y, m, day).getTime();
-  return STATE.jobs.filter(j => j.active !== false)
-    .filter(j => daysForJob(j).some(d => d.getTime() === target));
+  return STATE.jobs.filter(j => j.active !== false).filter(j => daysForJob(j).some(d => d.getTime() === target));
 }
 function jobColorMap() {
-  if (!STATE || !STATE.jobs) return {};
   const map = {};
-  const active = STATE.jobs.filter(j => j.active !== false).sort((a,b) => a.id - b.id);
+  const active = (STATE.jobs || []).filter(j => j.active !== false).sort((a,b) => a.id - b.id);
   active.forEach((j, i) => { map[j.id] = COLORS[i % COLORS.length]; });
   return map;
+}
+function jobsInMonth() {
+  const first = new Date(viewYear, viewMonth, 1);
+  const last = new Date(viewYear, viewMonth + 1, 0);
+  return (STATE.jobs || []).filter(j => j.active !== false).filter(j => {
+    const s = new Date(j.startDate), e = new Date(j.endDate || j.startDate);
+    return s <= last && e >= first;
+  }).sort((a,b) => new Date(a.startDate) - new Date(b.startDate));
+}
+function crewCountForJobTotal(jobId) {
+  if (!STATE.assignments) return 0;
+  let ct = 0;
+  for (const k in STATE.assignments) for (const slot in STATE.assignments[k]) if (STATE.assignments[k][slot] === jobId) ct++;
+  return ct;
 }
 function crewCountForJobOnDay(jobId, y, m, day) {
   const k = y + '_' + m;
@@ -282,14 +316,31 @@ function crewCountForJobOnDay(jobId, y, m, day) {
   }
   return ct;
 }
+function fmtShortDate(iso) { const d = new Date(iso); return (d.getMonth()+1) + '/' + d.getDate(); }
 
 // ============================================================
-// FORM
+// FORM (expandable)
 // ============================================================
-function clearForm() {
+function toggleForm() {
+  const f = document.getElementById('addForm');
+  const b = document.getElementById('addBtn');
+  const isOpen = f.classList.contains('open');
+  if (isOpen) { f.classList.remove('open'); b.classList.remove('open'); }
+  else { clearForm(false); f.classList.add('open'); b.classList.add('open'); }
+}
+function openForm() {
+  document.getElementById('addForm').classList.add('open');
+  document.getElementById('addBtn').classList.add('open');
+}
+function closeForm() {
+  document.getElementById('addForm').classList.remove('open');
+  document.getElementById('addBtn').classList.remove('open');
+}
+function cancelForm() { closeForm(); clearForm(false); }
+
+function clearForm(alsoUpdateUI) {
   editingJobId = null;
   document.getElementById('editingNote').style.display = 'none';
-  document.getElementById('formSectionTitle').textContent = 'Add Job';
   document.getElementById('saveBtn').textContent = 'Save Job';
   document.getElementById('deleteBtn').style.display = 'none';
   document.getElementById('jobClientName').value = '';
@@ -300,6 +351,7 @@ function clearForm() {
   document.getElementById('jobTeamSize').value = 2;
   document.getElementById('jobNotes').value = '';
   document.querySelectorAll('.wd-chip').forEach(el => el.classList.toggle('on', [1,2,3,4,5].indexOf(+el.dataset.d) !== -1));
+  if (alsoUpdateUI) { document.getElementById('addBtn').innerHTML = '+ Add Job <span class="chev">&#9660;</span>'; }
 }
 function loadJobIntoForm(id) {
   const j = STATE.jobs.find(x => x.id === id);
@@ -307,7 +359,6 @@ function loadJobIntoForm(id) {
   editingJobId = id;
   document.getElementById('editingNote').style.display = 'flex';
   document.getElementById('editingName').textContent = j.clientName || 'Job';
-  document.getElementById('formSectionTitle').textContent = 'Edit Job';
   document.getElementById('saveBtn').textContent = 'Save Changes';
   document.getElementById('deleteBtn').style.display = 'block';
   document.getElementById('jobClientName').value = j.clientName || '';
@@ -319,6 +370,9 @@ function loadJobIntoForm(id) {
   document.getElementById('jobNotes').value = j.notes || '';
   const wd = j.workDays || [1,2,3,4,5];
   document.querySelectorAll('.wd-chip').forEach(el => el.classList.toggle('on', wd.indexOf(+el.dataset.d) !== -1));
+  document.getElementById('addBtn').innerHTML = 'Editing job <span class="chev">&#9650;</span>';
+  document.getElementById('addBtn').classList.add('open');
+  openForm();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 async function saveJob() {
@@ -338,38 +392,40 @@ async function saveJob() {
     active:    true,
   };
   if (!data.startDate) return toast('Start date required', 'error');
-  if (editingJobId) {
-    Object.assign(STATE.jobs.find(x => x.id === editingJobId), data);
-  } else {
-    data.id = STATE.nextJobId || 1;
-    STATE.nextJobId = (STATE.nextJobId || 1) + 1;
-    STATE.jobs.push(data);
-  }
+  if (editingJobId) { Object.assign(STATE.jobs.find(x => x.id === editingJobId), data); }
+  else { data.id = STATE.nextJobId || 1; STATE.nextJobId = (STATE.nextJobId || 1) + 1; STATE.jobs.push(data); }
   try {
     await saveState(STATE);
     toast(editingJobId ? 'Job updated' : 'Job added', 'success');
-    clearForm();
-    renderCalendar();
-    renderJobsHere();
-  } catch (e) { toast('Save failed: ' + e.message, 'error'); }
+    closeForm();
+    clearForm(true);
+    renderAll();
+  } catch (e) { toast('Save failed', 'error'); }
 }
 async function deleteJob() {
   if (!editingJobId) return;
   if (!confirm('Delete this job? All crew assignments to it will be removed.')) return;
   const jid = editingJobId;
   STATE.jobs = STATE.jobs.filter(j => j.id !== jid);
-  for (const k in STATE.assignments) {
-    for (const slot in STATE.assignments[k]) {
-      if (STATE.assignments[k][slot] === jid) delete STATE.assignments[k][slot];
-    }
-  }
-  try {
-    await saveState(STATE);
-    toast('Job deleted', 'success');
-    clearForm();
-    renderCalendar();
-    renderJobsHere();
-  } catch (e) { toast('Delete failed: ' + e.message, 'error'); }
+  for (const k in STATE.assignments) for (const slot in STATE.assignments[k]) if (STATE.assignments[k][slot] === jid) delete STATE.assignments[k][slot];
+  try { await saveState(STATE); toast('Job deleted', 'success'); closeForm(); clearForm(true); renderAll(); } catch (e) { toast('Delete failed', 'error'); }
+}
+
+// ============================================================
+// PILLS STRIP
+// ============================================================
+function renderPills() {
+  const strip = document.getElementById('pillsStrip');
+  const list = jobsInMonth();
+  const colors = jobColorMap();
+  if (!list.length) { strip.innerHTML = '<span class="pills-empty">No jobs in ' + MONTH_NAMES[viewMonth].slice(0,3) + ' yet</span>'; return; }
+  strip.innerHTML = list.map(j =>
+    '<span class="job-pill" onclick="openAssignModal(' + j.id + ')">' +
+    '<span class="dot" style="background:' + colors[j.id] + ';"></span>' +
+    esc(j.clientName || 'Job') +
+    '<span class="pill-date">' + fmtShortDate(j.startDate) + '</span>' +
+    '</span>'
+  ).join('');
 }
 
 // ============================================================
@@ -380,11 +436,10 @@ function shiftMonth(dir) {
   while (viewMonth > 11) { viewMonth -= 12; viewYear++; }
   while (viewMonth < 0)  { viewMonth += 12; viewYear--; }
   selectedDay = null;
-  renderCalendar();
-  renderJobsHere();
+  renderAll();
 }
 function renderCalendar() {
-  document.getElementById('monthLbl').textContent = MONTH_NAMES[viewMonth] + ' ' + viewYear;
+  document.getElementById('monthLbl').textContent = MONTH_NAMES[viewMonth].slice(0,3) + ' ' + viewYear;
   const grid = document.getElementById('calGrid');
   const first = new Date(viewYear, viewMonth, 1);
   const dim = new Date(viewYear, viewMonth + 1, 0).getDate();
@@ -423,25 +478,14 @@ function renderJobsHere() {
     jobs = jobsOnDay(viewYear, viewMonth, selectedDay);
     title.textContent = jobs.length + (jobs.length === 1 ? ' job on ' : ' jobs on ') + MONTH_NAMES[viewMonth].slice(0,3) + ' ' + selectedDay;
   } else {
-    // Show all jobs that touch this month
-    const first = new Date(viewYear, viewMonth, 1);
-    const last = new Date(viewYear, viewMonth + 1, 0);
-    jobs = (STATE.jobs || []).filter(j => j.active !== false).filter(j => {
-      const s = new Date(j.startDate), e = new Date(j.endDate || j.startDate);
-      return s <= last && e >= first;
-    }).sort((a,b) => new Date(a.startDate) - new Date(b.startDate));
+    jobs = jobsInMonth();
     title.textContent = jobs.length + (jobs.length === 1 ? ' job' : ' jobs') + ' in ' + MONTH_NAMES[viewMonth];
   }
-  if (!jobs.length) { wrap.innerHTML = '<div class="no-jobs">' + (selectedDay ? 'No jobs on this day.' : 'No jobs this month yet. Add one above.') + '</div>'; return; }
+  if (!jobs.length) { wrap.innerHTML = '<div class="no-jobs">' + (selectedDay ? 'No jobs on this day.' : 'No jobs this month yet. Tap + Add Job above.') + '</div>'; return; }
   wrap.innerHTML = jobs.map(j => {
     const teamSize = j.teamSize || 1;
     const days = daysForJob(j);
-    let filled;
-    if (selectedDay) {
-      filled = crewCountForJobOnDay(j.id, viewYear, viewMonth, selectedDay);
-    } else {
-      filled = crewCountForJobTotal(j.id);
-    }
+    const filled = selectedDay ? crewCountForJobOnDay(j.id, viewYear, viewMonth, selectedDay) : crewCountForJobTotal(j.id);
     const total = selectedDay ? teamSize : (teamSize * days.length);
     return '<div class="job-item" style="--jcolor:' + colors[j.id] + ';" onclick="openAssignModal(' + j.id + ')">' +
       '<div class="job-item-name">' + esc(j.clientName || 'Job') + '</div>' +
@@ -449,20 +493,11 @@ function renderJobsHere() {
         '<span>' + esc(j.startTime || '') + '&ndash;' + esc(j.endTime || '') + '</span>' +
         '<span class="crew-chip">' + filled + ' / ' + total + '</span>' +
         (j.notes ? '<span>&#128221; Notes</span>' : '') +
-      '</div>' +
-    '</div>';
+      '</div></div>';
   }).join('');
 }
-function crewCountForJobTotal(jobId) {
-  if (!STATE.assignments) return 0;
-  let ct = 0;
-  for (const k in STATE.assignments) {
-    for (const slot in STATE.assignments[k]) {
-      if (STATE.assignments[k][slot] === jobId) ct++;
-    }
-  }
-  return ct;
-}
+
+function renderAll() { renderPills(); renderCalendar(); renderJobsHere(); }
 
 // ============================================================
 // ASSIGN MODAL
@@ -478,8 +513,7 @@ function closeAssignModal() { document.getElementById('assignModalOv').classList
 function editJobFromAssign() { const id = currentAssignJobId; closeAssignModal(); loadJobIntoForm(id); }
 
 function renderAssignBody() {
-  const j = STATE.jobs.find(x => x.id === currentAssignJobId);
-  if (!j) return;
+  const j = STATE.jobs.find(x => x.id === currentAssignJobId); if (!j) return;
   const body = document.getElementById('assignModalBody');
   const days = daysForJob(j);
   const teamSize = j.teamSize || 1;
@@ -497,9 +531,7 @@ function renderAssignBody() {
       const sp = slot.split('_');
       if (parseInt(sp[1]) === day && asgns[slot] === j.id) assigned.push({ empId: parseInt(sp[0]), slot });
     }
-    html += '<div class="day-row">' +
-      '<div class="day-row-hd"><div class="day-row-date">' + DOW[d.getDay()] + ', ' + MONTH_NAMES[m].slice(0,3) + ' ' + day + '</div><div class="day-row-count">' + assigned.length + ' / ' + teamSize + '</div></div>' +
-      '<div>';
+    html += '<div class="day-row"><div class="day-row-hd"><div class="day-row-date">' + DOW[d.getDay()] + ', ' + MONTH_NAMES[m].slice(0,3) + ' ' + day + '</div><div class="day-row-count">' + assigned.length + ' / ' + teamSize + '</div></div><div>';
     assigned.forEach(a => {
       const nm = (empsById[a.empId] || {}).name || 'Unknown';
       html += '<span class="crew-pill">' + esc(nm) + '<span class="remove" onclick="removeAssignment(\'' + k + '\',\'' + a.slot + '\')">&times;</span></span>';
@@ -514,8 +546,6 @@ async function removeAssignment(k, slot) {
   delete STATE.assignments[k][slot];
   try { await saveState(STATE); renderAssignBody(); renderJobsHere(); } catch (e) { toast('Remove failed', 'error'); }
 }
-
-// PICKER
 function openPicker(jobId, y, m, day) {
   pickerContext = { jobId, y, m, day };
   document.getElementById('pickerTitle').textContent = 'Crew for ' + MONTH_NAMES[m].slice(0,3) + ' ' + day;
@@ -523,10 +553,7 @@ function openPicker(jobId, y, m, day) {
   const monthAvail = (STATE.availability && STATE.availability[k]) || {};
   const asgnMap = (STATE.assignments && STATE.assignments[k]) || {};
   const onJobToday = new Set();
-  for (const slot in asgnMap) {
-    const sp = slot.split('_');
-    if (parseInt(sp[1]) === day && asgnMap[slot] === jobId) onJobToday.add(parseInt(sp[0]));
-  }
+  for (const slot in asgnMap) { const sp = slot.split('_'); if (parseInt(sp[1]) === day && asgnMap[slot] === jobId) onJobToday.add(parseInt(sp[0])); }
   const list = document.getElementById('pickerList'); list.innerHTML = '';
   const emps = (STATE.employees || []).filter(e => e.active !== false).sort((a,b) => a.name.localeCompare(b.name));
   emps.forEach(e => {
@@ -537,9 +564,7 @@ function openPicker(jobId, y, m, day) {
     let busyOn = null;
     for (const slot in asgnMap) {
       const sp = slot.split('_');
-      if (parseInt(sp[0]) === e.id && parseInt(sp[1]) === day) {
-        const oj = STATE.jobs.find(x => x.id === asgnMap[slot]); busyOn = oj ? oj.clientName : 'another job'; break;
-      }
+      if (parseInt(sp[0]) === e.id && parseInt(sp[1]) === day) { const oj = STATE.jobs.find(x => x.id === asgnMap[slot]); busyOn = oj ? oj.clientName : 'another job'; break; }
     }
     const row = document.createElement('div'); row.className = 'picker-row';
     let tag;
@@ -567,14 +592,9 @@ async function assignCrew(empId) {
 // PUBLISH
 async function publishNow() {
   if (!confirm('Publish the schedule? Crew will see the update on their phones.')) return;
-  const btn = document.getElementById('publishBtn');
-  btn.disabled = true; btn.textContent = 'Publishing…';
-  try {
-    const r = await fetch('/api/publish', { method:'POST', headers:{'X-Admin-Password': ADMIN_PW} });
-    if (!r.ok) throw new Error('http ' + r.status);
-    const d = await r.json();
-    updatePublishInfo(d.publishedAt);
-    toast('Published!', 'success');
+  const btn = document.getElementById('publishBtn'); btn.disabled = true; btn.textContent = 'Publishing…';
+  try { const r = await fetch('/api/publish', { method:'POST', headers:{'X-Admin-Password': ADMIN_PW} });
+    if (!r.ok) throw new Error(); const d = await r.json(); updatePublishInfo(d.publishedAt); toast('Published!', 'success');
   } catch (e) { toast('Publish failed', 'error'); }
   finally { btn.disabled = false; btn.textContent = 'Publish schedule'; }
 }
@@ -587,10 +607,9 @@ function updatePublishInfo(iso) {
   el.textContent = 'Last published: ' + ago;
 }
 
-// WORK-DAY CHIP toggles
+// Wire chips
 document.querySelectorAll('.wd-chip').forEach(el => el.addEventListener('click', () => el.classList.toggle('on')));
-
-// Modal overlay-click to close
+// Overlay-tap-close
 document.getElementById('assignModalOv').addEventListener('click', ev => { if (ev.target === ev.currentTarget) closeAssignModal(); });
 document.getElementById('pickerModalOv').addEventListener('click', ev => { if (ev.target === ev.currentTarget) closePickerModal(); });
 
@@ -598,16 +617,12 @@ document.getElementById('pickerModalOv').addEventListener('click', ev => { if (e
 async function boot() {
   if (ADMIN_PW) { const ok = await apiCheckPw(ADMIN_PW); if (!ok) { sessionStorage.removeItem('martech_admin_pw'); ADMIN_PW = ''; } }
   while (!ADMIN_PW) {
-    const pw = prompt('Admin password:');
-    if (pw === null) { document.body.innerHTML = '<div style="padding:40px;text-align:center;color:#666;">Login cancelled.</div>'; return; }
-    const ok = await apiCheckPw(pw);
-    if (ok) { ADMIN_PW = pw; sessionStorage.setItem('martech_admin_pw', pw); break; }
-    alert('Wrong password.');
+    const pw = prompt('Admin password:'); if (pw === null) { document.body.innerHTML = '<div style="padding:40px;text-align:center;color:#666;">Login cancelled.</div>'; return; }
+    const ok = await apiCheckPw(pw); if (ok) { ADMIN_PW = pw; sessionStorage.setItem('martech_admin_pw', pw); break; } alert('Wrong password.');
   }
   try { STATE = await loadState(); } catch (e) { document.body.innerHTML = '<div style="padding:40px;text-align:center;color:#c01010;">Could not load. Refresh to try again.</div>'; return; }
-  clearForm();
-  renderCalendar();
-  renderJobsHere();
+  clearForm(false);
+  renderAll();
   try { const r = await fetch('/api/published'); if (r.ok) { const p = await r.json(); updatePublishInfo(p.publishedAt); } else updatePublishInfo(null); } catch { updatePublishInfo(null); }
 }
 boot();

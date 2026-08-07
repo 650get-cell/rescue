@@ -12,6 +12,10 @@ here describing what changed.
 
 ---
 
+## 1.5.0 — 2026-08-06
+
+- **Mobile scheduler rebuilt around a sticky header:** (1) horizontal-scroll row of pills for jobs in the current month — tap a pill to open that job's assign-crew modal; (2) collapsible + Add Job button that expands the form when tapped and collapses back on save/cancel. Body area (below the sticky header) shows the month calendar grid and a jobs list, with more scroll room than before.
+
 ## 1.4.0 — 2026-08-06
 
 - **Redesign (mobile scheduler):** now uses the same card + form layout as the crew availability page — dark header, uppercase field labels, red focus borders. Top: job creation form. Middle: month calendar grid with colored bars per job (tap a day to filter). Bottom: jobs list. Sticky Publish button. Tap a job in the list to open the assign-crew modal, or hit "Edit job" to load it back into the form at the top.
