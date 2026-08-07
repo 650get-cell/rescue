@@ -12,6 +12,14 @@ here describing what changed.
 
 ---
 
+## 1.4.0 — 2026-08-06
+
+- **Redesign (mobile scheduler):** now uses the same card + form layout as the crew availability page — dark header, uppercase field labels, red focus borders. Top: job creation form. Middle: month calendar grid with colored bars per job (tap a day to filter). Bottom: jobs list. Sticky Publish button. Tap a job in the list to open the assign-crew modal, or hit "Edit job" to load it back into the form at the top.
+
+## 1.3.1 — 2026-08-06
+
+- **New (mobile):** compact calendar grid at the top of the mobile scheduler. Each day shows colored bars per job. Tap a day to filter the list below to just that day's jobs. Tap again to clear.
+
 ## 1.3.0 — 2026-08-06
 
 - **New:** mobile-friendly scheduler at `/scheduler-mobile.html`. Purpose-built for field use on a phone: sticky top bar with month navigation + big "+ Add Job" button; vertical scrollable job list; tap a job to assign crew day-by-day; sticky Publish button at the bottom. Uses the same data as the desktop scheduler — any change syncs both ways. Also linked as a new tile on the admin hub.
