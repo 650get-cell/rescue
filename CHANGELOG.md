@@ -12,6 +12,10 @@ here describing what changed.
 
 ---
 
+## 1.6.2 — 2026-08-07
+
+- **Style (mobile):** job color palette now matches the desktop scheduler exactly — same pastel colors in the same order (Pastel Blue, Mint, Pink, Yellow, Lavender, Peach, Sky, Lilac, Sand, Seafoam, Lemon, LtBlue, Coral, Grey). A given job shows the same color on both mobile and desktop.
+
 ## 1.6.1 — 2026-08-07
 
 - **Fix (mobile):** timezone bug where job dates shifted back one day (e.g. an Aug 3 job showed as Aug 2 in the pill, and calendar day-taps found "no jobs" on days that actually had jobs). Root cause: `new Date('YYYY-MM-DD')` parses as UTC midnight, which becomes the previous day in western timezones. Fixed by parsing all date-only strings as local dates.

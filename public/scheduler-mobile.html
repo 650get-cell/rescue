@@ -261,7 +261,23 @@ let pickerContext = null;
 
 const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-const COLORS = ['#c01010','#c07010','#9070c0','#1a4a2e','#2a70b0','#a05070','#e6a020','#4a7c8c'];
+// Same pastel palette + same order as the desktop scheduler's JOB_PALETTE.
+const COLORS = [
+  '#a0c4ff', // Pastel Blue
+  '#baffc9', // Pastel Mint
+  '#ffb3ba', // Pastel Pink
+  '#ffffba', // Pastel Yellow
+  '#cbaacb', // Pastel Lavender
+  '#ffdfba', // Pastel Peach
+  '#a7d3e0', // Pastel Sky
+  '#e2b2e8', // Pastel Lilac
+  '#ffd3b6', // Pastel Sand
+  '#a3d5d3', // Pastel Seafoam
+  '#f6e8b1', // Pastel Lemon
+  '#bae1ff', // Pastel LtBlue
+  '#ff6f61', // Pastel Coral
+  '#d3d3d3', // Pastel Grey
+];
 
 async function apiCheckPw(pw) {
   try { const r = await fetch('/api/admin/check', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({password: pw}) }); return r.ok; } catch { return false; }
