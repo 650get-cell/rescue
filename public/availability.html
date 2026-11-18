@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MarTech Rescue — Availability</title>
+    <script src="/analytics.js"></script>
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Syne:wght@700;800&display=swap"
       rel="stylesheet"
@@ -519,6 +520,7 @@
           if (!resp.ok) throw new Error(data.error || "Could not verify");
 
           // Unlocked — show the rest of the form
+          window.trackEvent('crew_verified');
           unlockedFor = name;
           unlockedPhone = phone;
           document.getElementById("lockedSection").style.display = "block";
@@ -861,6 +863,7 @@
         d.open();
         d.write(html);
         d.close();
+        window.trackEvent('personal_schedule_viewed');
       }
 
       async function submitForm() {
@@ -896,6 +899,7 @@
           });
           const data = await resp.json();
           if (!resp.ok) throw new Error(data.error || "Submit failed");
+          window.trackEvent('availability_submitted');
           toast(
             `Thanks ${name} — ${days.length} day${days.length !== 1 ? "s" : ""} saved for ${MONTHS[month]} ${year}`,
             false,
@@ -903,6 +907,7 @@
           );
           btn.textContent = "Update availability";
         } catch (e) {
+          window.trackEvent('availability_submit_failed');
           toast("Submit failed: " + e.message, true);
         } finally {
           btn.disabled = false;

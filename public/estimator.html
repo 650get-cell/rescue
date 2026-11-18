@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MarTech Rescue — Estimates</title>
+<script src="/analytics.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -391,7 +392,7 @@
 
   $('#btnSave').onclick = async ()=>{
     Q.savedAt = new Date().toISOString();
-    try { await api('PUT','/api/quotes/'+Q.id, Q); SAVED[Q.id] = JSON.parse(JSON.stringify(Q)); refreshList(); flash('#btnSave','Saved'); }
+    try { await api('PUT','/api/quotes/'+Q.id, Q); SAVED[Q.id] = JSON.parse(JSON.stringify(Q)); refreshList(); flash('#btnSave','Saved'); window.trackEvent('estimate_saved'); }
     catch(e){ flash('#btnSave','Save failed'); }
   };
   $('#btnLoad').onclick = ()=>{

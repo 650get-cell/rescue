@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MarTech Rescue — Crew Scheduler</title>
+<script src="/analytics.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -1644,8 +1645,10 @@ async function publishSchedule(){
       throw new Error(e.error || 'Publish failed');
     }
     const data = await resp.json();
+    window.trackEvent('schedule_published', { surface: 'desktop' });
     alert('Published! Crew can now see this schedule.\n\nPublished at: ' + new Date(data.publishedAt).toLocaleString());
   } catch (e) {
+    window.trackEvent('schedule_publish_failed', { surface: 'desktop' });
     alert('Publish failed: ' + e.message);
   }
 }
