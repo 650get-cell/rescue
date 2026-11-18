@@ -12,6 +12,11 @@ here describing what changed.
 
 ---
 
+## 1.12.0 — 2026-11-18
+
+- Ventilation Calculator also served at the short URL `/ventilation` (public, no login) for sharing with customers.
+- Added a Ventilation Calculator link to the availability page header.
+
 ## 1.11.0 — 2026-11-18
 
 - Added Ventilation Calculator page at `/ventilation.html` (Cube/Cylinder, Radius/Diameter, ventilation time at 7.5x and 10x air exchanges, rounded up to whole minutes).
