@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <title>MarTech Rescue — Mobile Scheduler</title>
+<script src="/analytics.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
 <style>
 * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
@@ -701,7 +702,8 @@ async function publishNow() {
   const btn = document.getElementById('publishBtn'); btn.disabled = true; btn.textContent = 'Publishing…';
   try { const r = await fetch('/api/publish', { method:'POST', headers:{'X-Admin-Password': ADMIN_PW} });
     if (!r.ok) throw new Error(); const d = await r.json(); updatePublishInfo(d.publishedAt); toast('Published!', 'success');
-  } catch (e) { toast('Publish failed', 'error'); }
+    window.trackEvent('schedule_published', { surface: 'mobile' });
+  } catch (e) { window.trackEvent('schedule_publish_failed', { surface: 'mobile' }); toast('Publish failed', 'error'); }
   finally { btn.disabled = false; btn.textContent = 'Publish schedule'; }
 }
 function updatePublishInfo(iso) {

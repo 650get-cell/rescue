@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MarTech Rescue — Estimates</title>
+<script src="/analytics.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
 <style>
   :root{--bg:#e8e8e8;--surface:#fff;--surface2:#f2f2f2;--border:#d8d8d8;--text:#1a1a1a;--muted:#666;--accent:#c01010}
@@ -275,7 +276,7 @@
   }
   function flash(sel,msg){ const b=$(sel),o=b.textContent; b.textContent=msg; setTimeout(()=>b.textContent=o,1200); }
   $('#btnSave').onclick=async()=>{ Q.savedAt=new Date().toISOString();
-    try{ await api('PUT','/api/quotes/'+Q.id,Q); SAVED[Q.id]=JSON.parse(JSON.stringify(Q)); refreshList(); flash('#btnSave','Saved'); }catch(e){ flash('#btnSave','Save failed'); } };
+    try{ await api('PUT','/api/quotes/'+Q.id,Q); SAVED[Q.id]=JSON.parse(JSON.stringify(Q)); refreshList(); flash('#btnSave','Saved'); if (window.trackEvent) window.trackEvent('estimate_saved'); }catch(e){ flash('#btnSave','Save failed'); } };
   $('#btnLoad').onclick=()=>{ const id=$('#savedList').value; if(id&&SAVED[id]){ Q=JSON.parse(JSON.stringify(SAVED[id])); Q.rates=Object.assign(blank().rates,Q.rates||{}); fill(); } };
   $('#btnNew').onclick=()=>{ Q=blank(); fill(); };
   $('#btnDelete').onclick=()=>{
