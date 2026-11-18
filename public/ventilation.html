@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ventilation Calculator</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap">
+<style>
+  /* Layout: Rescue Scheduler mobile look — dark header with red rule, white cards on grey, single column. Single light theme to match the scheduler. */
+  :root {
+    --bg: #e8e8e8;
+    --ink: #1a1a1a;
+    --red: #c01010;
+    --red-dark: #a00c0c;
+    --card: #ffffff;
+    --field: #f8f8f8;
+    --border: #d0d0d0;
+    --muted: #666666;
+    --soft: #f2f2f2;
+    --font-body: "Inter", "Segoe UI", Arial, sans-serif;
+    --font-display: "Syne", "Inter", "Segoe UI", sans-serif;
+    color-scheme: light;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 17px; }
+
+  .top { text-align: center; position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10; background: var(--ink); border-bottom: 3px solid var(--red); padding: 14px 16px 12px; }
+  .logo { font-family: var(--font-display); font-weight: 800; font-size: 20px; line-height: 1; letter-spacing: -0.02em; }
+  .logo .mar { color: var(--red); } .logo .tech { color: #ffffff; } .logo .res { color: #aaaaaa; font-weight: 700; }
+  .logo-sub { color: #888888; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; margin-top: 5px; }
+
+  .wrap { max-width: 520px; margin: 0 auto; padding-block: 16px 40px; padding-inline: 16px; display: grid; gap: 14px; }
+
+  .toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .toggle button {
+    font: 700 18px var(--font-body); letter-spacing: 0.06em; min-height: 56px; border-radius: 8px; cursor: pointer;
+    background: var(--card); color: var(--ink); border: 1.5px solid var(--border);
+  }
+  .toggle button[aria-pressed="true"] { background: var(--red); border-color: var(--red); color: #ffffff; }
+  .toggle.small button { font-size: 15px; min-height: 44px; }
+  .toggle button:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+
+  .card { background: var(--card); border: 1px solid #e3e3e3; border-radius: 12px; padding: 18px 16px; display: grid; gap: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+  .section-title { font-family: var(--font-display); font-weight: 800; font-size: 20px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--red); margin: 0; text-align: center; }
+
+  .field { display: grid; gap: 6px; justify-items: center; text-align: center; }
+  .field label { font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+  .field input {
+    width: 100%; font: 600 22px var(--font-body); font-variant-numeric: tabular-nums; min-height: 56px; padding: 10px 14px; text-align: center;
+    border: 1.5px solid var(--border); border-radius: 8px; background: var(--field); color: var(--ink); outline: none;
+  }
+  .field input:focus { border-color: var(--red); background: #ffffff; }
+  .field.center { justify-items: center; text-align: center; }
+  .field.center input { max-width: 200px; text-align: center; }
+  .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .pair.three { grid-template-columns: 1fr 1fr 1fr; }
+  @media (max-width: 380px) { .pair.three { grid-template-columns: 1fr 1fr; } }
+
+  .line { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 4px; padding-block: 10px; border-bottom: 1px solid #eeeeee; }
+  .line:last-child { border-bottom: 0; }
+  .line span { font-size: 14px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+  .line output { font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; text-align: center; }
+
+  .times { background: var(--ink); border-radius: 12px; overflow: hidden; border-bottom: 3px solid var(--red); }
+  .time { padding: 16px; display: grid; gap: 4px; justify-items: center; text-align: center; }
+  .time + .time { border-top: 1px solid #333333; }
+  .time span { font-size: 17px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #aaaaaa; }
+  .time output { font-family: var(--font-display); font-weight: 800; font-size: 40px; line-height: 1.1; color: #ffffff; font-variant-numeric: tabular-nums; }
+  .time output small { font-family: var(--font-body); font-size: 20px; font-weight: 700; color: var(--red); margin-left: 6px; }
+  .time.primary output { color: #ffffff; }
+
+  .notes { font-size: 14px; color: var(--muted); line-height: 1.6; margin: 0; padding-inline: 4px; text-align: center; }
+</style>
+</head>
+<body>
+
+<div class="top">
+  <div class="logo"><span class="mar">Mar</span><span class="tech">Tech</span> <span class="res">Rescue</span></div>
+  <div class="logo-sub">Ventilation Calculator</div>
+</div>
+
+<div class="wrap">
+  <div class="times">
+    <div class="time primary"><span>Total ventilation time @ 7.5x</span><output id="t75"></output></div>
+    <div class="time"><span>Total ventilation time @ 10x</span><output id="t10"></output></div>
+  </div>
+
+  <div class="toggle" role="group" aria-label="Space shape">
+    <button type="button" id="btn-cube" aria-pressed="true">CUBE</button>
+    <button type="button" id="btn-cyl" aria-pressed="false">CYLINDER</button>
+  </div>
+
+  <div class="card">
+    <label class="section-title" for="cfm">Fan CFM</label>
+    <div class="field center"><input id="cfm" type="number" inputmode="decimal" min="0" step="any"></div>
+    <div class="line"><span>Fan CFH</span><output id="cfh"></output></div>
+  </div>
+
+  <div class="card">
+    <p class="section-title">Tank / Vessel Dimensions</p>
+    <div class="pair three" id="dims-cube">
+      <div class="field"><label for="len">Length</label><input id="len" type="number" inputmode="decimal" min="0" step="any"></div>
+      <div class="field"><label for="wid">Width</label><input id="wid" type="number" inputmode="decimal" min="0" step="any"></div>
+      <div class="field"><label for="hgt">Height</label><input id="hgt" type="number" inputmode="decimal" min="0" step="any"></div>
+    </div>
+    <div class="pair" id="dims-cyl" hidden>
+      <div class="toggle small" role="group" aria-label="Measure across or to center" style="grid-column: 1 / -1;">
+        <button type="button" id="btn-rad" aria-pressed="true">RADIUS</button>
+        <button type="button" id="btn-dia" aria-pressed="false">DIAMETER</button>
+      </div>
+      <div class="field"><label for="rad" id="rad-label">Radius</label><input id="rad" type="number" inputmode="decimal" min="0" step="any"></div>
+      <div class="field"><label for="clen">Length/Height</label><input id="clen" type="number" inputmode="decimal" min="0" step="any"></div>
+    </div>
+    <div class="line"><span>Cubic feet of space</span><output id="vol"></output></div>
+  </div>
+
+  <div class="card">
+    <p class="section-title">Air exchanges</p>
+    <div>
+      <div class="line"><span>Per hour</span><output id="aph"></output></div>
+      <div class="line"><span>Per minute</span><output id="apm"></output></div>
+    </div>
+  </div>
+
+  <p class="notes">
+    Enter all measurements in feet. Round up.<br>
+    The recommended air exchanges are 7.5 prior to entry.<br>
+    Round up the total ventilation time to next whole minute.
+  </p>
+</div>
+
+<script>
+  // Formulas from Ventilation_Calculator.xlsx (Sheet1)
+  // Multiplier used in the "@ 7.5x" cells (C20/H20) of the spreadsheet
+  const MULT_75 = 7.5;
+  const MULT_10 = 10;
+
+  const $ = (id) => document.getElementById(id);
+  const state = {
+    shape: "cube",
+    cube: { cfm: 720, len: 30, wid: 10, hgt: 10 },
+    cyl:  { cfm: 5200, rad: 4, dia: 8, clen: 200, mode: "rad" }
+  };
+
+  function num(id) { const v = parseFloat($(id).value); return isFinite(v) ? v : NaN; }
+  function fmtNum(v, dp) { return isFinite(v) ? v.toFixed(dp) : ""; }
+  function fmtVol(v) { if (!isFinite(v)) return ""; return Number.isInteger(v) ? String(v) : v.toFixed(2); }
+  function setTime(id, v) {
+    const el = $(id);
+    // Round up to the next whole minute
+    el.innerHTML = isFinite(v) ? Math.ceil(v - 1e-9) + "<small>min</small>" : "&ndash;";
+  }
+
+  function loadInputs() {
+    const s = state[state.shape];
+    $("cfm").value = s.cfm;
+    if (state.shape === "cube") { $("len").value = s.len; $("wid").value = s.wid; $("hgt").value = s.hgt; }
+    else { $("rad").value = s.mode === "dia" ? s.dia : s.rad; $("clen").value = s.clen; }
+  }
+
+  function saveInputs() {
+    const s = state[state.shape];
+    s.cfm = $("cfm").value;
+    if (state.shape === "cube") { s.len = $("len").value; s.wid = $("wid").value; s.hgt = $("hgt").value; }
+    else { s[s.mode] = $("rad").value; s.clen = $("clen").value; }
+  }
+
+  function calc() {
+    const cfm = num("cfm");
+    const cfh = cfm * 60;                                        // =C9*60
+    const vol = state.shape === "cube"
+      ? num("len") * num("wid") * num("hgt")                     // =C12*C13*C14
+      : Math.PI * Math.pow(state.cyl.mode === "dia" ? num("rad") / 2 : num("rad"), 2) * num("clen"); // =PI()*H12^2*H13 (diameter halved to radius)
+    const aph = vol > 0 ? cfh / vol : NaN;                       // =C10/C16
+    const apm = aph / 60;                                        // =C18/60
+    const t75 = apm > 0 ? (1 / apm) * MULT_75 : NaN;             // (1/C19)*7.5 — spreadsheet cell used 7; corrected to 7.5
+    const t10 = apm > 0 ? (1 / apm) * MULT_10 : NaN;             // =(1/C19)*10
+
+    $("cfh").value = isFinite(cfh) ? String(Math.round(cfh * 100) / 100) : "";
+    $("vol").value = fmtVol(vol);
+    $("aph").value = fmtNum(aph, 2);
+    $("apm").value = fmtNum(apm, 2);
+    setTime("t75", t75);
+    setTime("t10", t10);
+  }
+
+  function setShape(shape) {
+    saveInputs();
+    state.shape = shape;
+    $("btn-cube").setAttribute("aria-pressed", shape === "cube");
+    $("btn-cyl").setAttribute("aria-pressed", shape === "cyl");
+    $("dims-cube").hidden = shape !== "cube";
+    $("dims-cyl").hidden = shape !== "cyl";
+    loadInputs();
+    calc();
+  }
+
+  function setMeasure(mode) {
+    saveInputs();
+    state.cyl.mode = mode;
+    $("btn-rad").setAttribute("aria-pressed", mode === "rad");
+    $("btn-dia").setAttribute("aria-pressed", mode === "dia");
+    $("rad-label").textContent = mode === "dia" ? "Diameter" : "Radius";
+    loadInputs();
+    calc();
+  }
+  $("btn-rad").addEventListener("click", () => setMeasure("rad"));
+  $("btn-dia").addEventListener("click", () => setMeasure("dia"));
+
+  $("btn-cube").addEventListener("click", () => setShape("cube"));
+  $("btn-cyl").addEventListener("click", () => setShape("cyl"));
+  ["cfm", "len", "wid", "hgt", "rad", "clen"].forEach(id => $(id).addEventListener("input", () => { saveInputs(); calc(); }));
+
+  loadInputs();
+  calc();
+</script>
+</body>
+</html>
