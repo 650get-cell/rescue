@@ -12,6 +12,11 @@ here describing what changed.
 
 ---
 
+## 1.10.0 — 2026-11-18
+
+- **New (admin):** Estimates page (`/estimator.html`), linked from a new card on the admin hub. Builds job quotes from shifts (date, start time, rescuers, on-site hours, travel, trucks) using the MarTech pay rules: Mon–Fri 8 ST / 8–12 OT / 12+ DT; weekday shift starting 5 PM or later 8 OT then DT; Saturday 8 OT then DT; Saturday 5 PM start all DT; Sunday all DT. Travel billed flat at the travel rate and does not count toward the 8/12 marks. Admin and trucks per day, no markup. Other labor lines and materials with markup carried over from the Job Estimate Worksheet.
+- **New (server):** `GET /api/quotes`, `PUT /api/quotes/:id`, `DELETE /api/quotes/:id` (admin password). Quotes are stored in the database under the `quotes` key.
+
 ## 1.9.2 — 2026-08-07
 
 - **Style (scheduler):** version indicator moved from a floating chip in the bottom-left to a small grey line under the "MarTech Rescue" logo in the header. Shows just the version number (e.g. `v1.9.2`). The commit hash is available on hover if anyone needs it.

@@ -756,6 +756,37 @@ app.post('/api/publish', requireAdmin, wrap(async (req, res) => {
 }));
 
 // ============================================================
+// ESTIMATES (job quotes) — stored as one JSON blob in kv_store key 'quotes'
+// ============================================================
+const QUOTE_ID_RE = /^[A-Za-z0-9_-]{1,40}$/;
+
+app.get('/api/quotes', requireAdmin, wrap(async (req, res) => {
+  res.json({ quotes: (await readKV('quotes')) || {} });
+}));
+
+app.put('/api/quotes/:id', requireAdmin, wrap(async (req, res) => {
+  const id = req.params.id;
+  const q = req.body;
+  if (!QUOTE_ID_RE.test(id) || !q || typeof q !== 'object' || Array.isArray(q)) {
+    return res.status(400).json({ error: 'Invalid quote.' });
+  }
+  q.id = id;
+  const all = (await readKV('quotes')) || {};
+  all[id] = q;
+  await writeKV('quotes', all);
+  res.json({ ok: true });
+}));
+
+app.delete('/api/quotes/:id', requireAdmin, wrap(async (req, res) => {
+  const id = req.params.id;
+  if (!QUOTE_ID_RE.test(id)) return res.status(400).json({ error: 'Invalid quote id.' });
+  const all = (await readKV('quotes')) || {};
+  delete all[id];
+  await writeKV('quotes', all);
+  res.json({ ok: true });
+}));
+
+// ============================================================
 // ROUTES (serve HTML)
 // ============================================================
 app.get('/', (req, res) => res.redirect('/availability.html'));
