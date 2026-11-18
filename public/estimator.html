@@ -6,11 +6,7 @@
 <title>MarTech Rescue — Estimates</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --bg:#e8e8e8; --surface:#ffffff; --surface2:#f2f2f2; --border:#d8d8d8;
-    --text:#1a1a1a; --muted:#666666; --accent:#c01010; --accent2:#a00c0c;
-    --st:#2b5aa8; --ot:#a86400; --dt:#c01010; --tr:#555;
-  }
+  :root{--bg:#e8e8e8;--surface:#fff;--surface2:#f2f2f2;--border:#d8d8d8;--text:#1a1a1a;--muted:#666;--accent:#c01010}
   *{box-sizing:border-box;margin:0;padding:0}
   body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:15px;line-height:1.45}
   .header{display:flex;align-items:center;justify-content:space-between;padding:14px 22px;border-bottom:3px solid #c01010;position:sticky;top:0;background:#1a1a1a;z-index:100;gap:10px;flex-wrap:wrap}
@@ -18,54 +14,60 @@
   .logo .mar{color:#c01010} .logo .tech{color:#fff} .logo .rescue{color:#aaa;font-weight:700}
   .logo .sub{color:#888;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-left:10px}
   .header-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-  .btn{font-family:'Inter',sans-serif;font-size:14px;font-weight:500;padding:7px 14px;border-radius:6px;cursor:pointer;border:1px solid rgba(255,255,255,0.2);transition:all .15s;white-space:nowrap}
-  .btn-ghost{background:#555;color:#fff;border-color:#555} .btn-ghost:hover{background:#666;border-color:#666}
-  .btn-accent{background:#c01010;color:#fff;border-color:#c01010;font-weight:600} .btn-accent:hover{background:#a00c0c;border-color:#a00c0c}
-  .header select{font-family:'Inter',sans-serif;font-size:14px;background:#2a2a2a;color:#fff;border:1px solid #555;border-radius:6px;padding:7px 10px;max-width:280px}
-  main{max-width:1500px;margin:0 auto;padding:18px 22px 60px}
+  .btn{font-family:'Inter',sans-serif;font-size:14px;font-weight:500;padding:7px 14px;border-radius:6px;cursor:pointer;border:1px solid rgba(255,255,255,0.2);white-space:nowrap;text-decoration:none}
+  .btn-ghost{background:#555;color:#fff;border-color:#555} .btn-ghost:hover{background:#666}
+  .btn-accent{background:#c01010;color:#fff;border-color:#c01010;font-weight:600} .btn-accent:hover{background:#a00c0c}
+  .header select{font-family:'Inter',sans-serif;font-size:14px;background:#2a2a2a;color:#fff;border:1px solid #555;border-radius:6px;padding:7px 10px;max-width:300px}
+  main{max-width:1300px;margin:0 auto;padding:18px 22px 60px}
   section{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:14px}
-  h2{font-family:'Syne',sans-serif;font-weight:800;font-size:18px;color:#1a1a1a;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid var(--border)}
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px 14px}
+  h2{font-family:'Syne',sans-serif;font-weight:800;font-size:18px;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid var(--border)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px 14px}
   label.f{display:flex;flex-direction:column;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600;gap:4px}
+  label.f.wide{grid-column:span 2}
   input,select,textarea{font-family:'Inter',sans-serif;font-size:15px;color:var(--text);border:1px solid var(--border);border-radius:6px;padding:8px 10px;background:var(--surface2);width:100%;outline:none;color-scheme:light}
   input:focus,select:focus,textarea:focus{border-color:var(--accent);background:#fff}
   input[type=number]{text-align:right}
-  textarea{min-height:90px;resize:vertical;line-height:1.5}
-  table{width:100%;border-collapse:collapse}
-  th,td{padding:7px 8px;border-bottom:1px solid var(--border);vertical-align:middle}
-  th{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);text-align:left;font-weight:600;white-space:nowrap}
-  td.n,th.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
-  td input{min-width:60px}
-  .tag{display:inline-block;font-size:12px;font-weight:600;padding:2px 6px;border-radius:3px;background:#1a1a1a;color:#fff;white-space:nowrap}
-  .tag.wk{background:#e6f5ea;color:#1a7a33} .tag.sat{background:#f5e8c0;color:#8a5010} .tag.sun,.tag.nt{background:#fee;color:var(--accent)}
-  .st{color:var(--st);font-weight:600} .ot{color:var(--ot);font-weight:600} .dt{color:var(--dt);font-weight:600} .tr{color:var(--tr);font-weight:600}
-  button{font-family:'Inter',sans-serif;cursor:pointer}
-  button.x{border:none;background:none;color:#999;font-size:16px;padding:2px 6px}
-  button.x:hover{color:var(--accent)}
-  .add{margin-top:10px;font-size:14px;padding:8px 14px;border-radius:5px;border:1px solid var(--border);background:transparent;color:var(--muted);transition:all .15s}
-  .add:hover{border-color:var(--accent);color:var(--accent)}
-  .totals{display:grid;grid-template-columns:1fr auto;gap:6px 24px;max-width:460px;margin-left:auto;font-size:17px}
-  .totals .grand{font-family:'Syne',sans-serif;font-weight:800;font-size:24px;border-top:2px solid var(--text);padding-top:6px}
-  .totals .grand.n{color:var(--accent)}
-  .lines tr.sub td{font-weight:700;border-top:2px solid var(--border)}
+  textarea{min-height:64px;resize:vertical}
   .muted{color:var(--muted);font-size:13px}
-  .rules{font-size:14px;color:var(--muted);margin:10px 0 0;padding-left:18px}
-  .scroll{overflow-x:auto}
+  table{width:100%;border-collapse:collapse}
+  .lines th,.lines td{padding:7px 8px;border-bottom:1px solid var(--border);text-align:left}
+  .lines th{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+  .lines .n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .lines tr.g td{font-family:'Syne',sans-serif;font-weight:800;font-size:22px;border-top:2px solid var(--text);border-bottom:none}
+  .lines tr.g td.n{color:var(--accent)}
+  .counts{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+  .chip{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:8px 14px;font-weight:600}
+  .chip.sat{background:#f6ead0;border-color:#e5cf9c} .chip.sun{background:#f7dede;border-color:#e9b9b9}
+  .cal{table-layout:fixed}
+  .cal th{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);padding:4px;border-bottom:2px solid var(--text);text-align:center}
+  .cal td{border:1px solid #c8c8c8;padding:5px 6px;vertical-align:top;font-size:12.5px;line-height:1.4}
+  .cal td.sat{background:#f6ead0} .cal td.sun{background:#f7dede} .cal td.x{background:#fafafa;border-color:#eee}
+  .cal td.wt{font-weight:700;text-align:right;vertical-align:middle;background:var(--surface2)}
+  .cal .d{font-weight:700;font-size:13.5px} .cal .h{color:var(--muted)}
+  .cal .r{display:flex;justify-content:space-between;gap:4px} .cal .t{border-top:1px solid #999;margin-top:3px;padding-top:2px;font-weight:700}
+  .print-head{display:none}
   @media print{
+    @page{size:letter landscape;margin:0.3in}
     *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
-    .header,.no-print,button{display:none!important}
-    body{background:#fff}
-    main{padding:0;max-width:none}
-    section{border:none;padding:6px 0;margin:0 0 6px}
-    input,select,textarea{border:none;padding:0;background:none;-webkit-appearance:none;appearance:none}
+    .header,.no-print{display:none!important}
+    body{background:#fff;font-size:11px} main{padding:0;max-width:none}
+    section{border:none;padding:0;margin:0 0 6px}
+    h2{font-size:13px;margin-bottom:4px;padding-bottom:2px}
+    .print-head{display:block;margin-bottom:6px}
+    .print-head .t1{font-weight:700;font-size:14px}
+    .lines th,.lines td{padding:2px 6px} .lines tr.g td{font-size:14px}
+    .cal td{font-size:9px;padding:3px 4px;line-height:1.3} .cal .d{font-size:10px}
+    .chip{padding:2px 8px}
+    .counts{margin-bottom:4px}
+    tr{page-break-inside:avoid}
   }
 </style>
 </head>
 <body>
 <div class="header">
-  <div class="logo"><span class="mar">Mar</span><span class="tech">Tech</span> <span class="rescue">Rescue</span><span class="sub">Job Estimate</span></div>
+  <div class="logo"><span class="mar">Mar</span><span class="tech">Tech</span> <span class="rescue">Rescue</span><span class="sub">Estimates</span></div>
   <div class="header-actions">
-    <a class="btn btn-ghost" href="/admin.html" style="text-decoration:none">← Admin</a>
+    <a class="btn btn-ghost" href="/admin.html">← Admin</a>
     <select id="savedList" aria-label="Saved quotes"></select>
     <button class="btn btn-ghost" id="btnLoad">Open</button>
     <button class="btn btn-ghost" id="btnNew">New</button>
@@ -76,359 +78,229 @@
 </div>
 
 <main>
-  <section>
-    <h2>Quote</h2>
-    <div class="grid" id="headerFields"></div>
+  <div class="print-head"><div class="t1" id="phTitle"></div><div id="phSub"></div></div>
+
+  <section class="no-print">
+    <h2>Job</h2>
+    <div class="grid">
+      <label class="f">Quote #<input data-k="quoteNo"></label>
+      <label class="f">Quote date<input type="date" data-k="quoteDate"></label>
+      <label class="f">Customer<input data-k="customer"></label>
+      <label class="f">Contact<input data-k="contact"></label>
+      <label class="f">Project / area<input data-k="project"></label>
+      <label class="f wide">Site address<textarea data-k="site"></textarea></label>
+    </div>
   </section>
 
-  <section>
+  <section class="no-print">
+    <h2>Schedule</h2>
+    <div class="grid">
+      <label class="f">Start date<input type="date" data-k="startDate"></label>
+      <label class="f">Number of days<input type="number" min="1" step="1" data-k="days"></label>
+      <label class="f">Shift start time<input type="time" data-k="startTime"></label>
+      <label class="f">Hours per shift<input type="number" min="0" step="0.25" data-k="hours"></label>
+      <label class="f">Rescuers<input type="number" min="0" step="1" data-k="rescuers"></label>
+      <label class="f">Trucks per day<input type="number" min="0" step="1" data-k="trucks"></label>
+    </div>
+    <div class="muted" style="margin-top:8px" id="schedNote"></div>
+  </section>
+
+  <section class="no-print">
+    <h2>Travel &amp; lodging</h2>
+    <div class="grid">
+      <label class="f">Travel hours per rescuer (whole job)<input type="number" min="0" step="0.25" data-k="travelHrs"></label>
+      <label class="f">Lodging qty<input type="number" min="0" step="1" data-k="lodgingQty"></label>
+      <label class="f">Lodging cost (each)<input type="number" min="0" step="0.01" data-k="lodgingCost"></label>
+      <label class="f">Lodging markup<select data-k="lodgingMarkup"></select></label>
+    </div>
+  </section>
+
+  <section class="no-print">
     <h2>Rates</h2>
-    <div class="grid" id="rateFields"></div>
-    <ul class="rules no-print">
-      <li>Mon–Fri: first 8 hrs ST, 8–12 OT, after 12 DT. Shift starting 5 PM or later: first 8 hrs OT, then DT.</li>
-      <li>Saturday: first 8 hrs OT, then DT. Saturday shift starting 5 PM or later is all DT.</li>
-      <li>Sunday: all DT.</li>
-      <li>Travel bills at the travel rate only and does not count toward the 8 and 12 hour marks. The day and start time of the shift set the rates for the whole shift. The clock does not restart at midnight.</li>
-    </ul>
-  </section>
-
-  <section>
-    <h2>Shifts</h2>
-    <div class="scroll">
-    <table id="shiftTable">
-      <thead><tr>
-        <th>Date</th><th>Day</th><th>Shift start</th><th class="n">Rescuers</th>
-        <th class="n">Travel to (hrs)</th><th class="n">On site (hrs)</th><th class="n">Travel home (hrs)</th><th class="n">Trucks</th>
-        <th class="n">ST</th><th class="n">OT</th><th class="n">DT</th><th class="n">Travel</th><th class="n">Shift total</th><th></th>
-      </tr></thead>
-      <tbody></tbody>
-    </table>
+    <div class="grid">
+      <label class="f">Straight time ($/hr)<input type="number" step="0.01" data-r="st"></label>
+      <label class="f">Overtime ($/hr)<input type="number" step="0.01" data-r="ot"></label>
+      <label class="f">Double time ($/hr)<input type="number" step="0.01" data-r="dt"></label>
+      <label class="f">Travel ($/hr per rescuer)<input type="number" step="0.01" data-r="travel"></label>
+      <label class="f">Admin ($/day)<input type="number" step="0.01" data-r="admin"></label>
+      <label class="f">Truck ($/day)<input type="number" step="0.01" data-r="truck"></label>
     </div>
-    <button class="add no-print" id="addShift">+ Add shift</button>
-    <div class="muted no-print" style="margin-top:6px">ST/OT/DT/Travel columns are hours per rescuer. Admin bills once per shift date.</div>
-  </section>
-
-  <section>
-    <h2>Other labor</h2>
-    <table id="laborTable">
-      <thead><tr><th>Work description</th><th class="n">Hrs</th><th class="n">Rate</th><th class="n">Total</th><th></th></tr></thead>
-      <tbody></tbody>
-    </table>
-    <button class="add no-print" id="addLabor">+ Add labor line</button>
-  </section>
-
-  <section>
-    <h2>Materials</h2>
-    <div class="scroll">
-    <table id="matTable">
-      <thead><tr><th class="n">Qty</th><th>Description</th><th class="n">Cost</th><th class="n">Subtotal</th><th>Markup</th><th class="n">Sell</th><th></th></tr></thead>
-      <tbody></tbody>
-    </table>
-    </div>
-    <button class="add no-print" id="addMat">+ Add material line</button>
   </section>
 
   <section>
     <h2>Estimate</h2>
-    <table class="lines" id="lineItems">
-      <thead><tr><th>Item</th><th class="n">Qty</th><th class="n">Rate</th><th class="n">Amount</th></tr></thead>
-      <tbody></tbody>
-    </table>
-    <div class="totals" style="margin-top:12px">
-      <div>Total hours</div><div class="n" id="tHrs"></div>
-      <div>Labor total</div><div class="n" id="tLabor"></div>
-      <div>Materials total</div><div class="n" id="tMat"></div>
-      <div class="grand">Estimate total</div><div class="grand n" id="tAll"></div>
-    </div>
+    <div class="counts" id="counts"></div>
+    <table class="lines"><thead><tr><th>Item</th><th class="n">Qty</th><th class="n">Rate</th><th class="n">Amount</th></tr></thead><tbody id="lines"></tbody></table>
   </section>
 
   <section>
-    <h2>Notes</h2>
-    <textarea id="notes"></textarea>
+    <h2>Daily calendar</h2>
+    <div id="calWrap"><div class="muted">Enter a start date and number of days.</div></div>
   </section>
 </main>
 
 <script>
 (function(){
-  const STORE_KEY = 'jobEstimates.v1';
-  const MARKUPS = [
-    {label:'None (×1.00)', v:1},
-    {label:'0.65 (×1.54)', v:1.54},
-    {label:'0.70 (×1.43)', v:1.43},
-    {label:'0.75 (×1.33)', v:1.33},
-    {label:'0.80 (×1.25)', v:1.25},
-    {label:'0.85 (×1.18)', v:1.18},
-  ];
-  const HEADER = [
-    ['quoteDate','Quote date','date'],['customer','Customer','text'],['contact','Contact','text'],
-    ['jobNumber','Job number','text'],['projectName','Project name','text'],['dateIn','Date in','date'],
-    ['dueDate','Due date','date'],['estimator','Estimator','text'],
-  ];
-  const RATES = [
-    ['st','Straight time ($/hr)'],['ot','Overtime ($/hr)'],['dt','Double time ($/hr)'],
-    ['travel','Travel ($/hr per rescuer)'],['admin','Admin ($/day)'],['truck','Truck ($/day)'],
-  ];
-  const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const MARKUPS=[['','—'],['1','None (×1.00)'],['1.54','0.65 (×1.54)'],['1.43','0.70 (×1.43)'],['1.33','0.75 (×1.33)'],['1.25','0.80 (×1.25)'],['1.18','0.85 (×1.18)']];
+  const DAYS=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const $=s=>document.querySelector(s);
+  const num=v=>{const n=parseFloat(v);return isFinite(n)?n:0};
+  const money=n=>n.toLocaleString('en-US',{style:'currency',currency:'USD'});
+  const hrs=n=>String(Math.round(n*100)/100);
+  const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
 
-  function blankQuote(){
-    return {
-      id: 'q' + Date.now().toString(36),
-      header: {quoteDate: new Date().toISOString().slice(0,10)},
-      rates: {st:135, ot:202.5, dt:270, travel:85, admin:100, truck:100},
-      shifts: [],
-      labor: ['Mobilization/Demobilization','Confined Space','Project Management','Supervision','Non Productive Time','Purchasing']
-               .map(d=>({desc:d, hrs:'', rate:''})),
-      materials: ['Miscellaneous Material','Bond','Freight','Tooling','Per Diem','Lodging','Environmental Fee']
-               .map(d=>({qty:'', desc:d, cost:'', markup:1})),
-      notes: ''
-    };
+  function blank(){
+    return {id:'q'+Date.now().toString(36), quoteNo:'', quoteDate:today(), customer:'', contact:'', project:'', site:'',
+      startDate:'', days:'', startTime:'07:00', hours:'', rescuers:'', trucks:'',
+      travelHrs:'', lodgingQty:'', lodgingCost:'', lodgingMarkup:'',
+      rates:{st:135, ot:202.5, dt:270, travel:85, admin:100, truck:100}};
   }
-
-  let Q = blankQuote();
-
-  // ---------- storage (server, admin-gated) ----------
-  let ADMIN_PW = sessionStorage.getItem('martech_admin_pw') || '';
-  let SAVED = {};
-  async function api(method, path, body){
-    const r = await fetch(path, {method, headers:{'Content-Type':'application/json','X-Admin-Password':ADMIN_PW}, body: body?JSON.stringify(body):undefined});
-    if (r.status === 401) { sessionStorage.removeItem('martech_admin_pw'); location.reload(); throw new Error('auth'); }
-    if (!r.ok) throw new Error('HTTP '+r.status);
-    return r.json();
-  }
-  async function loadSaved(){ try{ SAVED = (await api('GET','/api/quotes')).quotes || {}; }catch(e){ SAVED = {}; } refreshList(); }
-  function quoteName(q){
-    const h=q.header||{};
-    return [h.jobNumber, h.customer, h.projectName].filter(Boolean).join(' – ') || ('Untitled ' + (h.quoteDate||''));
-  }
-  function refreshList(){
-    const s=SAVED; const sel=$('#savedList');
-    const ids=Object.keys(s).sort((a,b)=>(s[b].savedAt||'').localeCompare(s[a].savedAt||''));
-    sel.innerHTML = '<option value="">— Saved quotes (' + ids.length + ') —</option>' +
-      ids.map(id=>`<option value="${id}">${esc(quoteName(s[id]))}</option>`).join('');
-    if (s[Q.id]) sel.value = Q.id;
-  }
-
-  // ---------- helpers ----------
-  function $(s){ return document.querySelector(s); }
-  function esc(s){ return String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
-  function num(v){ const n=parseFloat(v); return isFinite(n)?n:0; }
-  function money(n){ return n.toLocaleString('en-US',{style:'currency',currency:'USD'}); }
-  function hrs(n){ return (Math.round(n*100)/100).toString(); }
+  let Q=blank();
 
   // ---------- pay rules ----------
-  // Returns tier for each clock hour position; clock starts at drive start.
-  function shiftRules(dateStr, startStr){
-    if(!dateStr) return null;
-    const d = new Date(dateStr + 'T00:00:00');
-    const dow = d.getDay();
-    const hr = startStr ? parseInt(startStr.split(':')[0],10) : 0;
-    const night = hr >= 17;
-    if (dow === 0) return {dow, label:'Sunday – all DT', bands:[[0,Infinity,'dt']]};
-    if (dow === 6) return night
-      ? {dow, label:'Sat 5 PM+ – all DT', bands:[[0,Infinity,'dt']]}
-      : {dow, label:'Sat – 8 OT, then DT', bands:[[0,8,'ot'],[8,Infinity,'dt']]};
-    return night
-      ? {dow, label:'Weekday 5 PM+ – 8 OT, then DT', bands:[[0,8,'ot'],[8,Infinity,'dt']]}
-      : {dow, label:'Weekday – 8 ST, 8–12 OT, then DT', bands:[[0,8,'st'],[8,12,'ot'],[12,Infinity,'dt']]};
+  // Rates are set by the day and start time the shift begins. The clock does not restart at midnight.
+  function bands(dow, startHr){
+    const night = startHr >= 17;
+    if (dow===0) return [[0,Infinity,'dt']];
+    if (dow===6) return night ? [[0,Infinity,'dt']] : [[0,8,'ot'],[8,Infinity,'dt']];
+    return night ? [[0,8,'ot'],[8,Infinity,'dt']] : [[0,8,'st'],[8,12,'ot'],[12,Infinity,'dt']];
   }
-  function splitShift(s){
-    const r = shiftRules(s.date, s.start);
-    const out = {st:0, ot:0, dt:0, travel: num(s.travelTo)+num(s.travelHome), rule:r};
-    if(!r) return out;
-    const a = 0, b = num(s.onsite);
-    for (const [lo,hi,t] of r.bands){
-      const ov = Math.max(0, Math.min(b,hi) - Math.max(a,lo));
-      out[t] += ov;
+  function split(dow, startHr, h){
+    const o={st:0,ot:0,dt:0};
+    for (const [lo,hi,t] of bands(dow,startHr)) o[t]+=Math.max(0,Math.min(h,hi)-lo);
+    return o;
+  }
+  function parseDate(s){ const [y,m,d]=s.split('-').map(Number); return new Date(y,m-1,d); }
+
+  function compute(){
+    const R=Q.rates, n=Math.floor(num(Q.days)), h=num(Q.hours), resc=num(Q.rescuers), trucks=num(Q.trucks);
+    const startHr = Q.startTime ? parseInt(Q.startTime.split(':')[0],10) : 0;
+    const out={days:[], st:0, ot:0, dt:0, wd:0, sat:0, sun:0, night:startHr>=17};
+    if (!Q.startDate || n<1) return out;
+    const d0=parseDate(Q.startDate);
+    for (let i=0;i<n;i++){
+      const d=new Date(d0); d.setDate(d0.getDate()+i);
+      const dow=d.getDay(), s=split(dow,startHr,h);
+      const per = s.st*num(R.st)+s.ot*num(R.ot)+s.dt*num(R.dt);
+      out.days.push({d, dow, s, per, truck:trucks*num(R.truck), admin:num(R.admin), total: per*resc + trucks*num(R.truck) + num(R.admin)});
+      out.st+=s.st; out.ot+=s.ot; out.dt+=s.dt;
+      if (dow===0) out.sun++; else if (dow===6) out.sat++; else out.wd++;
     }
     return out;
   }
 
-  // ---------- render inputs ----------
-  function renderHeader(){
-    $('#headerFields').innerHTML = HEADER.map(([k,l,t])=>
-      `<label class="f">${l}<input type="${t}" data-h="${k}" value="${esc(Q.header[k]||'')}"></label>`).join('');
-    $('#rateFields').innerHTML = RATES.map(([k,l])=>
-      `<label class="f">${l}<input type="number" step="0.01" data-r="${k}" value="${esc(Q.rates[k])}"></label>`).join('');
-    $('#notes').value = Q.notes || '';
-  }
+  function hoursLabel(s){ return ['st','ot','dt'].filter(k=>s[k]).map(k=>hrs(s[k])+' '+k.toUpperCase()).join(' · ') || '0 hrs'; }
 
-  function renderShifts(){
-    const tb = $('#shiftTable tbody');
-    tb.innerHTML = Q.shifts.map((s,i)=>`
-      <tr data-i="${i}">
-        <td><input type="date" data-s="date" value="${esc(s.date)}"></td>
-        <td class="day"></td>
-        <td><input type="time" data-s="start" value="${esc(s.start)}"></td>
-        <td class="n"><input type="number" min="0" step="1" data-s="rescuers" value="${esc(s.rescuers)}" style="width:72px"></td>
-        <td class="n"><input type="number" min="0" step="0.25" data-s="travelTo" value="${esc(s.travelTo)}" style="width:84px"></td>
-        <td class="n"><input type="number" min="0" step="0.25" data-s="onsite" value="${esc(s.onsite)}" style="width:84px"></td>
-        <td class="n"><input type="number" min="0" step="0.25" data-s="travelHome" value="${esc(s.travelHome)}" style="width:84px"></td>
-        <td class="n"><input type="number" min="0" step="1" data-s="trucks" value="${esc(s.trucks)}" style="width:72px"></td>
-        <td class="n st c-st"></td><td class="n ot c-ot"></td><td class="n dt c-dt"></td><td class="n tr c-tr"></td>
-        <td class="n c-tot"></td>
-        <td><button class="x no-print" data-del-shift="${i}" title="Remove">×</button></td>
-      </tr>`).join('');
-  }
-  function renderLabor(){
-    $('#laborTable tbody').innerHTML = Q.labor.map((l,i)=>`
-      <tr data-i="${i}">
-        <td><input data-l="desc" value="${esc(l.desc)}"></td>
-        <td class="n"><input type="number" step="0.25" data-l="hrs" value="${esc(l.hrs)}" style="width:80px"></td>
-        <td class="n"><input type="number" step="0.01" data-l="rate" value="${esc(l.rate)}" style="width:90px"></td>
-        <td class="n c-tot"></td>
-        <td><button class="x no-print" data-del-labor="${i}" title="Remove">×</button></td>
-      </tr>`).join('');
-  }
-  function renderMats(){
-    $('#matTable tbody').innerHTML = Q.materials.map((m,i)=>`
-      <tr data-i="${i}">
-        <td class="n"><input type="number" step="1" data-m="qty" value="${esc(m.qty)}" style="width:70px"></td>
-        <td><input data-m="desc" value="${esc(m.desc)}"></td>
-        <td class="n"><input type="number" step="0.01" data-m="cost" value="${esc(m.cost)}" style="width:90px"></td>
-        <td class="n c-sub"></td>
-        <td><select data-m="markup">${MARKUPS.map(o=>`<option value="${o.v}" ${num(m.markup)===o.v?'selected':''}>${o.label}</option>`).join('')}</select></td>
-        <td class="n c-sell"></td>
-        <td><button class="x no-print" data-del-mat="${i}" title="Remove">×</button></td>
-      </tr>`).join('');
-  }
-  function renderAll(){ renderHeader(); renderShifts(); renderLabor(); renderMats(); recalc(); refreshList(); }
+  function render(){
+    const R=Q.rates, c=compute(), resc=num(Q.rescuers), n=c.days.length;
+    $('#schedNote').textContent = n ? (c.night?'Night shift (starts 5 PM or later). ':'Day shift. ') + 'Rates are set by the day the shift starts.' : '';
+    $('#counts').innerHTML = n ? `<span class="chip">${c.wd} weekdays</span><span class="chip sat">${c.sat} Saturdays</span><span class="chip sun">${c.sun} Sundays</span><span class="chip">${n} days total</span>` : '';
 
-  // ---------- calculate ----------
-  function recalc(){
-    const R = Q.rates;
-    let tot = {st:0, ot:0, dt:0, travel:0, truckDays:0};
-    const dates = new Set();
+    const L=[]; const add=(item,qty,rate,amt)=>{ if (amt) L.push([item,qty,rate,amt]); return amt||0; };
+    let total=0, totalHrs=0;
+    total+=add('Rescuer – Straight time', hrs(c.st*resc)+' hrs', money(num(R.st)), c.st*resc*num(R.st));
+    total+=add('Rescuer – Overtime', hrs(c.ot*resc)+' hrs', money(num(R.ot)), c.ot*resc*num(R.ot));
+    total+=add('Rescuer – Double time', hrs(c.dt*resc)+' hrs', money(num(R.dt)), c.dt*resc*num(R.dt));
+    const th=num(Q.travelHrs)*resc;
+    total+=add('Travel', hrs(th)+' hrs', money(num(R.travel)), th*num(R.travel));
+    total+=add('Administrative', n+(n===1?' day':' days'), money(num(R.admin)), n*num(R.admin));
+    const td=num(Q.trucks)*n;
+    total+=add('Trucks', td+(td===1?' truck-day':' truck-days'), money(num(R.truck)), td*num(R.truck));
+    const mk=num(Q.lodgingMarkup)||0, lq=num(Q.lodgingQty), lc=num(Q.lodgingCost);
+    if (lq && lc) total+=add('Lodging'+(mk&&mk!==1?` (×${mk})`:''), String(lq), mk?money(lc*mk):money(lc)+' + markup?', mk?lq*lc*mk:0);
+    totalHrs=(c.st+c.ot+c.dt)*resc+th;
+    $('#lines').innerHTML = L.map(r=>`<tr><td>${esc(r[0])}</td><td class="n">${esc(r[1])}</td><td class="n">${esc(r[2])}</td><td class="n">${money(r[3])}</td></tr>`).join('')
+      + (lq&&lc&&!mk ? `<tr><td colspan="4" class="muted">Pick a lodging markup to include lodging in the total.</td></tr>` : '')
+      + `<tr><td>Total hours</td><td class="n">${hrs(totalHrs)}</td><td></td><td></td></tr>`
+      + `<tr class="g"><td>Estimate total</td><td></td><td></td><td class="n">${money(total)}</td></tr>`;
 
-    document.querySelectorAll('#shiftTable tbody tr').forEach(tr=>{
-      const s = Q.shifts[+tr.dataset.i];
-      const sp = splitShift(s);
-      const n = num(s.rescuers);
-      tr.querySelector('.day').innerHTML = sp.rule ? `<span class="tag ${sp.rule.dow===0?'sun':sp.rule.dow===6?'sat':(parseInt(s.start)>=17?'nt':'wk')}" title="${esc(sp.rule.label)}">${DAYS[sp.rule.dow]}${s.start && parseInt(s.start)>=17?' 5PM+':''}</span>` : '';
-      tr.querySelector('.c-st').textContent = hrs(sp.st);
-      tr.querySelector('.c-ot').textContent = hrs(sp.ot);
-      tr.querySelector('.c-dt').textContent = hrs(sp.dt);
-      tr.querySelector('.c-tr').textContent = hrs(sp.travel);
-      const shiftCost = n*(sp.st*num(R.st) + sp.ot*num(R.ot) + sp.dt*num(R.dt) + sp.travel*num(R.travel)) + num(s.trucks)*num(R.truck);
-      tr.querySelector('.c-tot').textContent = money(shiftCost);
-      tot.st += sp.st*n; tot.ot += sp.ot*n; tot.dt += sp.dt*n; tot.travel += sp.travel*n;
-      tot.truckDays += num(s.trucks);
-      if (s.date) dates.add(s.date);
-    });
-    const adminDays = dates.size;
+    // print header
+    $('#phTitle').textContent = [Q.quoteNo?('Quote# '+Q.quoteNo):'', Q.customer, Q.project].filter(Boolean).join(' – ') || 'Job Estimate';
+    $('#phSub').textContent = n ? `${fmtLong(c.days[0].d)} – ${fmtLong(c.days[n-1].d)} · ${n} days · ${resc} rescuers · ${hrs(num(Q.hours))}-hour ${c.night?'night':'day'} shifts` : '';
 
-    const lines = [];
-    const L = (item, qty, unit, rate) => { const amt = qty*rate; if (qty) lines.push({item, qty:hrs(qty)+' '+unit, rate:money(rate), amt}); return amt; };
-
-    let labor = 0;
-    labor += L('Rescuer – Straight time', tot.st, 'hrs', num(R.st));
-    labor += L('Rescuer – Overtime', tot.ot, 'hrs', num(R.ot));
-    labor += L('Rescuer – Double time', tot.dt, 'hrs', num(R.dt));
-    labor += L('Travel', tot.travel, 'hrs', num(R.travel));
-    labor += L('Admin', adminDays, 'days', num(R.admin));
-
-    document.querySelectorAll('#laborTable tbody tr').forEach(tr=>{
-      const l = Q.labor[+tr.dataset.i];
-      const amt = num(l.hrs)*num(l.rate);
-      tr.querySelector('.c-tot').textContent = amt ? money(amt) : '';
-      if (amt) { lines.push({item:l.desc||'Labor', qty:hrs(num(l.hrs))+' hrs', rate:money(num(l.rate)), amt}); labor += amt; }
-    });
-    const laborLines = lines.length;
-    let totalHrs = tot.st + tot.ot + tot.dt + tot.travel + adminDays + Q.labor.reduce((t,l)=>t+num(l.hrs),0);
-
-    let mats = 0;
-    mats += L('Trucks', tot.truckDays, 'truck-days', num(R.truck));
-    document.querySelectorAll('#matTable tbody tr').forEach(tr=>{
-      const m = Q.materials[+tr.dataset.i];
-      const sub = num(m.qty)*num(m.cost);
-      const sell = sub*num(m.markup||1);
-      tr.querySelector('.c-sub').textContent = sub ? money(sub) : '';
-      tr.querySelector('.c-sell').textContent = sell ? money(sell) : '';
-      if (sell) {
-        const mk = num(m.markup||1);
-        lines.push({item:(m.desc||'Material') + (mk!==1?` (×${mk})`:''), qty:String(num(m.qty)), rate:money(num(m.cost)*mk), amt:sell});
-        mats += sell;
+    // calendar (weeks start Sunday)
+    if (!n){ $('#calWrap').innerHTML='<div class="muted">Enter a start date and number of days.</div>'; return; }
+    const first=c.days[0].d, lead=first.getDay();
+    const cells=[]; for(let i=0;i<lead;i++) cells.push(null); c.days.forEach(x=>cells.push(x)); while(cells.length%7) cells.push(null);
+    let html='<table class="cal"><thead><tr>'+DAYS.map(x=>`<th>${x}</th>`).join('')+'<th>Week total</th></tr></thead><tbody>';
+    for (let w=0; w<cells.length; w+=7){
+      let wt=0; html+='<tr>';
+      for (let j=0;j<7;j++){
+        const x=cells[w+j];
+        if(!x){ html+='<td class="x"></td>'; continue; }
+        wt+=x.total;
+        const cls=x.dow===6?'sat':x.dow===0?'sun':'';
+        let rr=''; if (resc<=4){ for(let k=1;k<=resc;k++) rr+=`<div class="r"><span>Rescuer ${k}</span><span>${money(x.per)}</span></div>`; }
+        else rr=`<div class="r"><span>${resc} rescuers × ${money(x.per)}</span><span>${money(x.per*resc)}</span></div>`;
+        html+=`<td class="${cls}"><div class="d">${MON[x.d.getMonth()]} ${x.d.getDate()}</div><div class="h">${hoursLabel(x.s)}</div>${rr}`
+          + (x.truck?`<div class="r"><span>Truck</span><span>${money(x.truck)}</span></div>`:'')
+          + (x.admin?`<div class="r"><span>Admin</span><span>${money(x.admin)}</span></div>`:'')
+          + `<div class="r t"><span>Day</span><span>${money(x.total)}</span></div></td>`;
       }
-    });
-
-    const rows = lines.map((l,i)=>`<tr><td>${esc(l.item)}</td><td class="n">${esc(l.qty)}</td><td class="n">${l.rate}</td><td class="n">${money(l.amt)}</td></tr>`);
-    if (laborLines) rows.splice(laborLines, 0, `<tr class="sub"><td colspan="3">Labor</td><td class="n">${money(labor)}</td></tr>`);
-    if (lines.length > laborLines) rows.push(`<tr class="sub"><td colspan="3">Materials</td><td class="n">${money(mats)}</td></tr>`);
-    $('#lineItems tbody').innerHTML = rows.join('') || '<tr><td colspan="4" class="muted">Add shifts or line items.</td></tr>';
-    $('#tHrs').textContent = hrs(totalHrs);
-    $('#tLabor').textContent = money(labor);
-    $('#tMat').textContent = money(mats);
-    $('#tAll').textContent = money(labor+mats);
+      html+=`<td class="wt">${money(wt)}</td></tr>`;
+    }
+    $('#calWrap').innerHTML=html+'</tbody></table>';
   }
+  function fmtLong(d){ return d.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}); }
 
-  // ---------- events ----------
+  function fill(){
+    document.querySelectorAll('[data-k]').forEach(el=>{ el.value = Q[el.dataset.k] ?? ''; });
+    document.querySelectorAll('[data-r]').forEach(el=>{ el.value = Q.rates[el.dataset.r] ?? ''; });
+    render(); refreshList();
+  }
+  $('[data-k=lodgingMarkup]').innerHTML = MARKUPS.map(([v,l])=>`<option value="${v}">${l}</option>`).join('');
   document.addEventListener('input', e=>{
-    const t = e.target, tr = t.closest('tr');
-    if (t.dataset.h) Q.header[t.dataset.h] = t.value;
-    else if (t.dataset.r) Q.rates[t.dataset.r] = t.value;
-    else if (t.dataset.s) Q.shifts[+tr.dataset.i][t.dataset.s] = t.value;
-    else if (t.dataset.l) Q.labor[+tr.dataset.i][t.dataset.l] = t.value;
-    else if (t.dataset.m) Q.materials[+tr.dataset.i][t.dataset.m] = t.dataset.m==='markup' ? num(t.value) : t.value;
-    else if (t.id === 'notes') Q.notes = t.value;
-    else return;
-    recalc();
+    const t=e.target;
+    if (t.dataset.k) Q[t.dataset.k]=t.value; else if (t.dataset.r) Q.rates[t.dataset.r]=t.value; else return;
+    render();
   });
-  document.addEventListener('change', e=>{ if (e.target.dataset.m==='markup') { Q.materials[+e.target.closest('tr').dataset.i].markup = num(e.target.value); recalc(); } });
-  document.addEventListener('click', e=>{
-    const t = e.target;
-    if (t.dataset.delShift !== undefined){ Q.shifts.splice(+t.dataset.delShift,1); renderShifts(); recalc(); }
-    if (t.dataset.delLabor !== undefined){ Q.labor.splice(+t.dataset.delLabor,1); renderLabor(); recalc(); }
-    if (t.dataset.delMat !== undefined){ Q.materials.splice(+t.dataset.delMat,1); renderMats(); recalc(); }
-  });
-  $('#addShift').onclick = ()=>{
-    const last = Q.shifts[Q.shifts.length-1];
-    let date = '';
-    if (last && last.date){ const d=new Date(last.date+'T00:00:00'); d.setDate(d.getDate()+1); date=d.toISOString().slice(0,10); }
-    Q.shifts.push(last ? {...last, date} : {date:'', start:'', rescuers:'', travelTo:'', onsite:'', travelHome:'', trucks:''});
-    renderShifts(); recalc();
-  };
-  $('#addLabor').onclick = ()=>{ Q.labor.push({desc:'',hrs:'',rate:''}); renderLabor(); recalc(); };
-  $('#addMat').onclick = ()=>{ Q.materials.push({qty:'',desc:'',cost:'',markup:1}); renderMats(); recalc(); };
+  document.addEventListener('change', e=>{ if (e.target.dataset.k==='lodgingMarkup'){ Q.lodgingMarkup=e.target.value; render(); } });
 
-  $('#btnSave').onclick = async ()=>{
-    Q.savedAt = new Date().toISOString();
-    try { await api('PUT','/api/quotes/'+Q.id, Q); SAVED[Q.id] = JSON.parse(JSON.stringify(Q)); refreshList(); flash('#btnSave','Saved'); }
-    catch(e){ flash('#btnSave','Save failed'); }
-  };
-  $('#btnLoad').onclick = ()=>{
-    const id = $('#savedList').value;
-    if (id && SAVED[id]) { Q = JSON.parse(JSON.stringify(SAVED[id])); renderAll(); }
-  };
-  $('#btnNew').onclick = ()=>{ Q = blankQuote(); renderAll(); };
-  $('#btnDelete').onclick = ()=>{
-    const id = $('#savedList').value; if (!id) return;
-    const b = $('#btnDelete');
-    if (b.dataset.arm !== id){ b.dataset.arm = id; b.textContent = 'Confirm delete'; setTimeout(()=>{ b.dataset.arm=''; b.textContent='Delete'; }, 3000); return; }
-    b.dataset.arm=''; b.textContent='Delete';
-    api('DELETE','/api/quotes/'+id).then(()=>{ delete SAVED[id]; if (Q.id === id) Q = blankQuote(); renderAll(); }).catch(()=>flash('#btnDelete','Delete failed'));
-  };
-  $('#btnPrint').onclick = ()=>{ try{ window.print(); }catch(e){} };
-  function flash(sel, msg){ const b=$(sel), o=b.textContent; b.textContent=msg; setTimeout(()=>b.textContent=o, 1200); }
-
-  window.__est = {splitShift};
-  async function checkPw(pw){
-    try{ const r = await fetch('/api/admin/check',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:pw})}); return r.ok; }catch{ return false; }
+  // ---------- storage (server, admin-gated) ----------
+  let ADMIN_PW=sessionStorage.getItem('martech_admin_pw')||'', SAVED={};
+  async function api(method,path,body){
+    const r=await fetch(path,{method,headers:{'Content-Type':'application/json','X-Admin-Password':ADMIN_PW},body:body?JSON.stringify(body):undefined});
+    if (r.status===401){ sessionStorage.removeItem('martech_admin_pw'); location.reload(); throw new Error('auth'); }
+    if (!r.ok) throw new Error('HTTP '+r.status);
+    return r.json();
   }
+  const qName=q=>[q.quoteNo, q.customer, q.project].filter(Boolean).join(' – ') || ('Untitled '+(q.quoteDate||''));
+  function refreshList(){
+    const ids=Object.keys(SAVED).filter(id=>SAVED[id] && SAVED[id].startDate!==undefined)
+      .sort((a,b)=>(SAVED[b].savedAt||'').localeCompare(SAVED[a].savedAt||''));
+    $('#savedList').innerHTML='<option value="">— Saved quotes ('+ids.length+') —</option>'+ids.map(id=>`<option value="${id}">${esc(qName(SAVED[id]))}</option>`).join('');
+    if (SAVED[Q.id]) $('#savedList').value=Q.id;
+  }
+  function flash(sel,msg){ const b=$(sel),o=b.textContent; b.textContent=msg; setTimeout(()=>b.textContent=o,1200); }
+  $('#btnSave').onclick=async()=>{ Q.savedAt=new Date().toISOString();
+    try{ await api('PUT','/api/quotes/'+Q.id,Q); SAVED[Q.id]=JSON.parse(JSON.stringify(Q)); refreshList(); flash('#btnSave','Saved'); }catch(e){ flash('#btnSave','Save failed'); } };
+  $('#btnLoad').onclick=()=>{ const id=$('#savedList').value; if(id&&SAVED[id]){ Q=JSON.parse(JSON.stringify(SAVED[id])); Q.rates=Object.assign(blank().rates,Q.rates||{}); fill(); } };
+  $('#btnNew').onclick=()=>{ Q=blank(); fill(); };
+  $('#btnDelete').onclick=()=>{
+    const id=$('#savedList').value, b=$('#btnDelete'); if(!id) return;
+    if (b.dataset.arm!==id){ b.dataset.arm=id; b.textContent='Confirm delete'; setTimeout(()=>{b.dataset.arm='';b.textContent='Delete'},3000); return; }
+    b.dataset.arm=''; b.textContent='Delete';
+    api('DELETE','/api/quotes/'+id).then(()=>{ delete SAVED[id]; if(Q.id===id) Q=blank(); fill(); }).catch(()=>flash('#btnDelete','Delete failed'));
+  };
+  $('#btnPrint').onclick=()=>{ try{ window.print(); }catch(e){} };
+
+  async function checkPw(pw){ try{ const r=await fetch('/api/admin/check',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:pw})}); return r.ok; }catch{ return false; } }
   async function boot(){
     if (ADMIN_PW && !(await checkPw(ADMIN_PW))) { sessionStorage.removeItem('martech_admin_pw'); ADMIN_PW=''; }
-    while (!ADMIN_PW) {
-      const pw = prompt('Admin password:');
-      if (pw === null) { document.body.innerHTML = '<div style="padding:60px;text-align:center;color:#666;font-family:sans-serif;">Login cancelled. Refresh to try again.</div>'; return; }
-      if (await checkPw(pw)) { ADMIN_PW = pw; sessionStorage.setItem('martech_admin_pw', pw); break; }
+    while(!ADMIN_PW){
+      const pw=prompt('Admin password:');
+      if (pw===null){ document.body.innerHTML='<div style="padding:60px;text-align:center;color:#666;font-family:sans-serif;">Login cancelled. Refresh to try again.</div>'; return; }
+      if (await checkPw(pw)){ ADMIN_PW=pw; sessionStorage.setItem('martech_admin_pw',pw); break; }
       alert('Wrong password.');
     }
-    renderAll();
-    loadSaved();
-    try {
-      const v = await (await fetch('/api/version')).json();
-      const el = document.createElement('div'); el.className='no-print';
+    fill();
+    try{ SAVED=(await api('GET','/api/quotes')).quotes||{}; }catch(e){ SAVED={}; }
+    refreshList();
+    try{ const v=await (await fetch('/api/version')).json(); const el=document.createElement('div'); el.className='no-print';
       el.style.cssText='position:fixed;bottom:8px;left:10px;font:14px/1.4 system-ui,sans-serif;color:#fff;background:#1a1a1a;padding:4px 10px;border-radius:4px;pointer-events:none;z-index:99999';
-      el.textContent='v'+v.version+' · '+v.commit; document.body.appendChild(el);
-    } catch(_){}
+      el.textContent='v'+v.version+' · '+v.commit; document.body.appendChild(el); }catch(_){}
   }
   boot();
 })();

@@ -1,149 +1,158 @@
 # MarTech Rescue Scheduler — IT Handoff
 
-This document is the deployment guide for taking the scheduler off Replit and hosting it on your own infrastructure.
+Deployment guide for hosting the Rescue Scheduler outside Replit. Current as of version **1.12.0** (2026-11-18). If anything here disagrees with `server.js`, the code wins.
 
 ## What it is
 
-A small crew-scheduling web app for MarTech Rescue. Crew submit monthly availability through a phone-gated form, an admin assigns crew to jobs through a separate scheduler page, and the admin publishes a read-only schedule that crew can view on their phones. There is no SaaS dependency — the entire app is one Node.js process, a folder of static HTML, and two JSON files for persistence.
+A small web app for MarTech Rescue's confined space rescue crew:
 
-The admin can attach free-text notes to each job (parking, contact info, gear, gate codes) through a Notes pill on the scheduler. Crew see the notes both in the "See my schedule" day-detail dialog and in the live calendar subscription feed — a per-crew `webcal://` URL that any phone calendar (iOS, Google, Outlook) can subscribe to. Once subscribed, the crew member's phone calendar auto-updates each hour: new shifts, partner names ("Chili Bar — with Tim Moyles"), and notes flow through automatically.
+- **Crew** submit monthly availability from their phones, view their published schedule, and can subscribe to a live calendar feed.
+- **Admin** builds jobs and crew assignments, publishes the schedule, and builds job estimates (quotes).
+- **Ventilation Calculator** — a public, no-login tool for crew and customers.
+
+One Node.js process, a folder of static HTML, and a PostgreSQL database.
 
 ## Tech stack
 
-- **Runtime:** Node.js 20 (Node 18 works; 20 is what it has been running on).
-- **Server:** Express 4.19.2. That is the *only* runtime dependency — see `package.json`.
-- **Frontend:** Plain HTML/CSS/JavaScript in `public/`. No framework, no build step, no bundler.
-- **Persistence:** JSON files in `./data/`. No database. No queue. No external services.
-- **Auth:** Two layers. Crew authenticate by phone-number match (digits-only, leading-1 stripped). Admin authenticates by an `X-Admin-Password` HTTP header with constant-time comparison and basic per-IP rate limiting on failed attempts.
+- **Runtime:** Node.js 20 (what it runs on today).
+- **Dependencies:** `express` 4 and `pg` 8. See `package.json`.
+- **Frontend:** plain HTML/CSS/JavaScript in `public/`. No framework, no build step.
+- **Storage:** PostgreSQL. Required; the server will not start without a reachable database.
+- **Fonts:** pages load Inter and Syne from Google Fonts. That is the only outbound call, and it is made by the browser, not the server.
 
-## Repository layout
+## Package contents
 
 ```
-server.js                    # Express app, all server logic in one file (~23 KB)
-package.json                 # dependencies + start script
-public/
-  availability.html          # Crew-facing form (submit availability, view personal schedule)
-  scheduler.html             # Admin-facing scheduler (job + assignment management)
-  availability_view.html     # Admin-facing read-only roster + availability summary
-  schedule_view.html         # Legacy redirect to availability.html
-data/
-  state.json                 # Full app state (employees, jobs, assignments, availability)
-  published.json             # Snapshot pushed by admin when they hit "Publish"
-  backups/                   # Auto-rotated snapshots written before each state save
-HANDOFF.md                   # This file
-Dockerfile                   # Optional containerized deploy
-.env.example                 # Environment variable template
+server.js            Express app — all server logic in one file
+package.json         Dependencies, version, start script
+package-lock.json    Lockfile for npm ci
+public/              All pages (see Pages below)
+db/schema.sql        Tables the app expects (run once on a new database)
+Dockerfile           Optional container build
+.dockerignore
+.env.example         Environment variable template
+HANDOFF.md           This file
+CHANGELOG.md         Version history
+README.md            Original end-user notes; describes the older JSON-file storage — use this HANDOFF for deployment
 ```
 
-## Run requirements
+Not included on purpose: live data (`data/`), Replit config, and internal development notes. See "Migrating live data" for the data.
 
-- Outbound network access not required at runtime — the app does not call out to anything.
-- Inbound: one HTTP port (default 3000, override via `PORT`).
-- Disk: writes to `./data/state.json`, `./data/published.json`, and `./data/backups/*.json`. Needs read+write on the `data/` directory.
-- RAM: trivial. The whole dataset is loaded into memory on each request — comfortable on 256 MB.
+## Pages
+
+| Path | Who | Auth |
+|---|---|---|
+| `/` | — | Redirects to `/availability.html` |
+| `/availability.html` | Crew | Phone-number match. Links to the Ventilation Calculator. |
+| `/schedule_view.html` | Crew | None (read-only published schedule) |
+| `/ventilation` and `/ventilation.html` | Crew and customers | None. Runs entirely in the browser — no server calls. |
+| `/admin.html` | Admin | Admin password. Hub page linking to the admin tools. |
+| `/scheduler.html` | Admin | Admin password. Desktop scheduler. |
+| `/scheduler-mobile.html` | Admin | Admin password. Phone scheduler. |
+| `/availability_view.html` | Admin | Admin password. Availability roster. |
+| `/estimator.html` | Admin | Admin password. Job estimates / quotes. |
+
+Admin pages are static files that prompt for the password in the browser; the protection is on the API endpoints behind them.
+
+## API endpoints
+
+| Method | Path | Auth |
+|---|---|---|
+| GET | `/api/version` | none — returns version and git commit |
+| GET | `/api/roster` | none |
+| GET | `/api/published` | none |
+| POST | `/api/availability/pin-check` | phone match |
+| POST | `/api/availability/lookup` | phone match |
+| POST | `/api/availability/submit` | phone match |
+| POST | `/api/availability/subscribe-url` | phone match |
+| GET | `/api/myschedule.ics?token=…` | per-crew token |
+| POST | `/api/admin/check` | password |
+| GET / PUT | `/api/state` | password |
+| POST | `/api/publish` | password |
+| GET | `/api/quotes` | password |
+| PUT / DELETE | `/api/quotes/:id` | password |
+| POST | `/api/admin/subscribe-url` | password |
+| POST | `/api/admin/subscribe-rotate` | password |
+| GET | `/api/admin/schedule.ics?token=…` | admin feed token |
+
+Admin endpoints take the password in the `X-Admin-Password` header. Calendar feed endpoints use a token in the query string because calendar apps cannot send headers.
 
 ## Environment variables
 
 | Variable | Required | Default | Purpose |
 |---|---|---|---|
+| `DATABASE_URL` | **yes** | — | PostgreSQL connection string, e.g. `postgres://user:pass@host:5432/dbname`. For a host that requires TLS, append `?sslmode=require`. |
+| `ADMIN_PASSWORD` | **yes** | `change-me` | Admin password. The default is a placeholder; never deploy with it. Get the production value from James through a secure channel. |
 | `PORT` | no | `3000` | HTTP listen port |
-| `ADMIN_PASSWORD` | **yes (for production)** | `change-me` | Required to call any admin endpoint. The default is a placeholder and unsafe to leave. Pick a long random string and set it in your hosting environment. James will share the current production password through a secure channel if you need to migrate state. |
 
-A `.env.example` is in the repo. Copy to `.env` and fill in.
+## Database
+
+The app does **not** create its own tables. Run `db/schema.sql` once against a new, empty database before first start:
+
+```bash
+psql "$DATABASE_URL" -f db/schema.sql
+```
+
+Two tables:
+
+- `kv_store` — three JSON rows keyed `state` (employees, jobs, availability, assignments), `published` (the crew-facing snapshot) and `quotes` (job estimates).
+- `state_backups` — a snapshot of the previous `state` value is written before every save; the app keeps the most recent 20 (`MAX_BACKUPS` in `server.js`).
+
+`schema.sql` is written from the queries in `server.js`. If you have access to the current Replit database, compare it against the live schema (`\d kv_store`, `\d state_backups` in psql) before relying on it.
+
+On first start against an empty database, the app seeds `state` with a default roster. To carry over live data, see below.
 
 ## How to run
 
-**Local / bare Node:**
+**Bare Node:**
 
 ```bash
-npm install
-ADMIN_PASSWORD='choose-something-strong' PORT=3000 npm start
+npm ci --omit=dev
+psql "$DATABASE_URL" -f db/schema.sql      # first time only
+DATABASE_URL='postgres://…' ADMIN_PASSWORD='…' PORT=3000 npm start
 ```
 
-The console prints `MarTech scheduler running on port 3000` on success. Open `http://localhost:3000/` to confirm — it redirects to `/availability.html`.
+Success prints `MarTech scheduler running on port 3000` and `Storage: PostgreSQL`. If the database is unreachable the process exits with `Failed to initialize database`.
 
-**Docker (one-command):**
+**Docker:**
 
 ```bash
 docker build -t martech-rescue .
 docker run -d --name martech-rescue \
   -p 3000:3000 \
-  -e ADMIN_PASSWORD='choose-something-strong' \
-  -v /var/lib/martech-rescue/data:/app/data \
+  -e DATABASE_URL='postgres://…' \
+  -e ADMIN_PASSWORD='…' \
   --restart unless-stopped \
   martech-rescue
 ```
 
-The bind-mount on `/app/data` is critical — without it the JSON state is lost on container recreation.
+All data lives in PostgreSQL, so the container itself holds nothing that needs a volume. The image's `/app/data` volume is left over from the older JSON-file storage and is not needed.
 
-## HTTP endpoints
+## Migrating live data from Replit
 
-| Method | Path | Auth | Purpose |
-|---|---|---|---|
-| GET | `/` | none | Redirects to `/availability.html` |
-| GET | `/availability.html` | none | Crew-facing availability form |
-| GET | `/scheduler.html` | client-side admin prompt | Admin scheduler UI |
-| GET | `/availability_view.html` | client-side admin prompt | Admin roster view |
-| GET | `/api/roster` | none | Names list for the dropdown |
-| POST | `/api/availability/pin-check` | phone match | Verify crew identity before showing form |
-| POST | `/api/availability/lookup` | phone match | Read a crew member's saved availability |
-| POST | `/api/availability/submit` | phone match | Submit or update availability |
-| GET | `/api/published` | none | Latest published schedule snapshot |
-| POST | `/api/admin/check` | password | Validate admin password |
-| GET | `/api/state` | password | Full state dump (admin) |
-| POST | `/api/publish` | password | Promote current state to `published.json` |
-| POST | `/api/availability/subscribe-url` | phone match | Mint (or fetch existing) opaque token, return https:// and webcal:// subscription URLs |
-| GET | `/api/myschedule.ics` | token in query string | Live per-crew ICS feed — calendar apps poll this every hour |
+Production currently runs on Replit (`rescue-reliabilitydiv.replit.app`) with a Replit-managed PostgreSQL database. Options:
 
-Admin endpoints take the password in the `X-Admin-Password` header. The ICS feed endpoint is deliberately token-only (no header) because calendar apps cannot send custom headers when polling — the token is the entire credential.
+1. **Database dump (simplest, complete).** From the Replit Shell of the production repl: `pg_dump "$DATABASE_URL" --data-only -t kv_store -t state_backups > rescue.sql`, download it, then `psql "$NEW_DATABASE_URL" -f rescue.sql` after running `schema.sql`.
+2. **Through the API.** `GET /api/state` and `GET /api/quotes` with the `X-Admin-Password` header return those two blobs; `GET /api/published` returns the published snapshot. Insert each into `kv_store` under keys `state`, `quotes` and `published`.
 
-**Per-job notes** ride along on the same publish flow: the admin types them in the scheduler's Notes pill, they save to `state.json` under each job, and the `/api/publish` snapshot copies them into `published.json` along with the other job fields. Crew see them in the calendar event DESCRIPTION (live feed) and in the day-detail dialog (See my schedule).
+Do the migration while the old instance is not being edited, then point crew at the new URL.
 
-## Data and backup model
+## Security notes
 
-`server.js` writes `data/state.json` atomically and snapshots the previous version to `data/backups/state-<timestamp>.json` before each save. On startup, if the main file is corrupted, the server falls back to the most recent good backup. Backups self-prune past `MAX_BACKUPS` (defined in `server.js`).
+- **Crew login is the phone number on file.** No password or SMS code. Phone numbers in the database are effectively credentials — treat the database and any dump of it as sensitive.
+- **Admin** is one shared password, compared in constant time, with a lockout after 10 failed attempts per IP in 15 minutes.
+- **No HTTPS in the app.** Terminate TLS at a reverse proxy or load balancer. Rate limiting reads the first `X-Forwarded-For` address, so make sure your proxy sets that header (and strips any client-supplied one).
+- **No CSRF protection on admin endpoints.** Consider limiting admin pages to a trusted network or putting them behind SSO.
+- **Calendar tokens** do not expire. To revoke one crew member's feed, clear `calendarToken` on their employee record in `state`. The admin feed token can be rotated from the scheduler.
 
-**Backup strategy you should run alongside the app:** nightly tarball of `./data/` to wherever your offsite backups live. The dataset is small (single-digit KB to low MB).
+## Operational notes
 
-**Restore:** copy a known-good `state.json` and `published.json` into `./data/` while the process is stopped, then start the process.
+- **Restart on deploy.** `server.js` changes need a process restart. Use a process manager (systemd, PM2) or the container restart policy.
+- **Browser caching.** After a deploy, users may need a hard refresh (Ctrl+Shift+R) to see new pages.
+- **Version check.** `GET /api/version` returns the running version and git commit. If deployed without the `.git` folder, the commit shows `nogit`; that is expected.
+- **Logs** go to stdout.
+- **Backups.** Run your normal PostgreSQL backup on this database. The in-app `state_backups` table is a short history, not an offsite backup.
 
-## Security model
+## Source
 
-- **Crew identity** is verified by exact match of the phone number on file (digits only, leading `1` country code is normalized away). No password, no SMS verification — the phone match is the entire crew-side authentication.
-- **Admin identity** is a single shared password compared with `crypto.timingSafeEqual`. After 10 failed attempts from one IP, that IP is locked out for a few minutes (`recordFail` / `rateLimited` in `server.js`).
-- **No HTTPS in the app itself.** Terminate TLS at your reverse proxy (nginx, Cloudflare, ALB, etc.) and forward to the Node process over HTTP on the configured `PORT`. The app does not look at `X-Forwarded-For` for rate limiting — if you need accurate per-IP limits behind a proxy, add `app.set('trust proxy', true)` near the top of `server.js`.
-- **No CSRF protection on admin endpoints.** The admin UI is gated by the password header; treat the admin pages as something to expose only to a trusted network or behind your SSO. If you put the scheduler on the open internet, consider adding origin checks or wrapping the admin endpoints behind your IdP.
-- **Calendar feed tokens** are 32-char url-safe random strings stored on each employee record (`calendarToken` field in `state.json`). They are minted on demand the first time a phone-verified crew member requests their subscribe URL. A leaked token only exposes one person's own shift schedule — no PII, no other crew's data — but tokens currently have no expiry. To revoke a token (e.g. a crew member changes phone), clear the field on their employee record in `state.json`; the next subscribe-url request will mint a fresh one. Consider adding a TTL or admin "rotate" button if you start dealing with sensitive customer addresses in job notes.
-
-## What to drop when migrating off Replit
-
-Files that exist only because the app was running on Replit and should be deleted when self-hosting:
-
-- `.replit` — Replit run config.
-- `replit.nix` — Replit Nix package config.
-- `.local/` — Replit Agent's local scaffolding.
-
-These do not affect the Node process; they are config for Replit's UI.
-
-## Migrating live data from the current Replit deployment
-
-The current production data lives in Replit at `./data/state.json` and `./data/published.json`. Two ways to move it:
-
-1. **Via Replit's file pane:** download both JSON files from Replit, drop them into your new host's `./data/` folder before starting the process.
-2. **Via the admin API:** while the Replit instance is still running, `curl -H 'X-Admin-Password: ...' https://<replit-url>/api/state > state.json`. That returns the full state JSON. There is no equivalent endpoint for `published.json`, so download that one directly via Replit's file pane.
-
-## Known quirks worth flagging
-
-- **Static HTML caching.** The browser cache can show stale versions of `availability.html` and `scheduler.html` after a deploy. Adding cache-busting query strings (`?v=<commit-sha>`) to the script/style refs is the proper fix; today users are told to hard-refresh (Ctrl+Shift+R).
-- **`server.js` requires a process restart to pick up changes.** Replit's "Republish" did not always restart the Node process; we hit this during deployment. If you wire up a CD pipeline, make sure it actually restarts the Node process (or use a process manager like PM2 that watches `server.js`).
-- **No structured logging.** The server writes to stdout. If you want structured logs, wrap with `pino` or a logger middleware.
-
-## Single source of truth
-
-GitHub repo: <https://github.com/650get-cell/rescue>
-
-James can grant IT push access if you want the canonical repo to live with you. Otherwise, treat the GitHub copy as the snapshot at the moment of handoff and fork into your own org.
-
-## Questions
-
-If anything in this doc doesn't match what you see in the code, the code wins. Open `server.js` — it is small enough that reading it top to bottom is the fastest way to verify behaviour.
+GitHub repo: <https://github.com/650get-cell/rescue>. James can grant access if IT wants to own the repo.

@@ -12,10 +12,16 @@ here describing what changed.
 
 ---
 
+## 1.13.0 — 2026-11-18
+
+- **Change (Estimates):** simplified the estimator. One schedule line instead of a row per shift: start date, number of days, shift start time, hours per shift, rescuers, trucks per day. The page counts weekdays, Saturdays and Sundays and applies the pay rules to each day. Added travel hours per rescuer (whole job, billed at the travel rate) and lodging (qty × cost with a markup picked from the worksheet list; lodging stays out of the total until a markup is picked). Added job details (quote #, customer, contact, project/area, site address). Removed other labor lines, tooling and the rest of the materials list.
+- **New (Estimates):** daily calendar under the estimate, weeks starting Sunday, showing hours and charges per rescuer, truck, admin, day total and week totals. Print prints the estimate and calendar.
+
 ## 1.12.0 — 2026-11-18
 
 - Ventilation Calculator also served at the short URL `/ventilation` (public, no login) for sharing with customers.
 - Added a Ventilation Calculator link to the availability page header.
+- IT handoff refreshed: `HANDOFF.md` rewritten for PostgreSQL storage and current pages/endpoints, `DATABASE_URL` added to `.env.example`, new `db/schema.sql`. `package-lock.json` now points at the public npm registry (14 entries pointed at Replit's internal mirror, which breaks `npm ci` outside Replit).
 
 ## 1.11.0 — 2026-11-18
 
