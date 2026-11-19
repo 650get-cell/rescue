@@ -10,7 +10,7 @@
   body { font-family:"Inter",sans-serif; background:#e8e8e8; min-height:100vh; color:#1a1a1a; padding:24px 16px 60px; }
 
   .header {
-    max-width:1000px; margin:0 auto; background:#1a1a1a; border-bottom:3px solid #c01010;
+    max-width:600px; margin:0 auto; background:#1a1a1a; border-bottom:3px solid #c01010;
     padding:22px 28px; border-radius:14px 14px 0 0;
   }
   .logo { font-family:"Syne",sans-serif; font-weight:800; font-size:24px; letter-spacing:-0.02em; }
@@ -19,10 +19,10 @@
   .logo .res { color:#aaa; font-weight:700; }
   .logo-sub { color:#888; font-size:12px; letter-spacing:.15em; text-transform:uppercase; font-weight:500; margin-top:4px; }
 
-  .container { max-width:1000px; margin:0 auto; background:#fff; border-radius:0 0 14px 14px; padding:36px 32px 40px; box-shadow:0 4px 24px rgba(0,0,0,.10); }
+  .container { max-width:600px; margin:0 auto; background:#fff; border-radius:0 0 14px 14px; padding:36px 32px 40px; box-shadow:0 4px 24px rgba(0,0,0,.10); }
 
 
-  .cards { display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:16px; }
+  .cards { display:flex; flex-direction:column; gap:14px; }
 
   .card {
     background:#fafafa; border:2px solid #e0e0e0; border-radius:12px; padding:24px 22px;
@@ -37,8 +37,11 @@
   .card-tag.crew { background:#f2f2f2; color:#333333; }
 
   @media (max-width:520px) {
-    .header { padding:18px 20px; }
-    .container { padding:26px 18px 30px; }
+    body { padding:0 0 60px; }
+    .header { padding:18px 20px; border-radius:0; }
+    .container { padding:20px 14px 28px; border-radius:0; box-shadow:none; }
+    .card { padding:20px 18px; }
+    .card:hover { transform:none; }
   }
 
   .version-chip { position:fixed; bottom:8px; left:10px; font:14px/1.4 system-ui,sans-serif; color:#fff; background:#1a1a1a; padding:4px 10px; border-radius:4px; pointer-events:none; user-select:none; z-index:99999; }
@@ -59,11 +62,6 @@
       <span class="card-tag crew">Crew</span>
     </a>
 
-    <a href="/schedule_view.html" class="card">
-      <div class="card-title">My Schedule</div>
-      <div class="card-desc">See the published job schedule.</div>
-      <span class="card-tag crew">Crew</span>
-    </a>
 
     <a href="/ventilation" class="card">
       <div class="card-title">Ventilation Calculator</div>
