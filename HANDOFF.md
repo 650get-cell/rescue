@@ -42,7 +42,7 @@ Not included on purpose: live data (`data/`), Replit config, and internal develo
 
 | Path | Who | Auth |
 |---|---|---|
-| `/` | — | Redirects to `/availability.html` |
+| `/` | Everyone | None. Landing page with links to every app. |
 | `/availability.html` | Crew | Phone-number match. Links to the Ventilation Calculator. |
 | `/schedule_view.html` | Crew | None (read-only published schedule) |
 | `/ventilation` and `/ventilation.html` | Crew and customers | None. Runs entirely in the browser — no server calls. |

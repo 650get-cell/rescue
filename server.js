@@ -789,7 +789,7 @@ app.delete('/api/quotes/:id', requireAdmin, wrap(async (req, res) => {
 // ============================================================
 // ROUTES (serve HTML)
 // ============================================================
-app.get('/', (req, res) => res.redirect('/availability.html'));
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
 app.get('/ventilation', (req, res) => res.sendFile(path.join(__dirname, 'public', 'ventilation.html')));
 
 // Error handler — anything a wrapped async route rejects with lands here.

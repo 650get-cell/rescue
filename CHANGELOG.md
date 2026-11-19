@@ -12,6 +12,10 @@ here describing what changed.
 
 ---
 
+## 1.14.0 — 2026-11-19
+
+- **New:** landing page at `/` (`public/index.html`) with links to every page: Submit Availability, Crew Schedule, Ventilation Calculator, Admin Dashboard, Scheduler, Mobile Scheduler, Availability View and Estimates. `/` used to go straight to the availability page.
+
 ## 1.13.0 — 2026-11-18
 
 - **Change (Estimates):** simplified the estimator. One schedule line instead of a row per shift: start date, number of days, shift start time, hours per shift, rescuers, trucks per day. The page counts weekdays, Saturdays and Sundays and applies the pay rules to each day. Added travel hours per rescuer (whole job, billed at the travel rate) and lodging (qty × cost with a markup picked from the worksheet list; lodging stays out of the total until a markup is picked). Added job details (quote #, customer, contact, project/area, site address). Removed other labor lines, tooling and the rest of the materials list.
