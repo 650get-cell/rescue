@@ -131,10 +131,75 @@
   .generated-icon { width: 60px; height: 76px; background: var(--red); color: #fff; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-size: 14px; font-weight: 800; letter-spacing: 0.08em; margin: 8px auto 14px; }
 
 
+  /* ============ PRINT-ONLY PDF-REPLICA LAYOUTS ============ */
+  .print-doc { display: none; }
+
+  @page { size: Letter; margin: 0.4in; }
+
   @media print {
-    .top, .nav-btn, .btn-outline, .btn-accent, .btn-dark, .new-job-btn, .filter-row, .search { display: none !important; }
-    body { background: #fff; }
-    .wrap { max-width: none; padding: 0; }
+    .top, .filter-row, .search, .btn-outline, .btn-accent, .btn-dark, .new-job-btn,
+    #view-dashboard, #view-job, #view-form, #view-book { display: none !important; }
+    body { background: #fff; font-family: "Inter", Arial, sans-serif; font-size: 9pt; color: #000; }
+    .wrap { max-width: none; padding: 0; margin: 0; display: block; }
+
+    body.print-permit .print-doc.permit,
+    body.print-plan   .print-doc.plan,
+    body.print-jsa    .print-doc.jsa,
+    body.print-air    .print-doc.air,
+    body.print-book   .print-doc.in-book { display: block; }
+
+    body.print-air, body.print-book { }
+
+    .print-doc + .print-doc { page-break-before: always; }
+
+    /* Header */
+    .pd-head { display: flex; align-items: center; justify-content: space-between; gap: 10pt; margin-bottom: 6pt; }
+    .pd-title { font-family: "Syne", "Inter", sans-serif; font-weight: 800; font-size: 16pt; letter-spacing: 0.02em; flex: 1; text-align: center; }
+    .pd-logo { font-family: "Syne", "Inter", sans-serif; font-weight: 800; font-size: 13pt; line-height: 1; letter-spacing: -0.02em; white-space: nowrap; }
+    .pd-logo .mar { color: #c01010; } .pd-logo .tech { color: #000; }
+    .pd-logo-sub { font-size: 7pt; letter-spacing: 0.1em; color: #444; text-align: right; margin-top: 2pt; }
+
+    /* Frame + section bars */
+    .pd-frame { border: 1px solid #000; }
+    .pd-bar { background: #d8d8d8; font-family: "Syne", "Inter", sans-serif; font-weight: 700; font-size: 10pt; letter-spacing: 0.04em; text-align: center; padding: 2pt 0; border-bottom: 1px solid #000; }
+
+    /* Rows */
+    .pd-row { display: flex; padding: 3pt 6pt; gap: 10pt; border-bottom: 1px solid #d0d0d0; }
+    .pd-row:last-child { border-bottom: none; }
+    .pd-field { display: flex; align-items: baseline; gap: 4pt; flex: 1; }
+    .pd-field-wide { flex: 2; }
+    .pd-label { font-weight: 500; color: #000; white-space: nowrap; }
+    .pd-value { flex: 1; border-bottom: 1px solid #000; min-height: 11pt; padding: 0 3pt; }
+
+    /* Check grid */
+    .pd-check-row { padding: 3pt 6pt; display: flex; gap: 10pt; flex-wrap: wrap; border-bottom: 1px solid #d0d0d0; }
+    .pd-check-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2pt 10pt; padding: 4pt 6pt; border-bottom: 1px solid #d0d0d0; }
+    .pd-check-grid-3 { grid-template-columns: repeat(3, 1fr); }
+    .pd-check-grid-2 { grid-template-columns: repeat(2, 1fr); }
+    .pd-check-item { display: flex; align-items: baseline; gap: 4pt; font-size: 9pt; }
+    .pd-check { width: 9pt; height: 9pt; border: 0.75pt solid #000; display: inline-flex; align-items: center; justify-content: center; font-size: 8pt; line-height: 1; flex-shrink: 0; }
+    .pd-check.on::before { content: "\2713"; font-weight: 700; }
+
+    /* Air log hourly table */
+    .pd-table { width: 100%; border-collapse: collapse; font-size: 8pt; }
+    .pd-table th, .pd-table td { border: 0.5pt solid #000; padding: 2pt 3pt; min-height: 14pt; text-align: center; }
+    .pd-table th { background: #d8d8d8; font-weight: 700; }
+    .pd-table td { height: 16pt; }
+
+    /* Narrative */
+    .pd-narrative { padding: 4pt 6pt; font-size: 8.5pt; line-height: 1.4; border-bottom: 1px solid #d0d0d0; }
+    .pd-narrative p { margin: 0 0 3pt; }
+
+    /* Side-by-side layout for rescue plan page 2 */
+    .pd-split { display: grid; grid-template-columns: 2fr 1fr; }
+    .pd-split > div { border-right: 1px solid #000; }
+    .pd-split > div:last-child { border-right: none; }
+
+    /* Signature line */
+    .pd-sig-row { display: flex; gap: 20pt; padding: 8pt 6pt 4pt; align-items: flex-end; }
+    .pd-sig { flex: 1; border-top: 1px solid #000; padding-top: 2pt; font-size: 8pt; color: #333; text-align: center; }
+
+    .pd-footer { font-size: 7pt; color: #666; padding: 4pt 6pt 0; text-align: right; }
   }
 </style>
 </head>
@@ -589,7 +654,16 @@
 
   document.querySelectorAll('[data-back]').forEach(b => b.addEventListener('click', () => show('job')));
 
-  document.getElementById('printBtn').addEventListener('click', () => window.print());
+  function doPrint(kind) {
+    document.body.classList.add('print-' + kind);
+    window.onafterprint = () => { document.body.classList.remove('print-' + kind); window.onafterprint = null; };
+    window.print();
+  }
+  document.getElementById('printBtn').addEventListener('click', () => {
+    // Book: print whichever docs are selected, using in-book marker.
+    // Simpler: print the full book (all four) since the in-book replicas don't yet reflect selection state.
+    doPrint('book');
+  });
   document.getElementById('emailBtn').addEventListener('click', () => alert('Email flow — wires to Outlook/Power Automate in production.'));
   document.getElementById('linkBtn').addEventListener('click', () => alert('SharePoint link copy — wires to SharePoint in production.'));
   document.getElementById('saveBtn').addEventListener('click', () => alert('Device save — wires to file download in production.'));
@@ -598,5 +672,353 @@
   renderJobs('active');
   show('dashboard');
 </script>
+
+<!-- ============ PRINT-ONLY DOCUMENTS ============ -->
+<div class="print-doc permit in-book">
+  <div class="pd-head">
+    <div style="width: 90pt;"></div>
+    <div class="pd-title">CONFINED SPACE ENTRY PERMIT</div>
+    <div class="pd-logo"><span class="mar">Mar</span><span class="tech">Tech</span><div class="pd-logo-sub">Mechanical Analysis / Repair, Inc.</div></div>
+  </div>
+  <div class="pd-frame">
+    <div class="pd-row"><div class="pd-field pd-field-wide"><span class="pd-label">Facility:</span><span class="pd-value" data-f="facility">Tesoro Refining — Martinez</span></div><div class="pd-field"><span class="pd-label">Representative:</span><span class="pd-value">M. Alvarez</span></div><div class="pd-field"><span class="pd-label">Work Order #:</span><span class="pd-value">884201</span></div></div>
+    <div class="pd-row"><div class="pd-field"><span class="pd-label">Duration of entry:</span><span class="pd-value"></span></div><div class="pd-field"><span class="pd-label">Date:</span><span class="pd-value">11/19/26</span></div><div class="pd-field"><span class="pd-label">Time:</span><span class="pd-value"></span></div></div>
+    <div class="pd-row"><div class="pd-field pd-field-wide"><span class="pd-label">Space Description:</span><span class="pd-value">Vessel V-204</span></div><div class="pd-field"><span class="pd-label">Space #:</span><span class="pd-value"></span></div></div>
+    <div class="pd-row"><div class="pd-field pd-field-wide"><span class="pd-label">Purpose of Entry:</span><span class="pd-value"></span></div></div>
+    <div class="pd-row"><div class="pd-field"><span class="pd-label">Attendant:</span><span class="pd-value"></span></div><div class="pd-field"><span class="pd-label">Entry Supervisor:</span><span class="pd-value">J. Stockwell</span></div></div>
+
+    <div class="pd-bar">ATMOSPHERE</div>
+    <div class="pd-row"><div class="pd-field"><span class="pd-label">Monitor Make:</span><span class="pd-value">MultiRAE</span></div><div class="pd-field"><span class="pd-label">Model:</span><span class="pd-value"></span></div><div class="pd-field"><span class="pd-label">Calibration:</span><span class="pd-value">11/02/26</span></div></div>
+    <div class="pd-row"><div class="pd-field"><span class="pd-label">Serial #:</span><span class="pd-value">#4</span></div><div class="pd-field pd-field-wide"><span class="pd-label">Fresh Air Calibration:</span><span class="pd-value"></span></div></div>
+    <div style="padding: 2pt 6pt; font-size: 8pt; text-align: center; font-weight: 700; border-bottom: 1px solid #d0d0d0;">DO NOT ENTER IF PERMISSIBLE ENTRY LEVELS ARE EXCEEDED</div>
+    <div style="padding: 0 6pt 4pt;">
+      <table class="pd-table" style="margin-top: 2pt;">
+        <tr><th></th><th>TIME</th><th>Oxygen<br>19.5% – 23.5%</th><th>LEL<br>&lt;10%</th><th>CO<br>35 PPM (8hr)</th><th>H2S<br>10 PPM (8hr)</th><th>Other</th><th>Notes</th></tr>
+        <tr><td style="text-align: left; padding: 2pt 4pt;">Open</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+        <tr><td style="text-align: left; padding: 2pt 4pt;">Closed</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      </table>
+    </div>
+
+    <div class="pd-bar">HAZARDS</div>
+    <div class="pd-check-row" style="display: block;">
+      <div style="font-size: 9pt;"><strong>MECHANICAL:</strong> <span class="pd-check"></span> Electrical &nbsp; <span class="pd-check"></span> Pneumatic &nbsp; <span class="pd-check"></span> Hydraulic &nbsp; <span class="pd-check"></span> Pipes or Ducts &nbsp; <span class="pd-check"></span> Engulfment &nbsp; <span class="pd-check"></span> Tripping &nbsp; <span class="pd-check"></span> Falling</div>
+      <div style="font-size: 9pt; margin-top: 2pt;"><strong>CHEMICAL:</strong> <span class="pd-check"></span> Oil &nbsp; <span class="pd-check"></span> Solvents &nbsp; <span class="pd-check"></span> Corrosive &nbsp; <span class="pd-check"></span> Caustic</div>
+      <div style="font-size: 9pt; margin-top: 2pt;"><strong>ATMOSPHERIC:</strong> <span class="pd-check on"></span> Oxygen Deficiency &nbsp; <span class="pd-check on"></span> Combustibles &nbsp; <span class="pd-check"></span> Carbon Monoxide &nbsp; <span class="pd-check"></span> Welding Fumes &nbsp; <span class="pd-check"></span> Airborne Particles &nbsp; <span class="pd-check"></span> Oil Mist</div>
+      <div style="font-size: 9pt; margin-top: 2pt;"><span class="pd-check"></span> Other (Specify): _______________ &nbsp;&nbsp; Hazardous substance: _______________</div>
+      <div style="font-size: 9pt; margin-top: 2pt;"><strong>TEMPERATURE:</strong> <span class="pd-check"></span> High &nbsp; <span class="pd-check"></span> Low</div>
+    </div>
+
+    <div class="pd-bar">HAZARD CONTROL</div>
+    <div class="pd-check-row" style="display: block;">
+      <div style="font-size: 9pt;"><strong>VENTILATION:</strong> <span class="pd-check"></span> Ventilation Fan &amp; Ducting ____ Feet &nbsp; <span class="pd-check"></span> Saddle Vent with Bend &nbsp; <span class="pd-check"></span> Exhaust &nbsp; <span class="pd-check"></span> Local Exhaust &nbsp; <span class="pd-check"></span> Local Supply</div>
+      <div style="font-size: 9pt; margin-top: 2pt;"><strong>MECHANICAL:</strong> <span class="pd-check"></span> Block Linkage &nbsp; <span class="pd-check"></span> Disconnect</div>
+      <div style="font-size: 9pt; margin-top: 2pt;"><strong>ELECTRICAL:</strong> <span class="pd-check"></span> Lock-Out &nbsp; <span class="pd-check"></span> Tag-Out</div>
+      <div style="font-size: 9pt; margin-top: 2pt;"><strong>PNEUMATIC:</strong> <span class="pd-check"></span> Lock-Out &nbsp; <span class="pd-check"></span> Tag-Out &nbsp; <span class="pd-check"></span> Disconnect &nbsp; <span class="pd-check"></span> Bleed</div>
+      <div style="font-size: 9pt; margin-top: 2pt;"><strong>PIPES/DUCTS:</strong> <span class="pd-check"></span> Blind &nbsp; <span class="pd-check"></span> Disconnect</div>
+      <div style="font-size: 9pt; margin-top: 2pt;"><strong>HYDRAULIC:</strong> <span class="pd-check"></span> Lock-Out &nbsp; <span class="pd-check"></span> Tag-Out &nbsp; <span class="pd-check"></span> Disconnect</div>
+      <div style="font-size: 9pt; margin-top: 2pt;"><strong>OTHER (Specify):</strong> _______________</div>
+    </div>
+
+    <div class="pd-bar">PROTECTIVE EQUIPMENT</div>
+    <div class="pd-check-row" style="display: block;">
+      <div style="font-size: 9pt;"><strong>LIGHTING:</strong> <span class="pd-check"></span> Cord Light &nbsp; <span class="pd-check"></span> Headlamp &nbsp; <span class="pd-check"></span> Rechargeable Light &nbsp; <span class="pd-check"></span> Fire Extinguisher &nbsp; <span class="pd-check"></span> Static Protection</div>
+      <div style="font-size: 9pt; margin-top: 2pt;"><span class="pd-check"></span> Warning Signs &nbsp; <span class="pd-check"></span> Cones &nbsp; <span class="pd-check"></span> Barricades/Tape &nbsp; <span class="pd-check"></span> Power Cords ____ feet &nbsp; <span class="pd-check"></span> Fall Protection</div>
+    </div>
+    <div class="pd-bar">PERSONAL PROTECTIVE EQUIPMENT</div>
+    <div class="pd-check-row" style="display: block;">
+      <div style="font-size: 9pt;"><span class="pd-check"></span> Body Harness &nbsp; <span class="pd-check"></span> PAL &nbsp; <span class="pd-check"></span> Safety Glasses &nbsp; <span class="pd-check"></span> Goggles &nbsp; <span class="pd-check"></span> Face Shield &nbsp; <span class="pd-check"></span> Hard Hat &nbsp; <span class="pd-check"></span> Ear Plugs</div>
+      <div style="font-size: 9pt; margin-top: 2pt;"><span class="pd-check"></span> Coveralls &nbsp; <span class="pd-check"></span> Gloves &nbsp; <span class="pd-check"></span> Tyvek Suit &nbsp; <span class="pd-check"></span> Chemical Gloves &nbsp; <span class="pd-check"></span> Over boots</div>
+    </div>
+    <div class="pd-bar">RESPIRATORY PROTECTION</div>
+    <div class="pd-check-row" style="display: block;">
+      <div style="font-size: 9pt;"><span class="pd-check"></span> SCBA &nbsp; <span class="pd-check"></span> SAR &nbsp; <span class="pd-check"></span> APR &nbsp; <span class="pd-check"></span> PAPR</div>
+      <div style="font-size: 9pt; margin-top: 2pt;"><strong>CARTRIDGE:</strong> <span class="pd-check"></span> Organic Vapor &nbsp; <span class="pd-check"></span> Acid Gas &nbsp; <span class="pd-check"></span> Organic Vapor/Acid Gas &nbsp; <span class="pd-check"></span> Dust/mist</div>
+    </div>
+    <div class="pd-bar">COMMUNICATIONS</div>
+    <div class="pd-check-row" style="display: block;">
+      <div style="font-size: 9pt;"><span class="pd-check"></span> Visual/Hand Signs &nbsp; <span class="pd-check"></span> Voice &nbsp; <span class="pd-check on"></span> Radio &nbsp; <span class="pd-check"></span> OATH &nbsp; <span class="pd-check"></span> Hardwire &nbsp; <span class="pd-check"></span> Cellular Phone</div>
+    </div>
+    <div class="pd-bar">ADDITIONAL PERMITS</div>
+    <div class="pd-check-row" style="display: block;">
+      <div style="font-size: 9pt;"><span class="pd-check"></span> Hot work &nbsp;&nbsp; <span class="pd-check"></span> Safe work</div>
+    </div>
+    <div class="pd-bar">EMERGENCY RESCUE PLAN</div>
+    <div style="padding: 3pt 6pt; font-size: 9pt;"><strong>ATTACHED:</strong> <span class="pd-check on"></span> YES</div>
+    <div style="padding: 3pt 6pt; font-size: 9pt; border-bottom: 1px solid #d0d0d0;"><strong>Notes:</strong></div>
+
+    <div class="pd-bar">PERMIT CLOSED</div>
+    <div class="pd-row"><div class="pd-field"><span class="pd-label">Time:</span><span class="pd-value"></span></div><div class="pd-field"><span class="pd-label">Date:</span><span class="pd-value"></span></div></div>
+    <div style="padding: 3pt 6pt; font-size: 9pt;">Were any unexpected hazards encountered during the entry? <span class="pd-check"></span> no &nbsp; <span class="pd-check"></span> yes (explain below)</div>
+    <div style="padding: 3pt 6pt; font-size: 9pt; min-height: 24pt; border-bottom: 1px solid #d0d0d0;">&nbsp;</div>
+    <div class="pd-sig-row"><div class="pd-sig">Supervisor &mdash; Print</div><div class="pd-sig">Signature</div></div>
+  </div>
+</div>
+
+<div class="print-doc plan in-book">
+  <div class="pd-head">
+    <div style="width: 90pt;"></div>
+    <div class="pd-title">CONFINED SPACE RESCUE PLAN</div>
+    <div class="pd-logo"><span class="mar">Mar</span><span class="tech">Tech</span><div class="pd-logo-sub">Mechanical Analysis / Repair, Inc.</div></div>
+  </div>
+  <div class="pd-frame">
+    <div class="pd-bar">WORK SITE DETAILS</div>
+    <div class="pd-row"><div class="pd-field pd-field-wide"><span class="pd-label">Facility:</span><span class="pd-value">Tesoro Refining — Martinez</span></div><div class="pd-field"><span class="pd-label">Work order #:</span><span class="pd-value">884201</span></div></div>
+    <div class="pd-row"><div class="pd-field pd-field-wide"><span class="pd-label">Customer Representative:</span><span class="pd-value">M. Alvarez</span></div><div class="pd-field"><span class="pd-label">Date:</span><span class="pd-value">11/19/26</span></div></div>
+    <div class="pd-row"><div class="pd-field pd-field-wide"><span class="pd-label">Emergency Assembly Location:</span><span class="pd-value">N. gate muster point</span></div></div>
+    <div class="pd-row"><div class="pd-field pd-field-wide"><span class="pd-label">Description of space:</span><span class="pd-value">Vessel V-204</span></div></div>
+    <div class="pd-row"><div class="pd-field pd-field-wide"><span class="pd-label">Rescue Team:</span><span class="pd-value">J. Stockwell, D. Ortega, K. Nguyen</span></div></div>
+
+    <div class="pd-bar">RESCUE COMMUNICATIONS PLAN</div>
+    <div class="pd-row"><div class="pd-field"><span class="pd-label">Emergency Phone Number:</span><span class="pd-value">911</span></div><div class="pd-field"><span class="pd-label">Radio Channel:</span><span class="pd-value">Ch. 4</span></div></div>
+    <div class="pd-row"><div class="pd-field pd-field-wide"><span class="pd-label">Facility Emergency Contact:</span><span class="pd-value"></span></div></div>
+    <div class="pd-check-row" style="display: block;">
+      <div style="font-size: 9pt;"><strong>Incident Communications:</strong> <span class="pd-check"></span> Visual/Hand Signs &nbsp; <span class="pd-check"></span> Voice &nbsp; <span class="pd-check on"></span> Radio &nbsp; <span class="pd-check"></span> OATH &nbsp; <span class="pd-check"></span> Hardwire &nbsp; <span class="pd-check"></span> Cellular Phone</div>
+      <div style="font-size: 9pt; margin-top: 2pt;"><strong>Backup plan:</strong> <span class="pd-check"></span> Visual/Hand Signs &nbsp; <span class="pd-check"></span> Voice &nbsp; <span class="pd-check"></span> Radio &nbsp; <span class="pd-check"></span> OATH &nbsp; <span class="pd-check on"></span> Hardwire &nbsp; <span class="pd-check"></span> Cellular Phone &nbsp; <span class="pd-check"></span> Other: _______</div>
+    </div>
+
+    <div class="pd-bar">POTENTIAL RESCUE SITUATIONS</div>
+    <div class="pd-check-row" style="display: block;">
+      <div style="font-size: 9pt;"><strong>MECHANICAL:</strong> <span class="pd-check"></span> Electrical &nbsp; <span class="pd-check"></span> Pneumatic &nbsp; <span class="pd-check"></span> Hydraulic &nbsp; <span class="pd-check"></span> Pipes or Ducts &nbsp; <span class="pd-check"></span> Engulfment &nbsp; <span class="pd-check"></span> Tripping &nbsp; <span class="pd-check on"></span> Falling</div>
+      <div style="font-size: 9pt; margin-top: 2pt;"><strong>CHEMICAL:</strong> <span class="pd-check"></span> Oil &nbsp; <span class="pd-check"></span> Solvents &nbsp; <span class="pd-check"></span> Corrosive &nbsp; <span class="pd-check"></span> Caustic</div>
+      <div style="font-size: 9pt; margin-top: 2pt;"><strong>ATMOSPHERIC:</strong> <span class="pd-check on"></span> Oxygen Deficiency &nbsp; <span class="pd-check on"></span> Combustibles &nbsp; <span class="pd-check"></span> Carbon Monoxide &nbsp; <span class="pd-check"></span> Welding Fumes &nbsp; <span class="pd-check"></span> Airborne Particles &nbsp; <span class="pd-check"></span> Oil Mist</div>
+      <div style="font-size: 9pt; margin-top: 2pt;"><strong>TEMPERATURE:</strong> <span class="pd-check"></span> High &nbsp; <span class="pd-check"></span> Low</div>
+      <div style="font-size: 9pt; margin-top: 2pt;"><span class="pd-check"></span> Other (Specify): _______________ &nbsp; Hazardous substance: _______________</div>
+      <div style="font-size: 9pt; margin-top: 2pt;"><strong>Material:</strong> _______________ &nbsp;&nbsp; <strong>SDS:</strong> _______________</div>
+    </div>
+
+    <div class="pd-bar">VENTILATION PLAN</div>
+    <div class="pd-check-row" style="display: block; font-size: 9pt;"><span class="pd-check"></span> Natural &nbsp; <span class="pd-check on"></span> Mechanical &nbsp; <span class="pd-check on"></span> Supply &nbsp; <span class="pd-check"></span> Exhaust &nbsp; <span class="pd-check"></span> Local Exhaust &nbsp; <span class="pd-check"></span> Other: _______________</div>
+
+    <div class="pd-bar">AIR MONITORING</div>
+    <div class="pd-row"><div class="pd-field"><span class="pd-label">Make:</span><span class="pd-value">MultiRAE</span></div><div class="pd-field"><span class="pd-label">Model:</span><span class="pd-value"></span></div><div class="pd-field"><span class="pd-label">Serial #:</span><span class="pd-value">#4</span></div></div>
+    <div class="pd-row"><div class="pd-field"><span class="pd-label">Calibration Date:</span><span class="pd-value">11/02/26</span></div><div class="pd-field pd-field-wide" style="font-size: 9pt;"><span class="pd-check"></span> Continuous &nbsp;&nbsp; Interval: <span class="pd-check"></span> 15min &nbsp; <span class="pd-check"></span> 30min &nbsp; <span class="pd-check on"></span> 1 Hour &nbsp; <span class="pd-check"></span> 2 Hours</div></div>
+
+    <div class="pd-split">
+      <div>
+        <div class="pd-bar">RESCUE PLAN DETAILS</div>
+        <div class="pd-narrative">
+          <p>Upon initiation of rescue procedures, contractors will be instructed to stop work while rescue is initiated, fossil fuel operating equipment will be turned off in the area surrounding the rescue site.</p>
+          <p>The rescue team will provide any necessary first aid and/or CPR for the injured entrant(s) if the conditions allow. The rescue team will remove the injured entrant from the space as safely and expeditiously as conditions allow.</p>
+          <p>The rescue team will maintain regular contact with the attendant regarding conditions within the space and the location of the entrants.</p>
+          <p>If an entrant(s) is injured or unable to exit the space unassisted, the rescue team will enter the space and conduct a rescue if conditions are safe for entry.</p>
+          <p>Raise or lower victim depending on location using mechanical advantage or manual lifting remove victim from space using rescue liter sked or spec pack, stabilize victim and provide first aid as needed.</p>
+          <p>Unless otherwise communicated, the facility is responsible for making any required notifications under Title 8 Section 5157 &amp; 5158.</p>
+        </div>
+      </div>
+      <div>
+        <div class="pd-bar">PRE-ENTRY CHECKLIST</div>
+        <div style="padding: 4pt 6pt; font-size: 9pt; line-height: 1.6;">
+          <div><span class="pd-check on"></span> Atmospheric Monitoring</div>
+          <div><span class="pd-check on"></span> Communication Plan</div>
+          <div><span class="pd-check on"></span> Emergency Assembly Location</div>
+          <div><span class="pd-check on"></span> Entry &amp; Exit Points</div>
+          <div><span class="pd-check on"></span> Evacuation Routes</div>
+          <div><span class="pd-check on"></span> Location of Rescue Equipment</div>
+          <div><span class="pd-check on"></span> Lock-out Tag-Out</div>
+          <div><span class="pd-check on"></span> Location of Hazards</div>
+          <div><span class="pd-check on"></span> Safety Check</div>
+          <div><span class="pd-check"></span> Ventilation</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pd-bar">EQUIPMENT</div>
+    <div class="pd-check-grid">
+      <div class="pd-check-item"><span class="pd-check on"></span>Basket Stretcher</div>
+      <div class="pd-check-item"><span class="pd-check on"></span>Gas Detector</div>
+      <div class="pd-check-item"><span class="pd-check on"></span>SKED / SPEC PAK</div>
+      <div class="pd-check-item"><span class="pd-check on"></span>First Aid kit</div>
+      <div class="pd-check-item"><span class="pd-check on"></span>SCBA</div>
+      <div class="pd-check-item"><span class="pd-check on"></span>Harness</div>
+      <div class="pd-check-item"><span class="pd-check on"></span>Rescue Strop</div>
+      <div class="pd-check-item"><span class="pd-check"></span>Long Arm</div>
+      <div class="pd-check-item"><span class="pd-check"></span>Crane</div>
+      <div class="pd-check-item"><span class="pd-check"></span>Hazardous Chemical Suit</div>
+      <div class="pd-check-item"><span class="pd-check on"></span>SRL</div>
+      <div class="pd-check-item"><span class="pd-check on"></span>Ladder</div>
+      <div class="pd-check-item"><span class="pd-check"></span>Defibrillator</div>
+      <div class="pd-check-item"><span class="pd-check on"></span>Life Rescue Line</div>
+      <div class="pd-check-item"><span class="pd-check on"></span>Cellular Phone</div>
+      <div class="pd-check-item"><span class="pd-check"></span>Winch</div>
+      <div class="pd-check-item"><span class="pd-check on"></span>Fire Extinguisher</div>
+      <div class="pd-check-item"><span class="pd-check on"></span>Lighting</div>
+      <div class="pd-check-item"><span class="pd-check on"></span>Tripod / Davit / Anchor</div>
+      <div class="pd-check-item"><span class="pd-check on"></span>Ventilation Equipment</div>
+    </div>
+
+    <div class="pd-bar">BRIEFING</div>
+    <div style="padding: 4pt 6pt; font-size: 9pt;">Participants of the Rescue Team briefed prior to work Commencing <span class="pd-check on"></span> Y &nbsp;&nbsp;&nbsp; Rescue Equipment Checked <span class="pd-check on"></span> Y</div>
+
+    <div class="pd-bar">ROLES</div>
+    <div class="pd-row"><div class="pd-field"><span class="pd-label">Rescue Supervisor:</span><span class="pd-value">J. Stockwell</span></div><div class="pd-field"><span class="pd-label">Rescuer 1:</span><span class="pd-value">D. Ortega</span></div></div>
+    <div class="pd-row"><div class="pd-field"><span class="pd-label">Rescuer 2:</span><span class="pd-value">K. Nguyen</span></div><div class="pd-field"><span class="pd-label">Rescuer 3:</span><span class="pd-value"></span></div></div>
+
+    <div class="pd-bar">TEAM ACKNOWLEDGEMENT</div>
+    <div style="padding: 10pt 6pt; font-size: 9pt;">Sign &amp; Date:</div>
+  </div>
+</div>
+
+<div class="print-doc jsa in-book">
+  <div class="pd-head">
+    <div class="pd-logo" style="flex: 0 0 auto;"><span class="mar">Mar</span><span class="tech">Tech</span><div class="pd-logo-sub">Mechanical Analysis / Repair, Inc.</div></div>
+    <div class="pd-title">DAILY JOB SAFETY ANALYSIS</div>
+    <div style="font-size: 9pt; text-align: right;"><div>Name: ______________</div><div style="margin-top: 2pt;">Date: ______________</div></div>
+  </div>
+  <div class="pd-frame">
+    <div class="pd-row"><div class="pd-field"><span class="pd-label">JOB #:</span><span class="pd-value">MTR-26-0042</span></div><div class="pd-field"><span class="pd-label">Job Lead Man:</span><span class="pd-value">J. Stockwell</span></div></div>
+    <div class="pd-row"><div class="pd-field pd-field-wide"><span class="pd-label">LOCATION:</span><span class="pd-value">Tesoro Refining — Martinez</span></div></div>
+    <div class="pd-row"><div class="pd-field pd-field-wide"><span class="pd-label">Work Description:</span><span class="pd-value">Confined Space Rescue Standby</span></div></div>
+    <div class="pd-row"><div class="pd-field pd-field-wide"><span class="pd-label">Emergency Medical Clinic:</span><span class="pd-value">Closest Hospital</span></div><div class="pd-field"><span class="pd-label">Phone #:</span><span class="pd-value">9-1-1</span></div></div>
+    <div style="padding: 4pt 6pt; font-size: 8pt; font-style: italic; border-bottom: 1px solid #d0d0d0;">ALL EMPLOYEES ASSIGNED TO THIS JOB MUST FULLY UNDERSTAND AND SIGN THE FOLLOWING JSA</div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid #000;">
+      <div style="border-right: 1px solid #000;">
+        <div class="pd-bar">Personal Protective Equipment</div>
+        <div style="padding: 4pt 6pt; font-size: 9pt; line-height: 1.6;">
+          <div><span class="pd-check on"></span> Ear Protection</div>
+          <div><span class="pd-check on"></span> Eyes — Safety Glasses, Goggles, Face Shield</div>
+          <div><span class="pd-check on"></span> Head — Hard Hat</div>
+          <div><span class="pd-check"></span> Respiratory Protection</div>
+          <div><span class="pd-check"></span> Safety Footwear</div>
+          <div><span class="pd-check"></span> Other ______________</div>
+        </div>
+        <div class="pd-bar">Fall Protection</div>
+        <div style="padding: 4pt 6pt; font-size: 9pt; line-height: 1.6;">
+          <div><span class="pd-check"></span> Anchor Point identified</div>
+          <div><span class="pd-check"></span> Harness, Lanyards, Ropes</div>
+          <div><span class="pd-check"></span> Harness Lanyard Inspection</div>
+        </div>
+        <div class="pd-bar">Rescue</div>
+        <div style="padding: 4pt 6pt; font-size: 9pt; line-height: 1.6;">
+          <div><span class="pd-check on"></span> Hardware Inspection</div>
+          <div><span class="pd-check on"></span> Rope Inspection</div>
+          <div><span class="pd-check on"></span> Atmospheric Monitor</div>
+          <div><span class="pd-check on"></span> Rescue Plan Required</div>
+        </div>
+      </div>
+      <div>
+        <div class="pd-bar">Hot Work</div>
+        <div style="padding: 4pt 6pt; font-size: 9pt; line-height: 1.6;">
+          <div><span class="pd-check"></span> Permit Required? Issued By: ______________</div>
+          <div><span class="pd-check"></span> Assign Firewatch</div>
+        </div>
+        <div class="pd-bar">Safety</div>
+        <div style="padding: 4pt 6pt; font-size: 9pt; line-height: 1.6;">
+          <div><span class="pd-check on"></span> Appropriate First Aid Supplies on Site?</div>
+          <div><span class="pd-check on"></span> Evacuation Assembly Location</div>
+          <div><span class="pd-check on"></span> Eye Wash / Safety Shower &mdash; Multiple</div>
+        </div>
+        <div class="pd-bar">Lock Out / Tag Out</div>
+        <div style="padding: 4pt 6pt; font-size: 9pt; line-height: 1.6;">
+          <div><span class="pd-check on"></span> Lock Out Tag Out Required</div>
+          <div><span class="pd-check on"></span> Who Will Report On? Contact</div>
+          <div><span class="pd-check"></span> Visually Inspect Lock Clearance Points?</div>
+          <div><span class="pd-check"></span> Equipment To Be Locked Out</div>
+          <div><span class="pd-check"></span> MCC/Lockout Location</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr;">
+      <div style="border-right: 1px solid #000;">
+        <div class="pd-bar">Hazards</div>
+        <div style="padding: 4pt 6pt; font-size: 9pt; line-height: 1.6;">
+          <div>1. Atmospheric change</div>
+          <div>2. Limited egress</div>
+          <div>3. Struck by</div>
+          <div>4. Slip trips and falls</div>
+          <div>5.</div>
+        </div>
+      </div>
+      <div>
+        <div class="pd-bar">Controls</div>
+        <div style="padding: 4pt 6pt; font-size: 9pt; line-height: 1.6;">
+          <div>Monitor atmosphere prior and during entry</div>
+          <div>Use of attendants and common communication</div>
+          <div>Wear helmet</div>
+          <div>Maintain 3 points of contact</div>
+          <div>&nbsp;</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid #000;">
+      <div style="border-right: 1px solid #000;">
+        <div class="pd-bar">ADDITIONAL FORMS NEEDED FOR JOB</div>
+        <div style="padding: 4pt 6pt; font-size: 9pt; line-height: 1.6;">
+          <div><span class="pd-check"></span> Confined space, Issued by: ______________</div>
+          <div><span class="pd-check"></span> Line Break, Issued by: ______________</div>
+          <div><span class="pd-check"></span> Safe work permit, Issued by: ______________</div>
+          <div><span class="pd-check"></span> Scaffold inspection</div>
+          <div><span class="pd-check"></span> Other</div>
+        </div>
+      </div>
+      <div>
+        <div class="pd-bar">Daily Work Tasks</div>
+        <div style="padding: 4pt 6pt; font-size: 9pt; line-height: 1.6;">
+          <div>1. Mobilization</div>
+          <div>2. Formulate rescue plan</div>
+          <div>3. Sign in and sign into LOTO</div>
+          <div>4. Inspect and set up rescue equipment</div>
+          <div>5. Demobilization, sign off loto, signout</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pd-bar">ASSIGNED EMPLOYEE SIGNATURES</div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 6pt; padding: 8pt 6pt;">
+      <div style="border-top: 1px solid #000; padding-top: 2pt; font-size: 8pt;">&nbsp;</div>
+      <div style="border-top: 1px solid #000; padding-top: 2pt; font-size: 8pt;">&nbsp;</div>
+      <div style="border-top: 1px solid #000; padding-top: 2pt; font-size: 8pt;">&nbsp;</div>
+      <div style="border-top: 1px solid #000; padding-top: 2pt; font-size: 8pt;">&nbsp;</div>
+      <div style="border-top: 1px solid #000; padding-top: 2pt; font-size: 8pt;">&nbsp;</div>
+      <div style="border-top: 1px solid #000; padding-top: 2pt; font-size: 8pt;">&nbsp;</div>
+      <div style="border-top: 1px solid #000; padding-top: 2pt; font-size: 8pt;">&nbsp;</div>
+      <div style="border-top: 1px solid #000; padding-top: 2pt; font-size: 8pt;">&nbsp;</div>
+    </div>
+  </div>
+</div>
+
+<div class="print-doc air in-book">
+  <div class="pd-head">
+    <div class="pd-logo" style="flex: 0 0 auto;"><span class="mar">Mar</span><span class="tech">Tech</span><div class="pd-logo-sub">Mechanical Analysis / Repair, Inc.</div></div>
+    <div class="pd-title" style="font-size: 14pt;">ENTRY / AIR MONITORING LOG</div>
+    <div style="width: 90pt;"></div>
+  </div>
+  <div class="pd-frame">
+    <div class="pd-row"><div class="pd-field pd-field-wide"><span class="pd-label">Customer/Facility:</span><span class="pd-value">Tesoro Refining — Martinez</span></div><div class="pd-field"><span class="pd-label">Date:</span><span class="pd-value">11/19/26</span></div></div>
+    <div class="pd-row"><div class="pd-field pd-field-wide"><span class="pd-label">Confined Space Description:</span><span class="pd-value">Vessel V-204</span></div><div class="pd-field" style="font-size: 9pt;"><strong>PRCS:</strong> <span class="pd-check on"></span> &nbsp; <strong>Non PRCS:</strong> <span class="pd-check"></span></div></div>
+    <div class="pd-row"><div class="pd-field"><span class="pd-label">Attendant Name:</span><span class="pd-value"></span></div><div class="pd-field"><span class="pd-label">Supervisor Name:</span><span class="pd-value">J. Stockwell</span></div></div>
+
+    <table class="pd-table" style="margin: 4pt 0 0;">
+      <tr><th>Entrant Name</th><th>Company</th><th>Time In</th><th>Time Out</th><th>Time In</th><th>Time Out</th><th>Time In</th><th>Time Out</th><th>Time In</th><th>Time Out</th><th>Notes</th></tr>
+      <tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+    </table>
+
+    <div class="pd-row" style="margin-top: 4pt;"><div class="pd-field"><span class="pd-label">Atmospheric Monitor:</span><span class="pd-value">MultiRAE #4</span></div><div class="pd-field"><span class="pd-label">Calibration Date:</span><span class="pd-value">11/02/26</span></div></div>
+    <div style="padding: 3pt 6pt; font-size: 9pt; font-style: italic; text-align: center; border-bottom: 1px solid #d0d0d0;">Atmospheric Monitoring results shall be logged every 1 hour</div>
+
+    <table class="pd-table">
+      <tr><td style="text-align: left; padding: 2pt 4pt; background: #d8d8d8;">Tester Initials</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td style="text-align: left; padding: 2pt 4pt; background: #d8d8d8;">Time of Test</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td style="text-align: left; padding: 2pt 4pt; background: #d8d8d8;">O₂</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td style="text-align: left; padding: 2pt 4pt; background: #d8d8d8;">LEL</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td style="text-align: left; padding: 2pt 4pt; background: #d8d8d8;">H₂S</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td style="text-align: left; padding: 2pt 4pt; background: #d8d8d8;">CO</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+    </table>
+
+    <div style="padding: 10pt 6pt 4pt; display: flex; gap: 20pt; font-size: 9pt;"><div style="flex: 1;"><div>Testers Signature: ______________________________</div></div><div style="flex: 1;"><div>Date: ______________________________</div></div></div>
+    <div style="padding: 4pt 6pt 10pt; display: flex; gap: 20pt; font-size: 9pt;"><div style="flex: 1;"><div>Customer Representative: ______________________________</div></div><div style="flex: 1;"><div>Date: ______________________________</div></div></div>
+  </div>
+</div>
+
+
 </body>
 </html>
