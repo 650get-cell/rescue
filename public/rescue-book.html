@@ -25,6 +25,7 @@
     color-scheme: light;
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  [hidden] { display: none !important; }
   body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.45; }
   button { font-family: inherit; }
 
@@ -467,6 +468,8 @@
 
   // ============ VIEW SWAP ============
   function show(view) {
+    // Job-specific views must never open before a job has been selected.
+    if (view !== 'dashboard' && !currentJob) view = 'dashboard';
     views.forEach(v => document.getElementById('view-' + v).hidden = (v !== view));
     const backBtn = document.getElementById('backBtn');
     const actionBtn = document.getElementById('actionBtn');
@@ -579,6 +582,7 @@
   function renderDocSelect() {
     const list = document.getElementById('docSelList');
     list.innerHTML = '';
+    if (!currentJob) { updateCount(); return; }
     currentJob.docs.forEach((d, i) => {
       const row = document.createElement('div');
       row.className = 'doc-sel';
@@ -606,6 +610,7 @@
   }
 
   function setAll(on) {
+    if (!currentJob) { updateCount(); return; }
     document.querySelectorAll('#docSelList .doc-sel').forEach(row => {
       const cb = row.querySelector('.doc-check');
       cb.classList.toggle('on', on);
@@ -619,15 +624,16 @@
 
   function updateCount() {
     const n = document.querySelectorAll('#docSelList .doc-check.on').length;
-    const total = currentJob.docs.length;
+    const total = currentJob ? currentJob.docs.length : 0;
     document.getElementById('bookCount').textContent = `${n} OF ${total}`;
     document.getElementById('genCount').textContent = n;
     const gen = document.getElementById('generateBtn');
-    gen.disabled = n === 0;
-    gen.style.opacity = n === 0 ? '0.4' : '1';
+    gen.disabled = !currentJob || n === 0;
+    gen.style.opacity = gen.disabled ? '0.4' : '1';
   }
 
   function resetBook() {
+    if (!currentJob) { updateCount(); return; }
     document.getElementById('bookCust').textContent = currentJob.customer;
     renderDocSelect();
     document.getElementById('allBtn').classList.add('on');
@@ -641,6 +647,7 @@
   document.getElementById('noneBtn').addEventListener('click', () => setAll(false));
 
   document.getElementById('generateBtn').addEventListener('click', () => {
+    if (!currentJob) return;
     const n = document.querySelectorAll('#docSelList .doc-check.on').length;
     if (n === 0) return;
     document.getElementById('preGenActions').hidden = true;
