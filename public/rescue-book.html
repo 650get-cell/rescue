@@ -464,7 +464,7 @@
   ];
 
   let currentJob = null;
-  const views = ['dashboard', 'job', 'form', 'book'];
+  const views = ['dashboard', 'job', 'form', 'book', 'new'];
 
   // ============ VIEW SWAP ============
   function show(view) {
@@ -480,6 +480,7 @@
     if (view === 'job') subLabel.textContent = 'Job · ' + currentJob.num;
     if (view === 'form') subLabel.textContent = 'Rescue Plan · ' + currentJob.num;
     if (view === 'book') subLabel.textContent = 'Book · ' + currentJob.num;
+    if (view === 'new') subLabel.textContent = 'New job';
     window.scrollTo(0, 0);
     // reset book state when (re)entering
     if (view === 'book') resetBook();
@@ -490,6 +491,7 @@
     if (!document.getElementById('view-book').hidden) return show('job');
     if (!document.getElementById('view-form').hidden) return show('job');
     if (!document.getElementById('view-job').hidden) return show('dashboard');
+    if (!document.getElementById('view-new').hidden) return show('dashboard');
   });
 
   // ============ DASHBOARD ============
@@ -522,7 +524,65 @@
   });
 
   document.getElementById('newJobBtn').addEventListener('click', () => {
-    alert('New job flow — not wired yet.');
+    // reset fields
+    ['nj-customer','nj-wo','nj-space','nj-rep','nj-lead','nj-attendant','nj-assembly','nj-monitor'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+    const today = new Date().toISOString().slice(0,10);
+    document.getElementById('nj-date').value = today;
+    document.querySelectorAll('#view-new .check-box').forEach(cb => {
+      cb.classList.add('on');
+      cb.textContent = '✓';
+    });
+    show('new');
+  });
+
+  // Create / Cancel
+  document.getElementById('nj-cancel').addEventListener('click', () => show('dashboard'));
+  document.getElementById('nj-create').addEventListener('click', () => {
+    const customer = document.getElementById('nj-customer').value.trim();
+    if (!customer) {
+      document.getElementById('nj-customer').focus();
+      document.getElementById('nj-customer').style.borderColor = 'var(--red)';
+      return;
+    }
+    // Generate job #
+    const year = new Date().getFullYear().toString().slice(-2);
+    const existing = JOBS.filter(j => j.num.startsWith('MTR-' + year + '-'));
+    const nextSeq = (existing.length + 1 + 42).toString().padStart(4, '0'); // continues after mock
+    const num = 'MTR-' + year + '-' + nextSeq;
+
+    const dateVal = document.getElementById('nj-date').value;
+    const d = new Date(dateVal + 'T00:00:00');
+    const meta = (document.getElementById('nj-space').value.trim() || 'New entry') + ' · ' +
+      d.toLocaleString('en-US', { month: 'short', day: 'numeric' });
+
+    // Selected docs
+    const selectedDocs = [];
+    document.querySelectorAll('#view-new .check-box.on').forEach(cb => {
+      const type = cb.dataset.doc;
+      selectedDocs.push({ type, status: 'Not started', sub: '', state: 'none' });
+    });
+
+    const job = {
+      num,
+      customer,
+      wo: document.getElementById('nj-wo').value.trim(),
+      space: document.getElementById('nj-space').value.trim(),
+      rep: document.getElementById('nj-rep').value.trim(),
+      lead: document.getElementById('nj-lead').value.trim(),
+      attendant: document.getElementById('nj-attendant').value.trim(),
+      assembly: document.getElementById('nj-assembly').value.trim(),
+      monitor: document.getElementById('nj-monitor').value.trim(),
+      date: dateVal,
+      meta,
+      status: 'active',
+      docs: selectedDocs,
+    };
+
+    JOBS.unshift(job);
+    renderJobs('active');
+    openJob(job);
   });
 
   // ============ JOB DETAIL ============
@@ -543,7 +603,8 @@
       let statusClass = '';
       if (d.state === 'ok') statusClass = 'ok';
       if (d.state === 'live') statusClass = 'live';
-      el.innerHTML = `<div class="tile-name">${d.type}</div><div class="tile-status ${statusClass}">● ${d.status}</div>`;
+      const statusText = d.status || 'Not started';
+      el.innerHTML = `<div class="tile-name">${d.type}</div><div class="tile-status ${statusClass}">${d.state === "none" ? "" : "● "}${statusText}</div>`;
       el.addEventListener('click', () => {
         if (d.type === 'Rescue Plan') show('form');
         else alert(d.type + ' form — not built yet in this preview.');
@@ -679,6 +740,54 @@
   renderJobs('active');
   show('dashboard');
 </script>
+
+
+<main class="wrap" id="view-new" hidden>
+  <div class="card">
+    <h2 style="font-family: var(--font-display); font-weight: 800; font-size: 20px; letter-spacing: -0.02em; margin: 0 0 4px;">New job</h2>
+    <div class="job-meta" style="margin-bottom: 14px;">Fill the job details — these flow into every form</div>
+
+    <label class="field-label">Customer / Facility</label>
+    <input type="text" class="text-input" id="nj-customer" placeholder="" style="margin-bottom: 10px;">
+
+    <label class="field-label">Work order #</label>
+    <input type="text" class="text-input" id="nj-wo" placeholder="" style="margin-bottom: 10px;">
+
+    <label class="field-label">Space description</label>
+    <input type="text" class="text-input" id="nj-space" placeholder="" style="margin-bottom: 10px;">
+
+    <label class="field-label">Customer representative</label>
+    <input type="text" class="text-input" id="nj-rep" placeholder="" style="margin-bottom: 10px;">
+
+    <label class="field-label">Date</label>
+    <input type="date" class="text-input" id="nj-date" style="margin-bottom: 10px;">
+
+    <label class="field-label">Lead / Supervisor</label>
+    <input type="text" class="text-input" id="nj-lead" placeholder="" style="margin-bottom: 10px;">
+
+    <label class="field-label">Attendant</label>
+    <input type="text" class="text-input" id="nj-attendant" placeholder="" style="margin-bottom: 10px;">
+
+    <label class="field-label">Emergency assembly location</label>
+    <input type="text" class="text-input" id="nj-assembly" placeholder="" style="margin-bottom: 10px;">
+
+    <label class="field-label">Atmospheric monitor</label>
+    <input type="text" class="text-input" id="nj-monitor" placeholder="" style="margin-bottom: 14px;">
+
+    <h3 class="section-title">Documents to include</h3>
+    <div style="display: grid; gap: 6px; margin-bottom: 14px;">
+      <label class="check-item"><span class="check-box on" data-doc="Permit">✓</span>Entry Permit</label>
+      <label class="check-item"><span class="check-box on" data-doc="Rescue Plan">✓</span>Rescue Plan</label>
+      <label class="check-item"><span class="check-box on" data-doc="JSA">✓</span>JSA</label>
+      <label class="check-item"><span class="check-box on" data-doc="Air / Entry Log">✓</span>Air / Entry Log</label>
+    </div>
+
+    <div style="display: grid; gap: 8px;">
+      <button class="btn-accent" id="nj-create">Create job</button>
+      <button class="btn-outline" id="nj-cancel">Cancel</button>
+    </div>
+  </div>
+</main>
 
 <!-- ============ PRINT-ONLY DOCUMENTS ============ -->
 <div class="print-doc permit in-book">
