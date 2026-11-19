@@ -130,6 +130,15 @@
 
   .generated-icon { width: 60px; height: 76px; background: var(--red); color: #fff; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-size: 14px; font-weight: 800; letter-spacing: 0.08em; margin: 8px auto 14px; }
 
+
+  .plan-narrative { background: var(--soft); border: 1px solid var(--border-soft); border-radius: 8px; padding: 12px 14px; font-size: 13px; line-height: 1.55; }
+  .plan-narrative summary { cursor: pointer; font-family: var(--font-display); font-weight: 800; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--red); list-style: none; display: flex; justify-content: space-between; align-items: center; }
+  .plan-narrative summary::-webkit-details-marker { display: none; }
+  .plan-narrative summary::after { content: '+'; font-size: 16px; color: var(--muted); }
+  .plan-narrative[open] summary::after { content: '-'; }
+  .plan-narrative p { margin: 10px 0 0; color: var(--ink); }
+  .plan-narrative p + p { margin-top: 8px; }
+
   @media print {
     .top, .nav-btn, .btn-outline, .btn-accent, .btn-dark, .new-job-btn, .filter-row, .search { display: none !important; }
     body { background: #fff; }
@@ -252,6 +261,16 @@
       <span class="pill on">1 hour</span>
       <span class="pill">2h</span>
     </div>
+
+    <details class="plan-narrative" style="margin-top: 16px;">
+      <summary>Rescue plan details</summary>
+      <p>Upon initiation of rescue procedures, contractors will be instructed to stop work while rescue is initiated, fossil fuel operating equipment will be turned off in the area surrounding the rescue site.</p>
+      <p>The rescue team will provide any necessary first aid and/or CPR for the injured entrant(s) if the conditions allow. The rescue team will remove the injured entrant from the space as safely and expeditiously as conditions allow.</p>
+      <p>The rescue team will maintain regular contact with the attendant regarding conditions within the space and the location of the entrants.</p>
+      <p>If an entrant(s) is injured or unable to exit the space unassisted, the rescue team will enter the space and conduct a rescue if conditions are safe for entry.</p>
+      <p>Raise or lower victim depending on location using mechanical advantage or manual lifting remove victim from space using rescue liter sked or spec pack, stabilize victim and provide first aid as needed.</p>
+      <p>Unless otherwise communicated, the facility is responsible for making any required notifications under Title 8 Section 5157 &amp; 5158.</p>
+    </details>
 
     <h3 class="section-title" style="margin-top: 16px;">Pre-entry checklist</h3>
     <div class="check-grid">
