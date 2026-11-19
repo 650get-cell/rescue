@@ -14,7 +14,7 @@ here describing what changed.
 
 ## 1.14.0 — 2026-11-19
 
-- **New:** landing page at `/` (`public/index.html`) with links to every page: Submit Availability, Crew Schedule, Ventilation Calculator, Admin Dashboard, Scheduler, Mobile Scheduler, Availability View and Estimates. `/` used to go straight to the availability page.
+- **New:** landing page at `/` (`public/index.html`) with links to Availability, My Schedule, Ventilation Calculator and Admin Dashboard. The other admin pages are reached through Admin Dashboard. `/` used to go straight to the availability page.
 
 ## 1.13.0 — 2026-11-18
 

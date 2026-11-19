@@ -21,8 +21,6 @@
 
   .container { max-width:1000px; margin:0 auto; background:#fff; border-radius:0 0 14px 14px; padding:36px 32px 40px; box-shadow:0 4px 24px rgba(0,0,0,.10); }
 
-  h1 { font-family:"Syne",sans-serif; font-size:26px; font-weight:800; color:#1a1a1a; margin-bottom:6px; }
-  .subtitle { color:#666; font-size:14px; margin-bottom:28px; }
 
   .cards { display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:16px; }
 
@@ -32,7 +30,6 @@
     transition:all .18s; cursor:pointer;
   }
   .card:hover { border-color:#c01010; background:#fff; transform:translateY(-2px); box-shadow:0 6px 18px rgba(192,16,16,.10); }
-  .card-icon { font-size:32px; line-height:1; }
   .card-title { font-family:"Syne",sans-serif; font-weight:800; font-size:18px; color:#1a1a1a; }
   .card-desc { font-size:13px; color:#666; line-height:1.5; }
   .card-tag { display:inline-block; font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; padding:3px 8px; border-radius:4px; align-self:flex-start; margin-top:4px; }
@@ -55,65 +52,34 @@
 </div>
 
 <div class="container">
-  <h1>What do you need?</h1>
-  <div class="subtitle">Pick an app below.</div>
-
   <div class="cards">
     <a href="/availability.html" class="card">
-      <div class="card-icon">📝</div>
-      <div class="card-title">Submit Availability</div>
+      <div class="card-title">Availability</div>
       <div class="card-desc">Enter the days you can work this month. Log in with your phone number.</div>
       <span class="card-tag crew">Crew</span>
     </a>
 
     <a href="/schedule_view.html" class="card">
-      <div class="card-icon">📅</div>
-      <div class="card-title">Crew Schedule</div>
+      <div class="card-title">My Schedule</div>
       <div class="card-desc">See the published job schedule.</div>
       <span class="card-tag crew">Crew</span>
     </a>
 
     <a href="/ventilation" class="card">
-      <div class="card-icon">🌬️</div>
       <div class="card-title">Ventilation Calculator</div>
       <div class="card-desc">Work out ventilation (CFM) for a confined space.</div>
       <span class="card-tag crew">Crew &amp; Customers</span>
     </a>
 
     <a href="/admin.html" class="card">
-      <div class="card-icon">🔒</div>
       <div class="card-title">Admin Dashboard</div>
-      <div class="card-desc">Admin home page. Password required.</div>
+      <div class="card-desc">Scheduler, Mobile Scheduler, Availability View and Estimates. Password required.</div>
       <span class="card-tag admin">Admin</span>
     </a>
 
-    <a href="/scheduler.html" class="card">
-      <div class="card-icon">🗓️</div>
-      <div class="card-title">Scheduler</div>
-      <div class="card-desc">Create jobs, assign crew, publish the schedule, export Excel, manage the roster.</div>
-      <span class="card-tag admin">Admin</span>
-    </a>
 
-    <a href="/scheduler-mobile.html" class="card">
-      <div class="card-icon">📱</div>
-      <div class="card-title">Mobile Scheduler</div>
-      <div class="card-desc">Add jobs and assign crew from your phone.</div>
-      <span class="card-tag admin">Admin</span>
-    </a>
 
-    <a href="/availability_view.html" class="card">
-      <div class="card-icon">👥</div>
-      <div class="card-title">Availability View</div>
-      <div class="card-desc">Calendar showing who's available each day. Edit any crew member's submission.</div>
-      <span class="card-tag admin">Admin</span>
-    </a>
 
-    <a href="/estimator.html" class="card">
-      <div class="card-icon">💲</div>
-      <div class="card-title">Estimates</div>
-      <div class="card-desc">Build job quotes from shifts, rates, trucks and admin. Save and reopen quotes.</div>
-      <span class="card-tag admin">Admin</span>
-    </a>
   </div>
 </div>
 
