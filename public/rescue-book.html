@@ -413,6 +413,53 @@
   </div>
 </main>
 
+<main class="wrap" id="view-new" hidden>
+  <div class="card">
+    <h2 style="font-family: var(--font-display); font-weight: 800; font-size: 20px; letter-spacing: -0.02em; margin: 0 0 4px;">New job</h2>
+    <div class="job-meta" style="margin-bottom: 14px;">Fill the job details — these flow into every form</div>
+
+    <label class="field-label">Customer / Facility</label>
+    <input type="text" class="text-input" id="nj-customer" placeholder="" style="margin-bottom: 10px;">
+
+    <label class="field-label">Work order #</label>
+    <input type="text" class="text-input" id="nj-wo" placeholder="" style="margin-bottom: 10px;">
+
+    <label class="field-label">Space description</label>
+    <input type="text" class="text-input" id="nj-space" placeholder="" style="margin-bottom: 10px;">
+
+    <label class="field-label">Customer representative</label>
+    <input type="text" class="text-input" id="nj-rep" placeholder="" style="margin-bottom: 10px;">
+
+    <label class="field-label">Date</label>
+    <input type="date" class="text-input" id="nj-date" style="margin-bottom: 10px;">
+
+    <label class="field-label">Lead / Supervisor</label>
+    <input type="text" class="text-input" id="nj-lead" placeholder="" style="margin-bottom: 10px;">
+
+    <label class="field-label">Attendant</label>
+    <input type="text" class="text-input" id="nj-attendant" placeholder="" style="margin-bottom: 10px;">
+
+    <label class="field-label">Emergency assembly location</label>
+    <input type="text" class="text-input" id="nj-assembly" placeholder="" style="margin-bottom: 10px;">
+
+    <label class="field-label">Atmospheric monitor</label>
+    <input type="text" class="text-input" id="nj-monitor" placeholder="" style="margin-bottom: 14px;">
+
+    <h3 class="section-title">Documents to include</h3>
+    <div style="display: grid; gap: 6px; margin-bottom: 14px;">
+      <label class="check-item"><span class="check-box on" data-doc="Permit">✓</span>Entry Permit</label>
+      <label class="check-item"><span class="check-box on" data-doc="Rescue Plan">✓</span>Rescue Plan</label>
+      <label class="check-item"><span class="check-box on" data-doc="JSA">✓</span>JSA</label>
+      <label class="check-item"><span class="check-box on" data-doc="Air / Entry Log">✓</span>Air / Entry Log</label>
+    </div>
+
+    <div style="display: grid; gap: 8px;">
+      <button class="btn-accent" id="nj-create">Create job</button>
+      <button class="btn-outline" id="nj-cancel">Cancel</button>
+    </div>
+  </div>
+</main>
+
 <script>
   // ============ MOCK DATA ============
   const JOBS = [
@@ -469,7 +516,7 @@
   // ============ VIEW SWAP ============
   function show(view) {
     // Job-specific views must never open before a job has been selected.
-    if (view !== 'dashboard' && !currentJob) view = 'dashboard';
+    if (['job', 'form', 'book'].includes(view) && !currentJob) view = 'dashboard';
     views.forEach(v => document.getElementById('view-' + v).hidden = (v !== view));
     const backBtn = document.getElementById('backBtn');
     const actionBtn = document.getElementById('actionBtn');
@@ -741,53 +788,6 @@
   show('dashboard');
 </script>
 
-
-<main class="wrap" id="view-new" hidden>
-  <div class="card">
-    <h2 style="font-family: var(--font-display); font-weight: 800; font-size: 20px; letter-spacing: -0.02em; margin: 0 0 4px;">New job</h2>
-    <div class="job-meta" style="margin-bottom: 14px;">Fill the job details — these flow into every form</div>
-
-    <label class="field-label">Customer / Facility</label>
-    <input type="text" class="text-input" id="nj-customer" placeholder="" style="margin-bottom: 10px;">
-
-    <label class="field-label">Work order #</label>
-    <input type="text" class="text-input" id="nj-wo" placeholder="" style="margin-bottom: 10px;">
-
-    <label class="field-label">Space description</label>
-    <input type="text" class="text-input" id="nj-space" placeholder="" style="margin-bottom: 10px;">
-
-    <label class="field-label">Customer representative</label>
-    <input type="text" class="text-input" id="nj-rep" placeholder="" style="margin-bottom: 10px;">
-
-    <label class="field-label">Date</label>
-    <input type="date" class="text-input" id="nj-date" style="margin-bottom: 10px;">
-
-    <label class="field-label">Lead / Supervisor</label>
-    <input type="text" class="text-input" id="nj-lead" placeholder="" style="margin-bottom: 10px;">
-
-    <label class="field-label">Attendant</label>
-    <input type="text" class="text-input" id="nj-attendant" placeholder="" style="margin-bottom: 10px;">
-
-    <label class="field-label">Emergency assembly location</label>
-    <input type="text" class="text-input" id="nj-assembly" placeholder="" style="margin-bottom: 10px;">
-
-    <label class="field-label">Atmospheric monitor</label>
-    <input type="text" class="text-input" id="nj-monitor" placeholder="" style="margin-bottom: 14px;">
-
-    <h3 class="section-title">Documents to include</h3>
-    <div style="display: grid; gap: 6px; margin-bottom: 14px;">
-      <label class="check-item"><span class="check-box on" data-doc="Permit">✓</span>Entry Permit</label>
-      <label class="check-item"><span class="check-box on" data-doc="Rescue Plan">✓</span>Rescue Plan</label>
-      <label class="check-item"><span class="check-box on" data-doc="JSA">✓</span>JSA</label>
-      <label class="check-item"><span class="check-box on" data-doc="Air / Entry Log">✓</span>Air / Entry Log</label>
-    </div>
-
-    <div style="display: grid; gap: 8px;">
-      <button class="btn-accent" id="nj-create">Create job</button>
-      <button class="btn-outline" id="nj-cancel">Cancel</button>
-    </div>
-  </div>
-</main>
 
 <!-- ============ PRINT-ONLY DOCUMENTS ============ -->
 <div class="print-doc permit in-book">

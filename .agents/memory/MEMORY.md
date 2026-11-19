@@ -1,1 +1,2 @@
 - [State storage (Postgres kv_store)](state-storage.md) — whole state is one JSONB blob; all mutations MUST go through withStateTxn (advisory-lock txn), never bare writeKV('state').
+- [Browser test fidelity](browser-test-fidelity.md) — DOM test doubles must preserve missing elements and parser timing rather than inventing nodes.

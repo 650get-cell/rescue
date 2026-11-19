@@ -4,14 +4,17 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 
 const html = fs.readFileSync('public/rescue-book.html', 'utf8');
-const source = html.match(/<script>([\s\S]*?)<\/script>/)[1];
+const script = html.match(/<script>([\s\S]*?)<\/script>/);
+const source = script[1];
+const parsedIds = new Set([...html.slice(0, script.index).matchAll(/\bid="([^"]+)"/g)].map(m => m[1]));
 
 // Minimal DOM harness runs the real page script and its registered handlers.
 function page() {
   function element() {
     const classes = new Set();
     const el = {
-      hidden: false, style: {}, dataset: {}, children: [], textContent: '',
+      hidden: false, style: {}, dataset: {}, children: [], textContent: '', value: '',
+      focus() { el.focused = true; },
       handlers: {},
       classList: {
         add: c => classes.add(c),
@@ -40,6 +43,7 @@ function page() {
   }
   const nodes = new Map();
   const get = id => {
+    if (!parsedIds.has(id)) return null;
     if (!nodes.has(id)) nodes.set(id, element());
     return nodes.get(id);
   };
@@ -63,6 +67,24 @@ function page() {
 
 test('hidden attribute overrides grid and inline display styles', () => {
   assert.match(html, /\[hidden\]\s*\{\s*display:\s*none\s*!important/);
+});
+
+test('new job opens before selecting an existing job, validates, creates, and cancels', () => {
+  const p = page();
+  p.click('newJobBtn');
+  assert.equal(p.get('view-new').hidden, false);
+  assert.equal(p.get('view-dashboard').hidden, true);
+  p.click('nj-create');
+  assert.equal(p.get('nj-customer').focused, true);
+  p.click('nj-cancel');
+  assert.equal(p.get('view-dashboard').hidden, false);
+  p.click('newJobBtn');
+  p.get('nj-customer').value = 'Test facility';
+  p.get('nj-space').value = 'Test space';
+  p.click('nj-create');
+  assert.equal(p.get('view-new').hidden, true);
+  assert.equal(p.get('view-job').hidden, false);
+  assert.equal(p.get('jobCust').textContent, 'Test facility');
 });
 
 test('ALL, NONE, generate, and job navigation are safe before selecting a job', () => {
