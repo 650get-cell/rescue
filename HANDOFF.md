@@ -1,12 +1,12 @@
 # MarTech Rescue Scheduler — IT Handoff
 
-Deployment guide for hosting the Rescue Scheduler outside Replit. Current as of version **1.12.0** (2026-11-18). If anything here disagrees with `server.js`, the code wins.
+Deployment guide for hosting the Rescue Scheduler outside Replit. Current as of version **1.15.0** (2026-11-19). If anything here disagrees with `server.js`, the code wins.
 
 ## What it is
 
 A small web app for MarTech Rescue's confined space rescue crew:
 
-- **Crew** submit monthly availability from their phones, view their published schedule, and can subscribe to a live calendar feed.
+- **Crew** submit monthly availability from their phones, view their own published days, and can subscribe to a live calendar feed.
 - **Admin** builds jobs and crew assignments, publishes the schedule, and builds job estimates (quotes).
 - **Ventilation Calculator** — a public, no-login tool for crew and customers.
 
@@ -44,7 +44,7 @@ Not included on purpose: live data (`data/`), Replit config, and internal develo
 |---|---|---|
 | `/` | Everyone | None. Landing page with links to every app. |
 | `/availability.html` | Crew | Phone-number match. Links to the Ventilation Calculator. |
-| `/schedule_view.html` | Crew | None (read-only published schedule) |
+| `/schedule_view.html` | Admin | Admin password. Full published schedule. |
 | `/ventilation` and `/ventilation.html` | Crew and customers | None. Runs entirely in the browser — no server calls. |
 | `/admin.html` | Admin | Admin password. Hub page linking to the admin tools. |
 | `/scheduler.html` | Admin | Admin password. Desktop scheduler. |
@@ -60,11 +60,12 @@ Admin pages are static files that prompt for the password in the browser; the pr
 |---|---|---|
 | GET | `/api/version` | none — returns version and git commit |
 | GET | `/api/roster` | none |
-| GET | `/api/published` | none |
+| GET | `/api/published` | password |
 | POST | `/api/availability/pin-check` | phone match |
 | POST | `/api/availability/lookup` | phone match |
 | POST | `/api/availability/submit` | phone match |
 | POST | `/api/availability/subscribe-url` | phone match |
+| POST | `/api/availability/my-published` | phone match — that crew member's own days only |
 | GET | `/api/myschedule.ics?token=…` | per-crew token |
 | POST | `/api/admin/check` | password |
 | GET / PUT | `/api/state` | password |

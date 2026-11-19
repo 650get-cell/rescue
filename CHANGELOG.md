@@ -12,6 +12,11 @@ here describing what changed.
 
 ---
 
+## 1.15.0 — 2026-11-19
+
+- **Change:** the full published schedule now needs the admin password. `/schedule_view.html` asks for it, and `/api/published` returns 401 without it.
+- **New:** `POST /api/availability/my-published` (phone match) returns only that crew member's own days, with partners on the same job and shift. The Availability page's "See my schedule" button uses it.
+
 ## 1.14.0 — 2026-11-19
 
 - **New:** landing page at `/` (`public/index.html`) with links to Availability, Ventilation Calculator and Admin Dashboard. The other admin pages are reached through Admin Dashboard. `/` used to go straight to the availability page.
