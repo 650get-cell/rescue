@@ -731,7 +731,7 @@ async function boot() {
   try { STATE = await loadState(); } catch (e) { document.body.innerHTML = '<div style="padding:40px;text-align:center;color:#c01010;">Could not load. Refresh to try again.</div>'; return; }
   clearForm(false);
   renderAll();
-  try { const r = await fetch('/api/published'); if (r.ok) { const p = await r.json(); updatePublishInfo(p.publishedAt); } else updatePublishInfo(null); } catch { updatePublishInfo(null); }
+  try { const r = await fetch('/api/published', { headers:{'X-Admin-Password': ADMIN_PW} }); if (r.ok) { const p = await r.json(); updatePublishInfo(p.publishedAt); } else updatePublishInfo(null); } catch { updatePublishInfo(null); }
 }
 boot();
 

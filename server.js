@@ -407,11 +407,52 @@ app.post('/api/availability/submit', wrap(async (req, res) => {
   res.json({ ok: true, employee: { id: empId, name: empName }, days: cleanDays });
 }));
 
-// Get the published schedule (read-only for crew)
-app.get('/api/published', wrap(async (req, res) => {
+// Get the full published schedule — admin password required.
+app.get('/api/published', requireAdmin, wrap(async (req, res) => {
   const pub = await readKV('published');
   if (!pub) return res.status(404).json({ error: 'No schedule published yet' });
   res.json(pub);
+}));
+
+// One crew member's published schedule — phone match required. Returns the
+// same shape as /api/published, cut down to: the jobs this person is on, the
+// assignment slots on their own days (theirs plus partners on the same job,
+// day and shift), and only id + name for the people in those slots.
+app.post('/api/availability/my-published', wrap(async (req, res) => {
+  const result = await verifyEmpAuth(req, res);
+  if (!result) return;
+  const { emp } = result;
+  const pub = await readKV('published');
+  if (!pub) return res.status(404).json({ error: 'No schedule published yet' });
+  const pubEmps = pub.employees || [];
+  const me = pubEmps.find(e => e.id === emp.id);
+  const out = { publishedAt: pub.publishedAt, employees: [], jobs: [], assignments: {} };
+  if (!me) return res.json(out);
+  const keepEmpIds = new Set([me.id]);
+  const keepJobIds = new Set();
+  for (const key in (pub.assignments || {})) {
+    const monthAsgns = pub.assignments[key];
+    const mine = [];
+    for (const slot in monthAsgns) {
+      const sp = slot.split('_');
+      if (parseInt(sp[0]) === me.id) mine.push({ day: parseInt(sp[1]), shift: sp[2] || 'day', jid: monthAsgns[slot] });
+    }
+    if (!mine.length) continue;
+    const kept = {};
+    for (const slot in monthAsgns) {
+      const sp = slot.split('_');
+      const day = parseInt(sp[1]), shift = sp[2] || 'day', jid = monthAsgns[slot];
+      if (mine.some(m => m.day === day && m.shift === shift && m.jid === jid)) {
+        kept[slot] = jid;
+        keepEmpIds.add(parseInt(sp[0]));
+        keepJobIds.add(jid);
+      }
+    }
+    out.assignments[key] = kept;
+  }
+  out.employees = pubEmps.filter(e => keepEmpIds.has(e.id)).map(e => ({ id: e.id, name: e.name }));
+  out.jobs = (pub.jobs || []).filter(j => keepJobIds.has(j.id));
+  res.json(out);
 }));
 
 // ============================================================

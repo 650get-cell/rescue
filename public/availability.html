@@ -754,7 +754,11 @@
         try {
           // Fetch published schedule AND the per-crew subscribe URLs in parallel.
           const [pubResp, subResp] = await Promise.all([
-            fetch("/api/published"),
+            fetch("/api/availability/my-published", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ name: unlockedFor, phone: unlockedPhone }),
+            }),
             fetch("/api/availability/subscribe-url", {
               method: "POST",
               headers: { "Content-Type": "application/json" },

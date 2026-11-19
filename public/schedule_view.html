@@ -169,7 +169,7 @@ function shiftView(dir){
 
 async function load() {
   try {
-    const resp = await fetch('/api/published');
+    const resp = await fetch('/api/published', { headers:{'X-Admin-Password': ADMIN_PW} });
     if (resp.status === 404) { snapshot = null; render(); return; }
     if (!resp.ok) throw new Error('Failed to load');
     snapshot = await resp.json();
@@ -489,7 +489,44 @@ function escapeHtml(s) {
   return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
-load();
+// ============================================================
+// AUTH GATE — same X-Admin-Password mechanism as other admin pages
+// ============================================================
+let ADMIN_PW = sessionStorage.getItem('martech_admin_pw') || '';
+
+async function apiCheckPw(pw) {
+  try {
+    const r = await fetch('/api/admin/check', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ password: pw }),
+    });
+    return r.ok;
+  } catch { return false; }
+}
+
+async function boot() {
+  if (ADMIN_PW) {
+    const ok = await apiCheckPw(ADMIN_PW);
+    if (!ok) { sessionStorage.removeItem('martech_admin_pw'); ADMIN_PW = ''; }
+  }
+  while (!ADMIN_PW) {
+    const pw = prompt('Admin password:');
+    if (pw === null) {
+      document.body.innerHTML = '<div style="padding:60px;text-align:center;color:#666;font-family:sans-serif;">Login cancelled. Refresh to try again.</div>';
+      return;
+    }
+    const ok = await apiCheckPw(pw);
+    if (ok) {
+      ADMIN_PW = pw;
+      sessionStorage.setItem('martech_admin_pw', pw);
+      break;
+    }
+    alert('Wrong password.');
+  }
+  load();
+}
+boot();
 
 // Re-render when viewport crosses the mobile breakpoint (rotation, resize)
 let _wasMobile = isMobileViewport();
