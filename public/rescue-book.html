@@ -220,6 +220,7 @@
   <div class="filter-row">
     <button class="filter-pill on" data-filter="active">ACTIVE</button>
     <button class="filter-pill" data-filter="recent">RECENT</button>
+    <button class="filter-pill" data-filter="archived">ARCHIVED</button>
     <button class="filter-pill" data-filter="all">ALL</button>
   </div>
   <input type="text" class="search" placeholder="Search customer or job #">
@@ -244,6 +245,7 @@
     <div style="display: grid; gap: 8px;">
       <button class="btn-outline">+ Add document</button>
       <button class="btn-accent" id="goBookBtn">Build book PDF</button>
+      <button class="btn-dark" id="archiveBtn">Archive job</button>
     </div>
   </div>
 </main>
@@ -545,14 +547,19 @@
   function renderJobs(filter) {
     const list = document.getElementById('jobList');
     list.innerHTML = '';
-    const rows = JOBS.filter(j => filter === 'all' ? true : filter === 'recent' ? true : j.status === 'active');
+    const rows = JOBS.filter(j => {
+      if (filter === 'all') return true;
+      if (filter === 'archived') return j.status === 'archived';
+      if (filter === 'recent') return j.status !== 'archived';
+      return j.status === 'active';
+    });
     rows.forEach(j => {
       const el = document.createElement('div');
       el.className = 'job-row';
       el.innerHTML = `
         <div class="job-row-top">
           <div class="job-num">${j.num}</div>
-          <span class="status-tag ${j.status === 'active' ? 'status-active' : 'status-done'}">${j.status === 'active' ? 'ACTIVE' : 'COMPLETE'}</span>
+          <span class="status-tag ${j.status === 'active' ? 'status-active' : 'status-done'}">${j.status === 'active' ? 'ACTIVE' : j.status === 'archived' ? 'ARCHIVED' : 'COMPLETE'}</span>
         </div>
         <div class="job-cust">${j.customer}</div>
         <div class="job-meta">${j.meta}</div>
@@ -639,7 +646,7 @@
     document.getElementById('jobCust').textContent = job.customer;
     document.getElementById('jobMeta').textContent = `WO #${job.wo} · ${job.space} · Lead: ${job.lead}`;
     const status = document.getElementById('jobStatus');
-    status.textContent = job.status === 'active' ? 'ACTIVE' : 'COMPLETE';
+    status.textContent = job.status === 'active' ? 'ACTIVE' : job.status === 'archived' ? 'ARCHIVED' : 'COMPLETE';
     status.className = 'status-tag ' + (job.status === 'active' ? 'status-active' : 'status-done');
 
     const tiles = document.getElementById('docTiles');
@@ -659,6 +666,7 @@
       tiles.appendChild(el);
     });
 
+    updateArchiveBtn();
     show('job');
   }
 
@@ -782,6 +790,29 @@
   document.getElementById('emailBtn').addEventListener('click', () => alert('Email flow — wires to Outlook/Power Automate in production.'));
   document.getElementById('linkBtn').addEventListener('click', () => alert('SharePoint link copy — wires to SharePoint in production.'));
   document.getElementById('saveBtn').addEventListener('click', () => alert('Device save — wires to file download in production.'));
+
+  // ============ ARCHIVE ============
+  function updateArchiveBtn() {
+    const btn = document.getElementById('archiveBtn');
+    if (!currentJob) return;
+    if (currentJob.status === 'archived') {
+      btn.textContent = 'Unarchive job';
+    } else {
+      btn.textContent = 'Archive job';
+    }
+  }
+  document.getElementById('archiveBtn').addEventListener('click', () => {
+    if (!currentJob) return;
+    if (currentJob.status === 'archived') {
+      currentJob.status = 'active';
+    } else {
+      currentJob.status = 'archived';
+    }
+    // refresh current filter view and return to dashboard
+    const activeFilter = document.querySelector('.filter-pill.on').dataset.filter;
+    renderJobs(activeFilter);
+    show('dashboard');
+  });
 
   // ============ BOOT ============
   renderJobs('active');
